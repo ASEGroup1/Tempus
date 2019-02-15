@@ -7,7 +7,7 @@ object Event {
 }
 
 class Event(val name:String, val eventType:EventType, val hours: Int) {
-  override def toString: String = s"$name - $eventType - :$hours"
+  override def toString: String = s"$name - $eventType - $hours"
 }
 
 object EventType extends Enumeration {
