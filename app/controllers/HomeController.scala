@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject._
 import play.api.mvc._
+import services.generator.studentgenerator.StudentGenerator
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -17,9 +18,7 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
    * a path of `/`.
    */
   def index = Action {
-
-
-    Ok("<html><head></head><body>test</body></html>").as("text/html")
+    Ok("<html><head></head><body>" + StudentGenerator.generate(100).toString +"</body></html>").as("text/html")
   }
 
 }
