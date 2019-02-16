@@ -35,7 +35,7 @@ object Scheduler {
       schedule.filter(_.timeRemaining > e.duration.getMillisOfDay).min(Ordering by[RoomSchedule, Int] (_.timeRemaining)) + e
     })
 
-    schedule.flatMap(s => s())
+    schedule.flatMap(_())
   }
 
   private class RoomSchedule(val room: Room, val period: Period) {
