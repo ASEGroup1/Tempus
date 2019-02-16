@@ -1,12 +1,9 @@
 package scheduler
 
 import java.util.Calendar
-
 import org.joda.time.LocalTime
 import services.generator.eventgenerator.EventType.EventType
-
 import scala.collection.mutable
-
 
 object Scheduler {
 
@@ -47,10 +44,9 @@ object Scheduler {
     }
 
     def apply(): Seq[ScheduledClass] = {
-      events.map(e => new ScheduledClass(period, e._1, room, e._2)) toList
+      events.map(e => new ScheduledClass(period, e._1, room, e._2)).toList
     }
   }
-
 }
 
 class Period(val calendar: Calendar, val duration: Duration)
