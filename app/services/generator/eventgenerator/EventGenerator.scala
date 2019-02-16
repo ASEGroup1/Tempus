@@ -6,5 +6,9 @@ import services.generator.Generator
 import scala.util.Random
 
 object EventGenerator extends Generator[Event] {
-  override def generate(): Event = Event(SubjectGenerator.generate(), EventType.values.toList(Random.nextInt(EventType.values.size - 1)), new LocalTime(Random.nextInt(4), Random.nextInt(60)))
+  val durations = Array(0,30)
+  override def generate(): Event = {
+    val duration = (Random.nextInt(8)+1)*30
+    Event(SubjectGenerator.generate(), EventType.values.toList(Random.nextInt(EventType.values.size - 1)), new LocalTime(Math.floorDiv(duration, 60), duration%60))
+  }
 }
