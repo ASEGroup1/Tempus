@@ -1,11 +1,11 @@
 package scheduler
 
+import java.text.SimpleDateFormat
 import java.util.Calendar
 
-import org.joda.time.LocalTime
+import org.joda.time.{DateTime, LocalTime}
 import services.generator.eventgenerator.EventGenerator
 import services.generator.roomgenerator.RoomGenerator
-
 import services.generator.eventgenerator.Event
 
 import scala.collection.mutable
@@ -31,10 +31,10 @@ object Scheduler {
     // Then add it to that slot
     events.sortBy(_.duration.getMillisOfDay)(Ordering[Int].reverse).foreach(e => {
       val availableRooms = schedule.filter(_.timeRemaining >= e.duration.getMillisOfDay)
-      if (availableRooms.isEmpty){
+      if (availableRooms.isEmpty) {
         //Could not generate a table to fit all events
         return None
-      }else{
+      } else {
         availableRooms.min(Ordering by[RoomSchedule, Int] (_.timeRemaining)) + e
       }
     })
@@ -61,23 +61,25 @@ object Scheduler {
 
   def main(args: Array[String]): Unit = {
     val rooms = RoomGenerator.generate(10).map(new Room(_))
-    val events = EventGenerator.generate(50)
-    val periods = Array(new Period(Calendar.getInstance(), new Duration(new LocalTime(8, 0), new LocalTime(20, 0))))
+    val events = EventGenerator.generate(100)
+    val periods = Array(new Period(DateTime.parse("01-01-19"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0))),
+      new Period(DateTime.parse("02-01-19"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0))))
 
     val schedule = Scheduler.schedule(rooms, events, periods)
-    if(schedule.isDefined) {
-      println("Room  Module       Start     End")
-      println(schedule.get.toSeq.sortBy(s => (s.room.id, s.time.start.getMillisOfDay)).mkString("\n"))
-    }else
+    if (schedule.isDefined) {
+      println("\tRoom  Module       Start     End")
+      schedule.get.groupBy(_.day.calendar.dayOfWeek()).foreach(e => println( e._1.getAsShortText +"\n\t" + e._2.toSeq.sortBy(s => (s.room.id, s.time.start.getMillisOfDay)).mkString("\n\t") + "\n"))
+    } else
       println("Could not generate a timetable")
   }
+
 }
 
-class Period(val calendar: Calendar, val duration: Duration)
+class Period(val calendar: DateTime, val duration: Duration)
 
-class ScheduledClass(val day: Period, val time: Duration, val room: Room, val event: Event){
+class ScheduledClass(val day: Period, val time: Duration, val room: Room, val event: Event) {
   override def toString: String = {
-    "%-5d %-12s %02d:%02d \t %02d:%02d".format(room.id,event.name, time.start.getHourOfDay, time.start.getMinuteOfHour,
+    "%-5d %-12s %02d:%02d \t %02d:%02d".format(room.id, event.name, time.start.getHourOfDay, time.start.getMinuteOfHour,
       time.end.getHourOfDay, time.end.getMinuteOfHour)
   }
 }
