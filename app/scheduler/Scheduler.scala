@@ -12,22 +12,25 @@ object Scheduler {
 
   // ATM just an ordered best fit bin packing
   def schedule(rooms: Seq[Room], events: Seq[Event], periods: Seq[Period]): Seq[ScheduledClass] = {
+    // generate a map of all combinations of rooms and periods, and send that to the other method
     schedule(rooms.flatMap(r => periods.map(p => (r -> p))), events)
   }
 
 
   /**
     *
-    * @param areas list of sequential time allowed ina a room
-    * @param events
+    * @param areas list of sequential time allowed in a room
+    * @param events classes, etc.
     */
   def schedule(areas: Seq[(Room, Period)], events: Seq[Event]): Seq[ScheduledClass] ={
-    // ordered best fir bin packing
+    // ordered best fit bin packing
     // packing "events" into "room" number of bins of size "period"
     val schedule = areas.map(a => new RoomSchedule(a._1, a._2))
 
+    // for each event (largest first), find the smallest slot (room and time) that it fits in
+    // Then add it to that slot
     events.sortBy(_.duration.getMillisOfDay)(Ordering[Int].reverse).foreach(e => {
-      schedule.min(Ordering by[RoomSchedule, Int](s => s.timeRemaining)).addEvent(e)
+      schedule.filterNot(_.timeRemaining<e.duration.getMillisOfDay).min(Ordering by[RoomSchedule, Int](s => s.timeRemaining)).addEvent(e)
     })
 
     schedule.flatMap(s => s.getSchedule())
@@ -37,6 +40,7 @@ object Scheduler {
     var timeRemaining = period.duration.duration()
     var durationPointer = new LocalTime(period.duration.start)
     var events = new HashMap[Duration, Event]()
+
     def addEvent(event: Event): Unit ={
       var duration = event.duration.getMillisOfDay
       events += (new Duration(new LocalTime(durationPointer), new LocalTime(durationPointer.plusMillis(duration))) -> event)
