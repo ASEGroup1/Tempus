@@ -32,7 +32,7 @@ object Scheduler {
     // for each event (largest first), find the smallest slot (room and time) that it fits in
     // Then add it to that slot
     events.sortBy(_.duration.getMillisOfDay)(Ordering[Int].reverse).foreach(e => {
-      schedule.filter(_.timeRemaining > e.duration.getMillisOfDay).min(Ordering by[RoomSchedule, Int] (s => s.timeRemaining)).addEvent(e)
+      schedule.filter(_.timeRemaining > e.duration.getMillisOfDay).min(Ordering by[RoomSchedule, Int] (_.timeRemaining)) + e
     })
 
     schedule.flatMap(s => s())
@@ -43,7 +43,7 @@ object Scheduler {
     var durationPointer = new LocalTime(period.duration.start)
     var events = mutable.HashMap[Duration, Event]()
 
-    def addEvent(event: Event): Unit = {
+    def +(event: Event): Unit = {
       var duration = event.duration.getMillisOfDay
       events += (new Duration(new LocalTime(durationPointer), new LocalTime(durationPointer.plusMillis(duration))) -> event)
       timeRemaining -= duration
@@ -54,7 +54,6 @@ object Scheduler {
       events.map(e => new ScheduledClass(period, e._1, room, e._2)).toList
     }
   }
-
 
   def main(args: Array[String]): Unit = {
     val rooms = RoomGenerator.generate(10).map(new Room(_))
