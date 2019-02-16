@@ -32,7 +32,7 @@ object Scheduler {
     // for each event (largest first), find the smallest slot (room and time) that it fits in
     // Then add it to that slot
     events.sortBy(_.duration.getMillisOfDay)(Ordering[Int].reverse).foreach(e => {
-      schedule.filter(_.timeRemaining > e.duration.getMillisOfDay).min(Ordering by[RoomSchedule, Int] (_.timeRemaining)) + e
+      schedule.filter(_.timeRemaining >= e.duration.getMillisOfDay).min(Ordering by[RoomSchedule, Int] (_.timeRemaining)) + e
     })
 
     schedule.flatMap(_())
