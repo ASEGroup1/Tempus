@@ -1,17 +1,20 @@
 name := "Tempus"
- 
-version := "1.0" 
-      
-lazy val `tempus` = (project in file(".")).enablePlugins(PlayScala)
 
-resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
-      
-resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
-      
-scalaVersion := "2.12.2"
+version := "1.0"
 
-libraryDependencies ++= Seq( jdbc , ehcache , ws , specs2 % Test , guice )
+scalaVersion := "2.12.8"
 
-unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
+lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
-      
+libraryDependencies += guice
+
+scalaSource in Compile := baseDirectory.value / "src/main/scala/"
+resourceDirectory in Compile := baseDirectory.value / "src/main/resources"
+
+scalaSource in Test := baseDirectory.value / "src/test/scala/"
+resourceDirectory in Test := baseDirectory.value / "src/test/resources"
+
+unmanagedResourceDirectories in Compile += baseDirectory.value / "conf"
+unmanagedResourceDirectories in Test += baseDirectory.value / "conf"
+
+libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
