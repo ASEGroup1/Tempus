@@ -4,13 +4,14 @@ import org.joda.time.{DateTime, LocalTime}
 import services.generator.eventgenerator.{Event, EventGenerator}
 import services.generator.roomgenerator.RoomGenerator
 import services.scheduler.poso.{Duration, Period, Room, ScheduledClass}
+import scala.collection.immutable.Set
 
 import scala.collection.mutable
 
 object Scheduler {
 
   // best fit bin packing
-  def schedule(rooms: Seq[Room], events: Seq[Event], periods: Seq[Period]): Option[Set[ScheduledClass]] =
+  def schedule(rooms: Seq[Room], events: Seq[Event], periods: Seq[Period]): Option[scala.collection.immutable.Set[ScheduledClass]] =
     scheduleI(rooms.flatMap(r => periods.map(p => r -> p)).toSet, events)
 
   /**
