@@ -16,3 +16,5 @@ resourceDirectory in Test := baseDirectory.value / "src/test/resources"
 
 unmanagedResourceDirectories in Compile += baseDirectory.value / "conf"
 unmanagedResourceDirectories in Test += baseDirectory.value / "conf"
+
+libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
