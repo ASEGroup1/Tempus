@@ -13,3 +13,6 @@ resourceDirectory in Compile := baseDirectory.value / "src/main/resources"
 
 scalaSource in Test := baseDirectory.value / "src/test/scala/"
 resourceDirectory in Test := baseDirectory.value / "src/test/resources"
+
+unmanagedResourceDirectories in Compile += baseDirectory.value / "conf"
+unmanagedResourceDirectories in Test += baseDirectory.value / "conf"
