@@ -8,25 +8,25 @@ import services.scheduler.Scheduler
 import services.scheduler.poso.{Duration, Period, Room, ScheduledClass}
 
 class SchedulerTests extends TestCase {
-  def generateSchedule(eventCount: Int, roomCount: Int): Seq[ScheduledClass] = {
+  def generateSchedule(eventCount: Int, roomCount: Int): Option[Seq[ScheduledClass]] = {
     Scheduler.schedule(
       RoomGenerator.generate(roomCount).map(new Room(_)),
       EventGenerator.generate(eventCount),
       Array(
         new Period(DateTime.parse("01-01-19"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0))),
         new Period(DateTime.parse("02-01-19"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0)))
-      )).get
+      ))
   }
 
-  def testIfScheduleIncludesAllEvents = assertEquals(100, generateSchedule(100, 10).size)
+  def testIfScheduleIncludesAllEvents = assertEquals(100, generateSchedule(100, 10).get.size)
 
-  def testIfNoEventsGenerateEmptySchedule = assertEquals(Set(), generateSchedule(0, 0))
+  def testIfNoEventsGenerateEmptySchedule = assertEquals(Vector(), generateSchedule(0, 0).get)
 
   def testIfEventsDoNotIntersect = {
     var currentEnd = -1
     var currentDay = -1
 
-    generateSchedule(100, 10).groupBy(_.room.id).foreach(s => {
+    generateSchedule(100, 10).get.groupBy(_.room.id).foreach(s => {
       s._2.sortBy(_.time.start.getHourOfDay).foreach(e => {
         print("[Day:" + currentDay + ", Room: " + e.room.id + ", end time:" + currentEnd + "] < [Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.id + ", Start time: " + e.time.start.getHourOfDay + "] < ")
         if (currentDay != e.day.calendar.getDayOfMonth) currentDay = e.day.calendar.getDayOfMonth
@@ -36,5 +36,9 @@ class SchedulerTests extends TestCase {
         currentEnd = e.time.end.getHourOfDay
       })
     })
+  }
+
+  def testIfEventsCannotFitInSchedule: Unit = {
+    assertEquals(None, generateSchedule(100, 1))
   }
 }
