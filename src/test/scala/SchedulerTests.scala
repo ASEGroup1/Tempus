@@ -8,7 +8,7 @@ import services.scheduler.Scheduler
 import services.scheduler.poso.{Duration, Period, Room, ScheduledClass}
 
 class SchedulerTests extends TestCase {
-  def generateSchedule(eventCount: Int, roomCount: Int): Set[ScheduledClass] = {
+  def generateSchedule(eventCount: Int, roomCount: Int): Seq[ScheduledClass] = {
     Scheduler.schedule(
       RoomGenerator.generate(roomCount).map(new Room(_)),
       EventGenerator.generate(eventCount),
@@ -26,13 +26,15 @@ class SchedulerTests extends TestCase {
     var currentEnd = -1
     var currentDay = -1
 
-    generateSchedule(100, 10).foreach(e => {
-      print(currentDay + ":" + currentEnd + " < " + e.day.calendar.getDayOfMonth + ":" + e.time.start.getHourOfDay + " < ")
-      if (currentDay != e.day.calendar.getDayOfMonth) currentDay = -1
-      else if (currentDay < e.day.calendar.getDayOfMonth) currentDay = e.day.calendar.getDayOfMonth
+    generateSchedule(100, 10).groupBy(_.room.id).foreach(s => {
+      s._2.sortBy(_.time.start.getHourOfDay).foreach(e => {
+        print("[Day:" + currentDay + ", Room: " + e.room.id + ", end time:" + currentEnd + "] < [Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.id + ", Start time: " + e.time.start.getHourOfDay + "] < ")
+        if (currentDay != e.day.calendar.getDayOfMonth) currentDay = e.day.calendar.getDayOfMonth
+        if (currentDay < e.day.calendar.getDayOfMonth) currentEnd = -1
 
-      if (currentEnd > e.time.start.getHourOfDay) fail(currentEnd + " > " + e.time.start.getHourOfDay)
-      currentEnd = e.time.end.getHourOfDay
+        if (currentEnd > e.time.start.getHourOfDay) fail(currentEnd + " > " + e.time.start.getHourOfDay)
+        currentEnd = e.time.end.getHourOfDay
+      })
     })
   }
 }
