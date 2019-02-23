@@ -6,4 +6,6 @@ class Duration(val start: LocalTime, val end: LocalTime) {
   def duration(): Int = {
     end.getMillisOfDay - start.getMillisOfDay
   }
+
+  def length = end.getHourOfDay - start.getHourOfDay
 }

@@ -18,3 +18,4 @@ unmanagedResourceDirectories in Compile += baseDirectory.value / "conf"
 unmanagedResourceDirectories in Test += baseDirectory.value / "conf"
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
+libraryDependencies += "com.mashape.unirest" % "unirest-java" % "1.3.0"

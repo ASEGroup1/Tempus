@@ -4,20 +4,21 @@ import org.joda.time.{DateTime, LocalTime}
 import services.generator.eventgenerator.{Event, EventGenerator}
 import services.generator.roomgenerator.RoomGenerator
 import services.scheduler.poso.{Duration, Period, Room, ScheduledClass}
+import scala.collection.immutable.Set
 
 import scala.collection.mutable
 
 object Scheduler {
 
   // best fit bin packing
-  def schedule(rooms: Seq[Room], events: Seq[Event], periods: Seq[Period]): Option[Set[ScheduledClass]] =
-    scheduleI(rooms.flatMap(r => periods.map(p => r -> p)).toSet, events)
+  def schedule(rooms: Seq[Room], events: Seq[Event], periods: Seq[Period]): Option[Seq[ScheduledClass]] =
+    scheduleI(rooms.flatMap(r => periods.map(p => r -> p)), events)
 
   /**
     * @param areas  a Set of tuples of all permutations of rooms and periods
     * @param events classes, etc.
     */
-  def scheduleI(areas: Set[(Room, Period)], events: Seq[Event]): Option[Set[ScheduledClass]] = {
+  def scheduleI(areas: Seq[(Room, Period)], events: Seq[Event]): Option[Seq[ScheduledClass]] = {
     // ordered best fit bin packing, packing "events" into "room" number of bins of size "period"
     val schedule = areas.map(a => new RoomSchedule(a._1, a._2))
 
@@ -29,7 +30,7 @@ object Scheduler {
       else availableRooms.min(Ordering by[RoomSchedule, Int] (_.timeRemaining)) + e
     })
 
-    Some(schedule.flatMap(_ ()))
+    Some(schedule.flatMap(_()))
   }
 
   private class RoomSchedule(val room: Room, val period: Period) {
