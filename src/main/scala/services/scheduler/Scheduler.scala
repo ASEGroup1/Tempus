@@ -59,7 +59,7 @@ object Scheduler {
     val schedule = Scheduler.schedule(rooms, events, periods)
     if (schedule.isDefined) {
       println("\tRoom  Module       Start     End")
-      schedule.get.groupBy(_.day.calendar.dayOfWeek()).foreach(e => println(e._1.getAsShortText + "\n\t" + e._2.toSeq.sortBy(s => (s.room.id, s.time.start.getMillisOfDay)).mkString("\n\t") + "\n"))
+      schedule.get.groupBy(_.day.calendar.dayOfWeek()).foreach(e => println(e._1.getAsShortText + "\n\t" + e._2.sortBy(s => (s.room.name, s.time.start.getMillisOfDay)).mkString("\n\t") + "\n"))
     } else println("Could not generate a timetable")
   }
 }
