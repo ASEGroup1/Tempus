@@ -4,8 +4,11 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
-# An example controller showing how to use dependency injection
+GET     /                       controllers.HomeController.index
 
 # Map static resources from the main resources folder to the root URL path
-GET     /*file                      controllers.HtmlController.display(path = "src/main/resources", file)
+GET     /*fileName.html         controllers.HtmlController.display(path = "src/main/resources/static/pages", fileName, ext = "html")
+GET     /*fileName.js           controllers.HtmlController.display(path = "src/main/resources/static/js", fileName , ext = "js")
+
+# Redirect all unrouted requests to the bad request page
+GET     /*other                 controllers.ErrorController.badRequest(other)
