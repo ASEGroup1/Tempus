@@ -12,3 +12,10 @@ GET     /get-generated-schedule                           controllers.ScheduleCo
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+# Map static resources from the main resources folder to the root URL path
+GET     /*fileName.html         controllers.StaticController.displayFile(path = "src/main/resources/static/pages", fileName, ext = "html", contentType = "text/html")
+GET     /*fileName.js           controllers.StaticController.displayFile(path = "src/main/resources/static/js", fileName , ext = "js", contentType = "text/javascript")
+
+# Map all static resources with unknown extentions to be rendered thier without MIME specified
+GET     /*fileName              controllers.StaticController.display(path = "src/main/resources/static", fileName , contentType = "")

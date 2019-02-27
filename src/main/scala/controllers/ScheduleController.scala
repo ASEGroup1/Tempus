@@ -11,7 +11,7 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   def generateScheduleResponse = Action {
     val schedule = Scheduler.generateSchedule(100, 10)
 
-    if(schedule.isEmpty) BadRequest("Could not generate with th").as("text/plain")
+    if(schedule.isEmpty) BadRequest("Could not generate, refresh for new random parameters.").as("text/plain")
     else Ok (Json.parse(schedule.get.map(_.toJson).mkString("[", ",", "]"))).as("application/json")
   }
 }
