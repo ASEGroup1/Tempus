@@ -10,7 +10,7 @@ object Room {
     val tableCount = if (m.group(4).matches(intPatternString)) m.group(4).toInt else -1
     val pcCount = if (m.group(7).matches(intPatternString)) m.group(7).toInt else -1
 
-    new Room(m.group(1), m.group(2), capacity, tableCount, m.group(4), m.group(5), pcCount, m.group(8) == "Yes")
+    new Room(m.group(1), m.group(2), capacity, tableCount, m.group(5), m.group(6), pcCount, m.group(8).toLowerCase().replace(" ", "") == "yes")
   }
 }
 

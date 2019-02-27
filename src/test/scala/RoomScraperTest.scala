@@ -8,6 +8,6 @@ class RoomScraperTest extends TestCase {
     val rooms = SussexRoomScraper.scrape
     print(rooms)
 
-    assertEquals(122, rooms.size)
+    assertEquals(139, rooms.size)
   }
 }
