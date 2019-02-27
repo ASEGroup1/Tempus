@@ -17,8 +17,8 @@ class HtmlController @Inject()(cc: ControllerComponents) extends AbstractControl
       else
         Ok(readFile(path, file)).as(contentType)
     } catch {
-      case _: FileNotFoundException => NotFound(ErrorPage.notFound(file))
-      case e: Exception => BadRequest(ErrorPage.badRequest(e))
+      case _: FileNotFoundException => NotFound(ErrorPage.notFound(file)).as("text/html")
+      case e: Exception => BadRequest(ErrorPage.badRequest(e)).as("text/html")
     }
   }
 
