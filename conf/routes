@@ -5,7 +5,11 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
+<<<<<<< HEAD
 GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
+=======
+GET     /get-generated-schedule                           controllers.ScheduleController.test
+>>>>>>> 5885622580d911bbbcac221f49af3b9e37ce03e6
 # An example controller showing how to use dependency injection
 
 # Map static resources from the /public folder to the /assets URL path
