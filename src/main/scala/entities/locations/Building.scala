@@ -1,4 +1,4 @@
-package entities
+package entities.locations
 
 import scala.collection.mutable.ArrayBuffer
 

@@ -1,8 +1,9 @@
 package entities.people
 
-import entities.Course
+import entities.CourseRole
+import entities.course.{Course, CourseRole}
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.ListBuffer
 
 class Person {
 
@@ -10,5 +11,5 @@ class Person {
 	var firstName: String = _
 	var lastName: String = _
 	var otherNames: String = _
-	var courses: ArrayBuffer[Course] = _
+	var courses: ListBuffer[(CourseRole, Course)] = _
 }

@@ -1,6 +1,6 @@
 package entities.people
 
-import entities.Course
+import entities.course.Course
 
 class Student extends Person{
 	var studentId: Int = _
