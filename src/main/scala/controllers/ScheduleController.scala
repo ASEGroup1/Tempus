@@ -7,6 +7,7 @@ import services.scheduler.Scheduler
 
 @Singleton
 class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+
   def generateScheduleResponse = Action {
     val schedule = Scheduler.generateSchedule(100, 10)
 
