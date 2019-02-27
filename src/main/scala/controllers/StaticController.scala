@@ -8,7 +8,7 @@ import views.ErrorPage
 
 import scala.io.Source
 
-class HtmlController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class StaticController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   def display(path: String, file: String, contentType:String) = Action {
     try {
