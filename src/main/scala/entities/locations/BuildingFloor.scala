@@ -1,4 +1,4 @@
-package entities
+package entities.locations
 
 class BuildingFloor {
 	var floorId: Int = _
