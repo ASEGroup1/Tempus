@@ -7,8 +7,8 @@
 GET     /                       controllers.HomeController.index
 
 # Map static resources from the main resources folder to the root URL path
-GET     /*fileName.html         controllers.HtmlController.display(path = "src/main/resources/static/pages", fileName, ext = "html")
-GET     /*fileName.js           controllers.HtmlController.display(path = "src/main/resources/static/js", fileName , ext = "js")
+GET     /*fileName.html         controllers.HtmlController.displayFile(path = "src/main/resources/static/pages", fileName, ext = "html", contentType = "text/html")
+GET     /*fileName.js           controllers.HtmlController.displayFile(path = "src/main/resources/static/js", fileName , ext = "js", contentType = "text/javascript")
 
-# Redirect all unrouted requests to the bad request page
-GET     /*other                 controllers.ErrorController.badRequest(other)
+# Map all static resources with unknown extentions to be rendered thier without MIME specified
+GET     /*fileName              controllers.HtmlController.display(path = "src/main/resources/static", fileName , contentType = "")

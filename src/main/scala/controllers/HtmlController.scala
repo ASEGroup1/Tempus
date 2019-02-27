@@ -10,17 +10,20 @@ import scala.io.Source
 
 class HtmlController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  def display(path: String, file: String) = Action {
+  def display(path: String, file: String, contentType:String) = Action {
     try {
-      Ok(readFile(path, file)).as("text/html")
+      if(contentType.isEmpty)
+        Ok(readFile(path, file))
+      else
+        Ok(readFile(path, file)).as(contentType)
     } catch {
       case _: FileNotFoundException => NotFound(ErrorPage.notFound(file))
       case e: Exception => BadRequest(ErrorPage.badRequest(e))
     }
   }
 
-  def display(path: String, fileName: String, ext: String): Action[AnyContent] =
-    display(path, fileName + "." + ext)
+  def displayFile(path: String, fileName: String, ext: String, contentType: String): Action[AnyContent] =
+    display(path, fileName + "." + ext, contentType)
 
 
   private def readFile(path: String, file: String): String = {
