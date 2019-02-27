@@ -17,7 +17,7 @@ class SchedulerTests extends TestCase {
     var currentDay = -1
     var currentRoom = ""
 
-    Scheduler.generateSchedule(100, 10).get.groupBy(sc => (sc.room.id, sc.day.calendar.dayOfMonth())).foreach(s => {
+    Scheduler.generateSchedule(100, 10).get.groupBy(sc => (sc.room.name, sc.day.calendar.dayOfMonth())).foreach(s => {
       s._2.sortBy(sc =>  (sc.time.start.getHourOfDay, sc.time.start.getMinuteOfHour)).foreach(e => {
         print("[Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.name + ", Start time: " + e.time.start.getHourOfDay + "] < ")
 
