@@ -6,11 +6,11 @@ object Room {
   val intPatternString = "[0-9]+"
 
   def apply(m: Matcher): Room = {
-    val capacity = if (m.group(2).matches(intPatternString)) m.group(2).toInt else -1
-    val tableCount = if (m.group(3).matches(intPatternString)) m.group(3).toInt else -1
-    val pcCount = if (m.group(6).matches(intPatternString)) m.group(6).toInt else -1
+    val capacity = if (m.group(3).matches(intPatternString)) m.group(3).toInt else -1
+    val tableCount = if (m.group(4).matches(intPatternString)) m.group(4).toInt else -1
+    val pcCount = if (m.group(7).matches(intPatternString)) m.group(7).toInt else -1
 
-    new Room(m.group(1), m.group(2), capacity, tableCount, m.group(4), m.group(5), pcCount, m.group(7) == "Yes")
+    new Room(m.group(1), m.group(2), capacity, tableCount, m.group(4), m.group(5), pcCount, m.group(8) == "Yes")
   }
 }
 
