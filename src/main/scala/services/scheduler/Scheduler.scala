@@ -15,8 +15,8 @@ object Scheduler {
       RoomGenerator.generate(roomCount).map(new Room(_)),
       EventGenerator.generate(eventCount),
       Array(
-        new Period(DateTime.parse("2019-01-01"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0))),
-        new Period(DateTime.parse("2019-01-02"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0)))
+        new Period(DateTime.parse("2019-01-01"), new Duration(8, 20)),
+        new Period(DateTime.parse("2019-01-02"), new Duration(8, 20))
       ))
   }
 
