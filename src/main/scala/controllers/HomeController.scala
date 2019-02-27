@@ -18,6 +18,6 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
    * a path of `/`.
    */
   def index = Action {
-    Ok("<html><head></head><body>" + StudentGenerator.generate(100).toString +"</body></html>").as("text/html")
+    Ok("<html><head><title>Student Generator</title></head><body>" + StudentGenerator.generate(100).toString +"</body></html>").as("text/html")
   }
 }

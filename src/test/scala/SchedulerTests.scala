@@ -15,15 +15,15 @@ class SchedulerTests extends TestCase {
   def testIfEventsDoNotIntersect = {
     var currentEnd = -1
     var currentDay = -1
-    var currentRoom = - 1
+    var currentRoom = ""
 
-    Scheduler.generateSchedule(100, 10).get.groupBy(sc => (sc.room.id, sc.day.calendar.dayOfMonth())).foreach(s => {
+    Scheduler.generateSchedule(100, 10).get.groupBy(sc => (sc.room.name, sc.day.calendar.dayOfMonth())).foreach(s => {
       s._2.sortBy(sc =>  (sc.time.start.getHourOfDay, sc.time.start.getMinuteOfHour)).foreach(e => {
-        print("[Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.id + ", Start time: " + e.time.start.getHourOfDay + "] < ")
+        print("[Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.name + ", Start time: " + e.time.start.getHourOfDay + "] < ")
 
         //When room changes reset currentEnd
-        if(currentRoom != e.room.id) {
-          currentRoom = e.room.id
+        if(currentRoom != e.room.name) {
+          currentRoom = e.room.name
           currentEnd = -1
         }
 

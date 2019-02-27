@@ -1,10 +1,9 @@
 package services.generator.roomgenerator
 
+import java.util.UUID
+
 import services.generator.Generator
 
-import scala.util.Random
-
-object RoomGenerator extends Generator[Int] {
-  var i = 0
-  override def generate(): Int = {i+=1; i}
+object RoomGenerator extends Generator[String] {
+  override def generate(): String = UUID.randomUUID.toString
 }
