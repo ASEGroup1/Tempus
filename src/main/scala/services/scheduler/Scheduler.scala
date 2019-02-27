@@ -10,6 +10,16 @@ import scala.collection.mutable
 
 object Scheduler {
 
+  def generateSchedule(eventCount: Int, roomCount: Int): Option[Seq[ScheduledClass]] = {
+    Scheduler.schedule(
+      RoomGenerator.generate(roomCount).map(new Room(_)),
+      EventGenerator.generate(eventCount),
+      Array(
+        new Period(DateTime.parse("2019-01-01"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0))),
+        new Period(DateTime.parse("2019-01-02"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0)))
+      ))
+  }
+
   // best fit bin packing
   def schedule(rooms: Seq[Room], events: Seq[Event], periods: Seq[Period]): Option[Seq[ScheduledClass]] =
     scheduleI(rooms.flatMap(r => periods.map(p => r -> p)), events)

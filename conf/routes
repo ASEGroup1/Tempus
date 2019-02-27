@@ -5,6 +5,7 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
+GET     /get-generated-schedule                           controllers.ScheduleController.test
 # An example controller showing how to use dependency injection
 
 # Map static resources from the /public folder to the /assets URL path
