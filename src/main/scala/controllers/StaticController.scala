@@ -25,8 +25,5 @@ class StaticController @Inject()(cc: ControllerComponents) extends AbstractContr
   def displayFile(path: String, fileName: String, ext: String, contentType: String): Action[AnyContent] =
     display(path, fileName + "." + ext, contentType)
 
-
-  private def readFile(path: String, file: String): String = {
-    Source.fromFile(path + "/" + file).mkString
-  }
+  private def readFile(path: String, file: String): String = Source.fromFile(path + "/" + file).mkString
 }
