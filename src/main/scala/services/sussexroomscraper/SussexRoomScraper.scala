@@ -15,6 +15,8 @@ object SussexRoomScraper {
 
   val PageUrl = "http://www.sussex.ac.uk/studentsystems/roomfac.php"
 
+  val roomDataForSession = scrape
+
   def scrape: Seq[Room] = {
     val matcher = RowDataPattern.matcher(Unirest.get(PageUrl).asString.getBody)
 

@@ -2,9 +2,8 @@ package services.scheduler
 
 import org.joda.time.{DateTime, LocalTime}
 import services.generator.eventgenerator.{Event, EventGenerator}
-import services.generator.roomgenerator.RoomGenerator
 import services.scheduler.poso.{Duration, Period, Room, ScheduledClass}
-import scala.collection.immutable.Set
+import services.sussexroomscraper.SussexRoomScraper
 
 import scala.collection.mutable
 
@@ -12,11 +11,14 @@ object Scheduler {
 
   def generateSchedule(eventCount: Int, roomCount: Int): Option[Seq[ScheduledClass]] = {
     Scheduler.schedule(
-      RoomGenerator.get(roomCount),
+      SussexRoomScraper.roomDataForSession,
       EventGenerator.generate(eventCount),
       Array(
         new Period(DateTime.parse("2019-01-01"), Duration(8, 20)),
-        new Period(DateTime.parse("2019-01-02"), Duration(8, 20))
+        new Period(DateTime.parse("2019-01-02"), Duration(8, 20)),
+        new Period(DateTime.parse("2019-01-03"), Duration(8, 20)),
+        new Period(DateTime.parse("2019-01-04"), Duration(8, 20)),
+        new Period(DateTime.parse("2019-01-05"), Duration(8, 20)),
       ))
   }
 
