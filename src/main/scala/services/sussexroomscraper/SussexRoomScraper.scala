@@ -15,11 +15,11 @@ object SussexRoomScraper {
 
   val PageUrl = "http://www.sussex.ac.uk/studentsystems/roomfac.php"
 
-  def scrape: Set[Room] = {
+  def scrape: Seq[Room] = {
     val matcher = RowDataPattern.matcher(Unirest.get(PageUrl).asString.getBody)
 
     var rooms = ArrayBuffer[Room]()
     while (matcher.find()) rooms += Room(matcher)
-    rooms.toSet
+    rooms
   }
 }
