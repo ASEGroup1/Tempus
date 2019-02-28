@@ -10,5 +10,7 @@ class ModuleFehqLevel {
 	var fehqLevel: Int = _
 	var prerequisite: ModuleFehqLevel = _
 	var courseAvailability: ListBuffer[Course] = _
+	var maxStudents: Int = _
 	var modulePeople: ListBuffer[(ModuleRole, Person)] = _
+	var sessionStructure: ListBuffer[ModuleSessionStructure] = _
 }

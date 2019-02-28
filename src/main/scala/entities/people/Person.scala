@@ -1,6 +1,5 @@
 package entities.people
 
-import entities.CourseRole
 import entities.course.{Course, CourseRole}
 
 import scala.collection.mutable.ListBuffer
