@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Schedule</title>
+    <link rel="stylesheet" type="text/css" href="table.css">
     <script src="lib/superagent.js"></script>
     <script src = "netUtils.js"></script>
+    <script src="scheduleRender.js"></script>
+
     <script>
         function onLoad() {
             var elem = document.getElementById('ScheduleDiv');
             getSchedule().then(function(res){
-                elem.innerText = JSON.stringify(res)
+                //elem.innerText = JSON.stringify(res)
+                genTable(elem, res);
             })
+
         }
     </script>
 </head>
