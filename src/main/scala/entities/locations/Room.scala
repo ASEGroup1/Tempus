@@ -8,5 +8,4 @@ class Room {
 	var roomType: RoomType = _
 	var roomCapacity: Int = _
 	var partitions: ListBuffer[RoomPartition] = _
-	var floor: BuildingFloor = _
 }

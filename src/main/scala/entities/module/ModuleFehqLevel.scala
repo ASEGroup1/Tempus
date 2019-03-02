@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 class ModuleFehqLevel {
 	var baseModule: Module = _
 	var fehqLevel: Int = _
-	var prerequisite: ModuleFehqLevel = _
+	var prerequisites: ListBuffer[ModuleFehqLevel] = _
 	var courseAvailability: ListBuffer[Course] = _
 	var maxStudents: Int = _
 	var modulePeople: ListBuffer[(ModuleRole, Person)] = _

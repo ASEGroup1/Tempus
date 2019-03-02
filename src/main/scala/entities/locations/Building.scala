@@ -1,9 +1,9 @@
 package entities.locations
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.ListBuffer
 
 class Building {
 	var buildingId: Int = _
 	var name: String = _
-	var floors: ArrayBuffer[BuildingFloor] = _
+	var floors: ListBuffer[BuildingFloor] = _
 }

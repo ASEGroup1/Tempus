@@ -1,9 +1,9 @@
 package entities.timing
 
-import java.time.LocalTime
+import java.time.OffsetTime
 
 class TimePeriod {
 	var timePeriodId: Int = _
-	var start: LocalTime = _
-	var end: LocalTime = _
+	var start: OffsetTime = _
+	var end: OffsetTime = _
 }
