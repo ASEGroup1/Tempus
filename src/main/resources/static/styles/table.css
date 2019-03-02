@@ -13,7 +13,7 @@ table td, table th {
     padding: 3px 2px;
 }
 table tbody td {
-    font-size: 13px;
+    font-size: 18px;
     color: #E6E6E6;
 }
 table tr:nth-child(even) {

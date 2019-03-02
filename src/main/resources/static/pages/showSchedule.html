@@ -10,10 +10,9 @@
 
     <script>
         function onLoad() {
-            var elem = document.getElementById('ScheduleDiv');
-            getSchedule().then(function(res){
+	        getSchedule().then(function(res){
                 //elem.innerText = JSON.stringify(res)
-                genTable(elem, res);
+                genTable(document.getElementById('ScheduleDiv'), res);
             })
 
         }
