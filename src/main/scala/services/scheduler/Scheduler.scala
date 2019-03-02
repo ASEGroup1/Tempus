@@ -2,9 +2,8 @@ package services.scheduler
 
 import org.joda.time.{DateTime, LocalTime}
 import services.generator.eventgenerator.{Event, EventGenerator}
-import services.generator.roomgenerator.RoomGenerator
 import services.scheduler.poso.{Duration, Period, Room, ScheduledClass}
-import scala.collection.immutable.Set
+import services.sussexroomscraper.SussexRoomScraper
 
 import scala.collection.mutable
 
@@ -12,11 +11,14 @@ object Scheduler {
 
   def generateSchedule(eventCount: Int, roomCount: Int): Option[Seq[ScheduledClass]] = {
     Scheduler.schedule(
-      RoomGenerator.generate(roomCount).map(new Room(_)),
+      SussexRoomScraper.roomDataForSession,
       EventGenerator.generate(eventCount),
       Array(
-        new Period(DateTime.parse("2019-01-01"), new Duration(8, 20)),
-        new Period(DateTime.parse("2019-01-02"), new Duration(8, 20))
+        new Period(DateTime.parse("2019-01-01"), Duration(8, 20)),
+        new Period(DateTime.parse("2019-01-02"), Duration(8, 20)),
+        new Period(DateTime.parse("2019-01-03"), Duration(8, 20)),
+        new Period(DateTime.parse("2019-01-04"), Duration(8, 20)),
+        new Period(DateTime.parse("2019-01-05"), Duration(8, 20)),
       ))
   }
 
@@ -56,20 +58,5 @@ object Scheduler {
     }
 
     def apply() = events.map(e => new ScheduledClass(period, e._1, room, e._2)).toList
-  }
-
-  def main(args: Array[String]): Unit = {
-    val rooms = RoomGenerator.generate(10).map(new Room(_))
-    val events = EventGenerator.generate(100)
-    val periods = Array(
-      new Period(DateTime.parse("01-01-19"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0))),
-      new Period(DateTime.parse("02-01-19"), new Duration(new LocalTime(8, 0), new LocalTime(20, 0)))
-    )
-
-    val schedule = Scheduler.schedule(rooms, events, periods)
-    if (schedule.isDefined) {
-      println("\tRoom  Module       Start     End")
-      schedule.get.groupBy(_.day.calendar.dayOfWeek()).foreach(e => println(e._1.getAsShortText + "\n\t" + e._2.sortBy(s => (s.room.name, s.time.start.getMillisOfDay)).mkString("\n\t") + "\n"))
-    } else println("Could not generate a timetable")
   }
 }

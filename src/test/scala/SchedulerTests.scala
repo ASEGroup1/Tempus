@@ -40,6 +40,6 @@ class SchedulerTests extends TestCase {
   }
 
   def testIfEventsCannotFitInSchedule: Unit = {
-    assertEquals(None, Scheduler.generateSchedule(100, 1))
+    assertEquals(None, Scheduler.generateSchedule(10000, 1))
   }
 }
