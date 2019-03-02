@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule</title>
+    <script src="lib/superagent.js"></script>
+    <script src = "netUtils.js"></script>
+    <script>
+        function onLoad() {
+            var elem = document.getElementById('ScheduleDiv');
+            getSchedule().then(function(res){
+                elem.innerText = JSON.stringify(res)
+            })
+        }
+    </script>
+</head>
+<body onload = "onLoad()">
+    <div id="ScheduleDiv"></div>
+</body>
+</html>
