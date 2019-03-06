@@ -1,16 +1,12 @@
 package entities.module
 
-import entities.course.Course
-import entities.people.Person
+class ModuleFehqLevel()
 
-import scala.collection.mutable.ListBuffer
-
-class ModuleFehqLevel {
-	var baseModule: Module = _
-	var fehqLevel: Int = _
-	var prerequisites: ListBuffer[ModuleFehqLevel] = _
-	var courseAvailability: ListBuffer[Course] = _
-	var maxStudents: Int = _
-	var modulePeople: ListBuffer[(ModuleRole, Person)] = _
-	var sessionStructure: ListBuffer[ModuleSessionStructure] = _
-}
+var baseModule: Module,
+var fehqLevel: Int,
+var prerequisites: ListBuffer[ModuleFehqLevel],
+var courseAvailability: ListBuffer[Course],
+var maxStudents: Int,
+var modulePeople: ListBuffer[(ModuleRole, Person)],
+var sessionStructure: ListBuffer[ModuleSessionStructure]
+)

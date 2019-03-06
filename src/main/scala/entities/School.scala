@@ -2,8 +2,8 @@ package entities
 
 import entities.locations.Building
 
-class School {
-	var schoolId: Int = _
-	var schoolName: String = _
-	var mainBuilding: Building = _
-}
+class School(
+	var schoolId: Int,
+	var schoolName: String,
+	var mainBuilding: Building
+)

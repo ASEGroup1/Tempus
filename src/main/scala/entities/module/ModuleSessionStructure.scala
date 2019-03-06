@@ -1,9 +1,9 @@
 package entities.module
 
-class ModuleSessionStructure {
-	var moduleSessionStructureId: Int = _
-	var weekNo: Int = _
-	var sessionType: ModuleSessionType = _
-	var noOfSessions: Int = _
-	var maxSessionSize: Int = _
-}
+class ModuleSessionStructure(
+	var moduleSessionStructureId: Int,
+	var weekNo: Int,
+	var sessionType: ModuleSessionType,
+	var noOfSessions: Int,
+	var maxSessionSize: Int
+)

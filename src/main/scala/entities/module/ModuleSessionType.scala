@@ -1,7 +1,7 @@
 package entities.module
 
-class ModuleSessionType {
-	var moduleSessionTypeId: Int = _
-	var name: String = _
-	var description: String = _
-}
+class ModuleSessionType(
+	var moduleSessionTypeId: Int,
+	var name: String,
+	var description: String
+)

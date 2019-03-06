@@ -1,7 +1,7 @@
 package entities.course
 
-class CourseRole {
-  var courseRoleId: Int = _
-  var courseRoleName: String =_
-  var courseRoleDescription: String =_
-}
+class CourseRole(
+	var courseRoleId: Int,
+	var courseRoleName: String,
+	var courseRoleDescription: String
+)

@@ -1,8 +1,7 @@
 package entities.locations
 
-class RoomType {
-	var roomTypeId: Int =_
-	var name: String = _
-	var description: String = _
-
-}
+class RoomType(
+	var roomTypeId: Int,
+	var name: String,
+	var description: String
+)

@@ -1,8 +1,8 @@
 package entities.module
 
-class ModuleRole {
-  var moduleRoleId: Int = _
-  var name: String = _
-  var description: String = _
+class ModuleRole(
+	var moduleRoleId: Int,
+	var name: String,
+	var description: String
 
-}
+)
