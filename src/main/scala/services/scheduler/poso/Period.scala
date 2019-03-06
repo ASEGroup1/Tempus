@@ -1,5 +1,6 @@
 package services.scheduler.poso
 
-import org.joda.time.DateTime
+import entities.timing.TimePeriod
+import java.time.OffsetDateTime
 
-class Period(val calendar: DateTime, val duration: Duration)
+class Period(val calendar: OffsetDateTime, val timePeriod: TimePeriod)
