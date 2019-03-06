@@ -6,10 +6,10 @@ import entities.people.Person
 
 import scala.collection.mutable.ListBuffer
 
-class Course {
-  var courseId: Int = _
-  var courseName: String = _
-  var school: School = _
-  var coursePeople: ListBuffer[(CourseRole, Person)] = _
-  var moduleAvailability: ListBuffer[ModuleFehqLevel] =  _
-}
+class Course(
+	val courseId: Int,
+	var courseName: String,
+	var school: School,
+	var coursePeople: ListBuffer[(CourseRole, Person)],
+	var moduleAvailability: ListBuffer[ModuleFehqLevel],
+)
