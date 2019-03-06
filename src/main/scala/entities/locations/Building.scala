@@ -7,4 +7,4 @@ class Building(
 	var name: String,
 	var floors: ListBuffer[BuildingFloor]
 
-}
+)
