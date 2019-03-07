@@ -1,10 +1,6 @@
 import junit.framework.TestCase
-import org.joda.time.{DateTime, LocalTime}
 import org.junit.Assert._
-import services.generator.eventgenerator.EventGenerator
-import services.generator.roomgenerator.RoomGenerator
 import services.scheduler.Scheduler
-import services.scheduler.poso.{Duration, Period, Room, ScheduledClass}
 
 class SchedulerTests extends TestCase {
 
@@ -17,9 +13,9 @@ class SchedulerTests extends TestCase {
     var currentDay = -1
     var currentRoom = ""
 
-    Scheduler.generateSchedule(100, 10).get.groupBy(sc => (sc.room.name, sc.day.calendar.dayOfMonth())).foreach(s => {
-      s._2.sortBy(sc =>  (sc.time.start.getHourOfDay, sc.time.start.getMinuteOfHour)).foreach(e => {
-        print("[Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.name + ", Start time: " + e.time.start.getHourOfDay + "] < ")
+	  Scheduler.generateSchedule(100, 10).get.groupBy(sc => (sc.room.name, sc.day.calendar.getDayOfMonth())).foreach(s => {
+		  s._2.sortBy(sc => (sc.time.start.getHour, sc.time.start.getMinute)).foreach(e => {
+			  print("[Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.name + ", Start time: " + e.time.start.getHour + "] < ")
 
         //When room changes reset currentEnd
         if(currentRoom != e.room.name) {
@@ -33,8 +29,8 @@ class SchedulerTests extends TestCase {
           currentEnd = -1
         }
 
-        if (currentEnd > e.time.start.getHourOfDay) fail(currentEnd + " > " + e.time.start.getHourOfDay)
-        currentEnd = e.time.end.getHourOfDay
+			  if (currentEnd > e.time.start.getHour) fail(currentEnd + " > " + e.time.start.getHour)
+			  currentEnd = e.time.end.getHour
       })
     })
   }
