@@ -17,23 +17,23 @@ object Scheduler {
       SussexRoomScraper.roomDataForSession,
       EventGenerator.generate(eventCount),
       Array(
-		  new Period(OffsetDateTime.parse("2019-01-01"), new TimePeriod {
+		  new Period(OffsetDateTime.parse("2019-01-01T00:00:00+00:00"), new TimePeriod {
 			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
 			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
 		  }),
-		  new Period(OffsetDateTime.parse("2019-01-02"), new TimePeriod {
+		  new Period(OffsetDateTime.parse("2019-01-02T00:00:00+00:00"), new TimePeriod {
 			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
 			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
 		  }),
-		  new Period(OffsetDateTime.parse("2019-01-03"), new TimePeriod {
+		  new Period(OffsetDateTime.parse("2019-01-03T00:00:00+00:00"), new TimePeriod {
 			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
 			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
 		  }),
-		  new Period(OffsetDateTime.parse("2019-01-04"), new TimePeriod {
+		  new Period(OffsetDateTime.parse("2019-01-04T00:00:00+00:00"), new TimePeriod {
 			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
 			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
 		  }),
-		  new Period(OffsetDateTime.parse("2019-01-05"), new TimePeriod {
+		  new Period(OffsetDateTime.parse("2019-01-05T00:00:00+00:00"), new TimePeriod {
 			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
 			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
 		  }),
