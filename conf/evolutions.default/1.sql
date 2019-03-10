@@ -1,4 +1,3 @@
-# User schema
 
 # --- !Ups
 
@@ -26,10 +25,41 @@ CREATE TABLE IF NOT EXISTS `tempus`.`Staff`
 	CONSTRAINT `StaffPersonFK`
 		FOREIGN KEY (`PersonID`)
 			REFERENCES `tempus`.`Person` (`PersonID`)
-			ON DELETE NO ACTION
-			ON UPDATE NO ACTION
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 );
+
+-- -----------------------------------------------------
+-- Table `tempus`.`Student`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`Student` (
+  `StudentID` INT NOT NULL,
+  `CourseID` INT NULL,
+  `CurrentFEHQLevelCompleted` TINYINT NULL,
+  `AcademicAdvisorID` INT NULL,
+  `PersonID` INT NULL,
+  PRIMARY KEY (`StudentID`),
+  CONSTRAINT `AcademicAdvisorFK`
+    FOREIGN KEY (`AcademicAdvisorID`)
+    REFERENCES `tempus`.`Staff` (`StaffID`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT `StudentPersonFK`
+    FOREIGN KEY (`PersonID`)
+    REFERENCES `tempus`.`Person` (`PersonID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
+	-- -----------------------------------------------------
+-- Table `tempus`.`Building`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`Building` (
+  `BuildingID` INT NOT NULL,
+  `BuildingName` VARCHAR(45) NULL,
+  PRIMARY KEY (`BuildingID`));
 
 # --- !Downs
 
-drop table `tempus`.`Person`;
+DROP TABLE `tempus`.`Person`;
+DROP TABLE `tempus`.`Staff`;
+DROP TABLE `tempus`.`Student`;
