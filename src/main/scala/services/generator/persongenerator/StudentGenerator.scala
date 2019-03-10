@@ -1,4 +1,4 @@
-package services.generator.persongenerator.studentgenerator
+package services.generator.persongenerator
 
 import entities.people.Student
 import services.generator.Generator

@@ -1,4 +1,4 @@
-package services.generator.persongenerator.staffgenerator
+package services.generator.persongenerator
 
 import entities.people.Staff
 import services.generator.Generator
