@@ -3,9 +3,10 @@ package services.scheduler
 import java.time.temporal.{ChronoField, ChronoUnit}
 import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 
+import entities.locations.Room
 import entities.timing.TimePeriod
 import services.generator.eventgenerator.{Event, EventGenerator}
-import services.scheduler.poso.{Period, Room, ScheduledClass}
+import services.scheduler.poso.{Period, ScheduledClass}
 import services.sussexroomscraper.SussexRoomScraper
 
 import scala.collection.mutable
@@ -15,7 +16,7 @@ object Scheduler {
   def generateSchedule(eventCount: Int, roomCount: Int): Option[Seq[ScheduledClass]] = {
     Scheduler.schedule(
       SussexRoomScraper.roomDataForSession,
-      EventGenerator.generate(eventCount),
+      EventGenerator.gen(eventCount),
       Array(
 		  new Period(OffsetDateTime.parse("2019-01-01"), new TimePeriod {
 			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)

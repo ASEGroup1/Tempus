@@ -13,13 +13,13 @@ class SchedulerTests extends TestCase {
     var currentDay = -1
     var currentRoom = ""
 
-	  Scheduler.generateSchedule(100, 10).get.groupBy(sc => (sc.room.name, sc.day.calendar.getDayOfMonth())).foreach(s => {
+	  Scheduler.generateSchedule(100, 10).get.groupBy(sc => (sc.room.roomId, sc.day.calendar.getDayOfMonth())).foreach(s => {
 		  s._2.sortBy(sc => (sc.time.start.getHour, sc.time.start.getMinute)).foreach(e => {
-			  print("[Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.name + ", Start time: " + e.time.start.getHour + "] < ")
+			  print("[Day: " + e.day.calendar.getDayOfMonth + ", Room: " + e.room.roomId + ", Start time: " + e.time.start.getHour + "] < ")
 
         //When room changes reset currentEnd
-        if(currentRoom != e.room.name) {
-          currentRoom = e.room.name
+        if(currentRoom != e.room.roomId) {
+          currentRoom = e.room.roomId
           currentEnd = -1
         }
 
