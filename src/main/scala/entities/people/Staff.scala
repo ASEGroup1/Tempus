@@ -1,6 +1,10 @@
 package entities.people
 
-class Staff extends Person {
-	var staffId: Int = _
-	var jobTitle: String = _ // Possibly make this a user defined value at some point
-}
+import entities.course.{Course, CourseRole}
+import entities.module.{ModuleFehqLevel, ModuleRole}
+
+import scala.collection.mutable.ListBuffer
+
+class Staff(var staffId: Int, var jobTitle: String, personId: Int, firstName: String, lastName: String, otherNames: String,
+							courses: ListBuffer[(CourseRole, Course)], modules: ListBuffer[(ModuleRole, ModuleFehqLevel)]
+						 ) extends Person(personId, firstName, lastName, otherNames, courses, modules)
