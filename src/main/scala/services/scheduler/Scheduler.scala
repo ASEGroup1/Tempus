@@ -6,8 +6,8 @@ import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 import entities.locations.Room
 import entities.timing.TimePeriod
 import services.generator.eventgenerator.{Event, EventGenerator}
+import services.generator.locationgenerator.SussexRoomScraper
 import services.scheduler.poso.{Period, ScheduledClass}
-import services.sussexroomscraper.SussexRoomScraper
 
 import scala.collection.mutable
 

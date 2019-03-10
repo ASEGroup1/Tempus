@@ -13,12 +13,12 @@ object Room {
     new Room(m.group(1), getRoomType(m.group(2)), capacity, m.group(8).toLowerCase().replace(" ", "") == "yes", null)
   }
 
-  val LecturePattern = ".*[L|l]ecture.*".r
-  val SeminarPattern = ".*[S|s]eminar.*".r
-  val LabPattern = ".*[L|l]aboratory.*".r
+  val LecturePattern = ".*lecture.*".r
+  val SeminarPattern = ".*seminar.*".r
+  val LabPattern = ".*[lab|laboratory|computer].*".r
 
   def getRoomType(roomTypeString: String): RoomType = {
-    roomTypeString match {
+    roomTypeString.toLowerCase match {
       case LecturePattern() => new RoomType(0, roomTypeString, "")
       case SeminarPattern() => new RoomType(1, roomTypeString, "")
       case LabPattern() => new RoomType(2, roomTypeString, "")

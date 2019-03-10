@@ -1,6 +1,6 @@
 import junit.framework.TestCase
 import org.junit.Assert.assertEquals
-import services.sussexroomscraper.SussexRoomScraper
+import services.generator.locationgenerator.SussexRoomScraper
 
 class RoomScraperTest extends TestCase {
   //TODO mock request

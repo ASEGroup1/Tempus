@@ -1,4 +1,4 @@
-package services.sussexroomscraper
+package services.generator.locationgenerator
 
 import java.util.regex.Pattern
 

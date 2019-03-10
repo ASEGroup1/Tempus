@@ -1,9 +1,8 @@
-package services.generator.roomgenerator
+package services.generator.locationgenerator
 
 import java.util.UUID
 
 import services.generator.Generator
-import services.sussexroomscraper.SussexRoomScraper
 
 object RoomGenerator extends Generator[String] {
   override def gen(): String = UUID.randomUUID.toString

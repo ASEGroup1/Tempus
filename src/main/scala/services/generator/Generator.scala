@@ -11,5 +11,8 @@ trait Generator[T] {
 
   def genStr = UUID.randomUUID().toString
 
+  //These methods are 1 line however to avoid imports and maintain code concision
   def genInt = Random.nextInt
+
+  def genInt(min:Int, max:Int) = Random.nextInt(max) + min
 }
