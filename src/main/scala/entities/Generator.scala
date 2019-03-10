@@ -1,6 +1,6 @@
-package services.generator
+package entities
 
-import java.time._
+import java.time.{OffsetDateTime, OffsetTime}
 import java.util.UUID
 
 import scala.util.Random

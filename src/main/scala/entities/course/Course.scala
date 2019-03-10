@@ -1,10 +1,14 @@
 package entities.course
 
-import entities.School
+import entities.{Generator, School}
 import entities.module.ModuleFehqLevel
 import entities.people.Person
 
 import scala.collection.mutable.ListBuffer
+
+object Course extends Generator[Course] {
+	override def gen() = new Course(genInt, genStr, null, null, null)
+}
 
 class Course(
 	val courseId: Int,

@@ -1,6 +1,12 @@
 package entities.module
 
+import entities.Generator
 import entities.timing.TimePeriod
+
+object ModuleTimetableSession extends Generator[ModuleTimetableSession] {
+	override def gen() = new ModuleTimetableSession(genInt, null, null, genInt)
+}
+
 
 class ModuleTimetableSession(
 	var timetableSessionId: Int,

@@ -1,9 +1,15 @@
 package entities.module
 
+import entities.Generator
 import entities.course.Course
 import entities.people.Person
+import services.generator.modulegenerator.ModuleFehqLevel.genInt
 
 import scala.collection.mutable.ListBuffer
+
+object ModuleFehqLevel extends Generator[ModuleFehqLevel] {
+	override def gen() = new ModuleFehqLevel(null, genInt, null, null, genInt(10, 500), null, null)
+}
 
 class ModuleFehqLevel(
 	var baseModule: Module,

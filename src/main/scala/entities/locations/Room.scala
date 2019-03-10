@@ -27,7 +27,6 @@ object Room {
   }
 }
 
-
 class Room(
             var roomId: String,
             var roomType: RoomType,
@@ -35,3 +34,9 @@ class Room(
             var disabledAccess: Boolean,
             var partitions: ListBuffer[RoomPartition]
           )
+
+class RoomType(
+                var roomTypeId: Int,
+                var name: String,
+                var description: String
+              )

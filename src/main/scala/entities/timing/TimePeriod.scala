@@ -3,6 +3,13 @@ package entities.timing
 import java.time.OffsetTime
 import java.time.temporal.ChronoField
 
+import entities.Generator
+import services.generator.timingGenerator.TimePeriod.{genInt, genOT}
+
+object TimePeriod extends Generator[TimePeriod] {
+	override def gen() = new TimePeriod(genInt, genOT, genOT)
+}
+
 class TimePeriod(
 	var timePeriodId: Int,
 	var start: OffsetTime,
