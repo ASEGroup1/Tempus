@@ -1,5 +1,6 @@
 package services.generator
 
+import java.time._
 import java.util.UUID
 
 import scala.util.Random
@@ -15,4 +16,8 @@ trait Generator[T] {
   def genInt = Random.nextInt
 
   def genInt(min:Int, max:Int) = Random.nextInt(max) + min
+
+  def genODT = new OffsetDateTime()
+
+  def genOT = new OffsetTime()
 }
