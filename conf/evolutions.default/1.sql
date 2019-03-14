@@ -361,7 +361,144 @@ CREATE TABLE IF NOT EXISTS `tempus`.`ModuleCourseAvaiability` (
     FOREIGN KEY (`ModuleFEHQLevelID`)
     REFERENCES `tempus`.`ModuleFEHQLevel` (`ModuleFEHQLevelID`)
     ON DELETE SET NULL
-    ON UPDATE CASCADE)
+    ON UPDATE CASCADE);
+
+    -- -----------------------------------------------------
+-- Table `tempus`.`TermPeriod`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`TermPeriod` (
+  `TermPeriodID` INT NOT NULL AUTO_INCREMENT,
+  `TermID` INT NULL,
+  `TermPeriodNo` INT NULL,
+  `TermPeriodStart` DATE NULL,
+  `TermPeriodEnd` DATE NULL,
+  PRIMARY KEY (`TermPeriodID`),
+  CONSTRAINT `TermPeriodTermFK`
+    FOREIGN KEY (`TermID`)
+    REFERENCES `tempus`.`Term` (`TermID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE);
+
+-- -----------------------------------------------------
+-- Table `tempus`.`ModuleSessionType`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`ModuleSessionType` (
+  `ModuleSessionTypeID` INT NOT NULL AUTO_INCREMENT,
+  `MoudleSessionTypeName` VARCHAR(45) NULL,
+  `ModuleSessionTypeDescription` VARCHAR(2000) NULL,
+  `ModuleSessionTypecol` VARCHAR(45) NULL,
+  PRIMARY KEY (`ModuleSessionTypeID`));
+
+-- -----------------------------------------------------
+-- Table `tempus`.`ModuleSessionStructure`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`ModuleSessionStructure` (
+  `ModuleSessionStructureID` INT NOT NULL AUTO_INCREMENT,
+  `ModuleFEHQLevelID` INT NULL,
+  `WeekNo` INT NULL,
+  `ModuleSessionTypeID` INT NULL,
+  `NoSessionsRequired` INT NULL,
+  `MaxSessionSize` INT NULL COMMENT 'In terms of number of students',
+  PRIMARY KEY (`ModuleSessionStructureID`),
+  CONSTRAINT `ModuleSessionStructureModuleFEHQLevelFK`
+    FOREIGN KEY (`ModuleFEHQLevelID`)
+    REFERENCES `tempus`.`ModuleFEHQLevel` (`ModuleFEHQLevelID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  CONSTRAINT `ModuleSessionStructureModuleSessionTypeFK`
+    FOREIGN KEY (`ModuleSessionTypeID`)
+    REFERENCES `tempus`.`ModuleSessionType` (`ModuleSessionTypeID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE);
+
+    -- -----------------------------------------------------
+-- Table `tempus`.`ModuleTermNumber`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`ModuleTermNumber` (
+  `ModuleID` INT NOT NULL,
+  `TermNumber` INT NOT NULL COMMENT 'Terms which the module is added to by default can contain multiple terms',
+  PRIMARY KEY (`ModuleID`, `TermNumber`),
+  CONSTRAINT `ModuleTermNumberModuleFK`
+    FOREIGN KEY (`ModuleID`)
+    REFERENCES `tempus`.`Module` (`ModuleID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
+    -- -----------------------------------------------------
+-- Table `tempus`.`ModuleDayTimingConstraint`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`ModuleDayTimingConstraint` (
+  `ModuleTimingConstraintID` INT NOT NULL AUTO_INCREMENT,
+  `TimePeriodDayNo` INT NOT NULL,
+  `DayTimingConstraintID` INT NULL,
+  PRIMARY KEY (`ModuleTimingConstraintID`, `TimePeriodDayNo`));
+
+  -- -----------------------------------------------------
+-- Table `tempus`.`TimePeriod`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`TimePeriod` (
+  `TimePeriodID` INT NOT NULL AUTO_INCREMENT,
+  `StartTime` TIME NULL,
+  `EndTime` TIME NULL,
+  PRIMARY KEY (`TimePeriodID`));
+
+  -- -----------------------------------------------------
+-- Table `tempus`.`DayTimingConstraint`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`DayTimingConstraint` (
+  `ModuleDayTimingConstraintID` INT NOT NULL,
+  `TimePeriodAvailabilityID` INT NULL,
+  PRIMARY KEY (`ModuleDayTimingConstraintID`),
+  CONSTRAINT `DayTimingConstraintModuleDayTimingConstraintFK`
+    FOREIGN KEY (`ModuleDayTimingConstraintID`)
+    REFERENCES `tempus`.`ModuleDayTimingConstraint` (`ModuleTimingConstraintID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `DayTimingConstraintTimePeriodAvailabilityFK`
+    FOREIGN KEY (`TimePeriodAvailabilityID`)
+    REFERENCES `tempus`.`TimePeriodAvailability` (`TimePeriodAvailabilityID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE);
+
+    -- -----------------------------------------------------
+-- Table `tempus`.`TimePeriodAvailability`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`TimePeriodAvailability` (
+  `TimePeriodAvailabilityID` INT NOT NULL AUTO_INCREMENT,
+  `DayTimingConstraintID` INT NULL,
+  `TimePeriodID` INT NULL,
+  `Available` TINYINT NULL COMMENT 'Treat as Boolean',
+  PRIMARY KEY (`TimePeriodAvailabilityID`),
+  CONSTRAINT `TimePeriodAvailabilityDayTimingConstraintFK`
+    FOREIGN KEY (`DayTimingConstraintID`)
+    REFERENCES `tempus`.`DayTimingConstraint` (`ModuleDayTimingConstraintID`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `TimePeriodAvailabilityTimePeriodFK`
+    FOREIGN KEY (`TimePeriodID`)
+    REFERENCES `tempus`.`TimePeriod` (`TimePeriodID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE);
+
+    -- -----------------------------------------------------
+-- Table `tempus`.`ModuleTimeTableSession`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tempus`.`ModuleTimeTableSession` (
+  `ModuleTimeTableSessionID` INT NOT NULL AUTO_INCREMENT,
+  `ModuleSessionTypeID` INT NULL,
+  `TimePeriodID` INT NULL,
+  `DayNo` INT NULL,
+  PRIMARY KEY (`ModuleTimeTableSessionID`),
+  CONSTRAINT `ModuleTimeTableSessionModuleSessionTypeFK`
+    FOREIGN KEY (`ModuleSessionTypeID`)
+    REFERENCES `tempus`.`ModuleSessionType` (`ModuleSessionTypeID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+  CONSTRAINT `ModuleTimeTableSessionTimePeriodFK`
+    FOREIGN KEY (`TimePeriodID`)
+    REFERENCES `tempus`.`TimePeriod` (`TimePeriodID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE);
 
 # --- !Downs
 
@@ -389,8 +526,13 @@ DROP TABLE `tempus`.`RoomPartition`;
 DROP TABLE `tempus`.`RoomFeature`;
 DROP TABLE `tempus`.`RoomPartitionFeature`;
 DROP TABLE `tempus`.`ModuleCourseAvaiability`;
-
-
-
+DROP TABLE `tempus`.`TermPeriod`;
+DROP TABLE `tempus`.`ModuleSessionType`;
+DROP TABLE `tempus`.`ModuleSessionStructure`;
+DROP TABLE `tempus`.`ModuleTermNumber`;
+DROP TABLE `tempus`.`ModuleDayTimingConstraint`;
+DROP TABLE `tempus`.`TimePeriod`;
+DROP TABLE `tempus`.`DayTimingConstraint`;
+DROP TABLE `tempus`.`TimePeriodAvailability`;
 
 
