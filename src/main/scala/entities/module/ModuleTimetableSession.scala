@@ -6,5 +6,5 @@ class ModuleTimetableSession(
 	var timetableSessionId: Int,
 	var sessionType: ModuleSessionType,
 	var timePeriod: TimePeriod,
-	var dayNumber: Int // As in which Day in the term period the session occurs on
+	var dayNumber: Int // As in which Day in the week period the session occurs on
 )
