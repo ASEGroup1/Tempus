@@ -15,4 +15,5 @@ class Module(
               var requiredSessions: mutable.Set[RequiredSession]
             ) {
   def this() = this(0, "", "", "", null, null, null)
+  def this(name:String) = this(0, name, "", "", null, null, null)
 }
