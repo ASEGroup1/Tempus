@@ -4,6 +4,7 @@ import java.time.{LocalDate, LocalDateTime, LocalTime}
 import java.util.regex.Pattern
 
 import entities.School
+import entities.course.Course
 import entities.module.{Module, RequiredSession}
 
 import scala.collection.mutable
@@ -11,13 +12,27 @@ import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 object TimeTableParser {
-  val ModulePattern = Pattern.compile("[5-9]L([\\S\\s]*?)\\([A-Z0-9]+\\)/[0-9]+,([A-Za-z]+),([0-9]{1,2}:[0-9]{1,2}),([0-9]{1,2}:[0-9]{1,2}),([\\S\\s]*?),[\\S\\s]*?,([\\S\\s]*?),([\\S\\s]*?),")
+  val TimeTablePattern = Pattern.compile("[5-9]L([\\S\\s]*?)\\([A-Z0-9]+\\)/[0-9]+,([A-Za-z]+),([0-9]{1,2}:[0-9]{1,2}),([0-9]{1,2}:[0-9]{1,2}),([\\S\\s]*?),[\\S\\s]*?,([\\S\\s]*?),([\\S\\s]*?),")
+  val SchoolPattern = Pattern.compile("[A-Z][0-9]{4},([\\S\\s]*?),")
 
-  val timeTablecsvStr = Source.fromFile(getClass.getResource("/input/Gregory_Mitten_Full_Timetable.csv").getPath).mkString
+  val timeTableCsvStr = Source.fromFile(getClass.getResource("/input/Gregory_Mitten_Full_Timetable.csv").getPath).mkString
 
-  def parseModules(): mutable.Set[Module] = {
+  val schools: Set[School] = {
+    val schoolMatcher = SchoolPattern.matcher(timeTableCsvStr)
+    var schools = mutable.Set[School]()
+    var schoolId = 0
+
+    while (schoolMatcher.find) {
+      schools += new School(schoolId, schoolMatcher.group(1), null)
+      schoolId += 1
+    }
+
+    schools.groupBy(_.schoolName).map(_._2.head).filter(!_.schoolName.contains("(")).toSet
+  }
+
+  val modules: Set[Module] = {
     var modules = mutable.Set[Module]()
-    val moduleMatcher = ModulePattern.matcher(timeTablecsvStr)
+    val moduleMatcher = TimeTablePattern.matcher(timeTableCsvStr)
     var currentModule = new Module()
     var sessions = mutable.Set[RequiredSession]()
 
@@ -30,11 +45,11 @@ object TimeTableParser {
           sessions = mutable.Set[RequiredSession]()
         }
         currentModule = new Module(0, moduleMatcher.group(6), moduleMatcher.group(1), "",
-          new School(0, moduleMatcher.group(7), null),
+          if (schools.groupBy(_.schoolName).contains(moduleMatcher.group(7))) schools.filter(_.schoolName == moduleMatcher.group(7)).head else null,
           ListBuffer(2),
           null)
       }
     }
-    modules
+    modules.groupBy(_.moduleName).map(_._2.head).toSet
   }
 }
