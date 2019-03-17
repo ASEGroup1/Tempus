@@ -16,7 +16,7 @@ object TimeTableParser {
 
   val timeTableCsvStr = Source.fromFile(getClass.getResource("/input/Gregory_Mitten_Full_Timetable.csv").getPath).mkString
 
-  val schools: Set[School] = {
+  val schools: Map[String, School] = {
     val schoolMatcher = SchoolPattern.matcher(timeTableCsvStr)
     var schools = mutable.Set[School]()
     var schoolId = 0
@@ -26,10 +26,10 @@ object TimeTableParser {
       schoolId += 1
     }
 
-    schools.groupBy(_.schoolName).map(_._2.head).filter(!_.schoolName.contains("(")).toSet
+    schools.groupBy(_.schoolName).map(_._2.head).filter(!_.schoolName.contains("(")).map(s => s.schoolName -> s).toMap
   }
 
-  val modules: Set[Module] = {
+  val modules: Map[String, Module] = {
     var modules = mutable.Set[Module]()
     val moduleMatcher = TimeTablePattern.matcher(timeTableCsvStr)
     var currentModule = new Module()
@@ -44,11 +44,11 @@ object TimeTableParser {
           sessions = mutable.Set[RequiredSession]()
         }
         currentModule = new Module(0, moduleMatcher.group(6), Utils.toSnake(moduleMatcher.group(1)), "",
-          if (schools.groupBy(_.schoolName).contains(moduleMatcher.group(7))) schools.filter(_.schoolName == moduleMatcher.group(7)).head else null,
+          if (schools.contains(Utils.toSnake(moduleMatcher.group(7)))) schools(Utils.toSnake(moduleMatcher.group(7))) else null,
           ListBuffer(2),
           null)
       }
     }
-    modules.groupBy(_.moduleName).map(_._2.head).toSet
+    modules.map(m => m.moduleName -> m).toMap
   }
 }

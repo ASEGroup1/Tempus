@@ -17,7 +17,7 @@ import scala.util.Random
 
 object Student extends Generator[Student] {
   val studentRole = new ModuleRole(0, "Student", "")
-  val modules:Map[String, Module] = TimeTableParser.modules.map(m => Utils.toSnake(m.moduleName) -> m).toMap
+  val modules:Map[String, Module] = TimeTableParser.modules
   val moduleChoicesStr = Source.fromFile(getClass.getResource("/input/Pathways.csv").getPath).mkString
   val PathwayPattern = Pattern.compile("([A-Z][0-9]{4}[A-Z]-.*?),[A-Z][0-9]+(.*)")
 
