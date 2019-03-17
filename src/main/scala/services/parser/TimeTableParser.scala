@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 object TimeTableParser {
-  val TimeTablePattern = Pattern.compile("[5-9]L[\\s]([\\S\\s]*?)\\([A-Z0-9]+\\)/[0-9]+,([A-Za-z]+),([0-9]{1,2}:[0-9]{1,2}),([0-9]{1,2}:[0-9]{1,2}),([\\S\\s]*?),[\\S\\s]*?,([\\S\\s]*?),([\\S\\s]*?),")
+  val TimeTablePattern = Pattern.compile("\\\"?[0-9]L[\\s]([\\S\\s]*?)\\([\\S\\s]+?\\)\\/[0-9]+\\\"?,([A-Za-z]+),([0-9]{1,2}:[0-9]{1,2}),([0-9]{1,2}:[0-9]{1,2}),([\\S\\s]*?),[\\S\\s]*?,([\\S\\s]*?),([\\S\\s]*?),")
   val SchoolPattern = Pattern.compile("[A-Z][0-9]{4},([\\S\\s]*?),")
 
   val timeTableCsvStr = Source.fromFile(getClass.getResource("/input/Gregory_Mitten_Full_Timetable.csv").getPath).mkString
