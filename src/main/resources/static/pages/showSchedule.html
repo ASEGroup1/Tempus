@@ -1,24 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Schedule</title>
-    <link rel="stylesheet" type="text/css" href="table.css">
-    <script src="lib/superagent.js"></script>
-    <script src = "netUtils.js"></script>
-    <script src="scheduleRender.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        <title>Schedule</title>
+        <link rel="stylesheet" type="text/css" href="table.css">
+        <script src="lib/superagent.js"></script>
+        <script src = "netUtils.js"></script>
+        <script src="scheduleRender.js"></script>
 
-    <script>
-        function onLoad() {
-	        getSchedule().then(function(res){
-                //elem.innerText = JSON.stringify(res)
-                genTable(document.getElementById('ScheduleDiv'), res);
-            })
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
+        <script>
+            function onLoad() {
+                getSchedule().then(function(res){
+                    //elem.innerText = JSON.stringify(res)
+                    genTable(document.getElementById('ScheduleDiv'), res);
+                })
+            }
+        </script>
 
-        }
-    </script>
-</head>
-<body onload = "onLoad()">
-    <div id="ScheduleDiv"></div>
-</body>
+
+    </head>
+    <body onload = "onLoad()">
+        <div id="ScheduleDiv"></div>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    </body>
 </html>
