@@ -3,6 +3,7 @@ package services.sussexroomscraper
 import java.util.regex.Pattern
 
 import com.mashape.unirest.http.Unirest
+import entities.locations.Room
 import services.scheduler.poso.Room
 
 import scala.collection.mutable.ArrayBuffer
