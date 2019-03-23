@@ -2,7 +2,7 @@ package entities.people
 
 import entities.course.Course
 
-class Student extends Person {
+class Student {
 	var studentId: Int = _
 	var course: Course = _
 	var currentFehqLevelCompleted: Int = _

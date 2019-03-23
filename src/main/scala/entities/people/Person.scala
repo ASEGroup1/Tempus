@@ -1,16 +1,11 @@
 package entities.people
 
-import entities.course.{Course, CourseRole}
-import entities.module.{ModuleFehqLevel, ModuleRole}
+case class Person(
 
-import scala.collection.mutable.ListBuffer
+	                 personId: Long,
+	                 firstName: String,
+	                 lastName: String,
+	                 otherNames: String)
 
-abstract class Person {
-
-	var personId: Int = _
-	var firstName: String = _
-	var lastName: String = _
-	var otherNames: String = _
-	var courses: ListBuffer[(CourseRole, Course)] = _
-	var modules: ListBuffer[(ModuleRole, ModuleFehqLevel)] = _
-}
+//	var courses: ListBuffer[(CourseRole, Course)] ,
+//	var modules: ListBuffer[(ModuleRole, ModuleFehqLevel)])
