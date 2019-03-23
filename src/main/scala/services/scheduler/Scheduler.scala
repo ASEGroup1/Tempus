@@ -19,7 +19,7 @@ object Scheduler {
   def getPeriodDefault(dayOfMonth: Int) = getPeriod(dayOfMonth, 1, 8, 20)
 
   def getPeriod(dayOfMonth: Int, monthOfYear:Int, beginHour24: Int, endHour24: Int) =
-    new Period(OffsetDateTime.parse(s"2019-0$dayOfMonth-0${monthOfYear}T00:00:00+00:00"), new TimePeriod {
+    new Period(OffsetDateTime.parse(s"2019-0$monthOfYear-0${dayOfMonth}T00:00:00+00:00"), new TimePeriod {
     start = OffsetTime.of(beginHour24, 0, 0, 0, ZoneOffset.UTC)
     end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
   })
@@ -28,7 +28,6 @@ object Scheduler {
     val rooms = SussexRoomScraper.roomDataForSession
     val events = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(m._1 -> _.durationInHours)).toSet
     val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
-
 
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
 
