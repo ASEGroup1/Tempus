@@ -1,35 +1,37 @@
 package dao
 
+import java.util.concurrent.{ArrayBlockingQueue, Executors, ThreadPoolExecutor, TimeUnit}
+
 import entities.people.Person
 import javax.inject.{Inject, Singleton}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.libs.concurrent.Execution.Implicits._
 import slick.jdbc.JdbcProfile
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.{TableQuery, Tag}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PersonDAOImpl @Inject()(dbConfigProvider: DatabaseConfigProvider) extends PersonDAO {
 
 	private val dbConfig = dbConfigProvider.get[JdbcProfile]
+	private val db = dbConfig.db
 
-	override def add(person: Person): Future[String] = {
-		val db = Database.forConfig("mydb")
-		try {
-			db.run(people += person).map(res => "Person successfully added").recover {
-				case ex: Exception => ex.getCause.getMessage
-			}
-		} finally
-			db.close()
+	override def add(person: Person): Future[String] = try {
+		var executionContext = ExecutionContext.fromExecutor(
+			new ThreadPoolExecutor(2,4, 10, TimeUnit.SECONDS, new ArrayBlockingQueue[Runnable](2), Executors.defaultThreadFactory()))
+		db.run(people += person)
+			.map(res => "Person successfully added")(executionContext).recover {
+			case ex: Exception => ex.getCause.getMessage
+		}(executionContext)
 	}
+	finally
+		db.close()
 
 	implicit val people = TableQuery[PersonTable]
 
 	override def get(id: Long): Future[Option[Person]] = {
-		val db = Database.forConfig("mydb")
 		try {
 			db.run(people.filter(_.personId === id).result.headOption)
 		} finally
@@ -37,7 +39,6 @@ class PersonDAOImpl @Inject()(dbConfigProvider: DatabaseConfigProvider) extends 
 	}
 
 	override def delete(id: Long): Future[Int] = {
-		val db = Database.forConfig("mydb")
 		try {
 			db.run(people.filter(_.personId === id).delete)
 		} finally
@@ -45,7 +46,6 @@ class PersonDAOImpl @Inject()(dbConfigProvider: DatabaseConfigProvider) extends 
 	}
 
 	override def listAll: Future[Seq[Person]] = {
-		val db = Database.forConfig("mydb")
 		val seq = new ListBuffer[Person]()
 		try {
 			db.run(people.result)
