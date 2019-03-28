@@ -1,7 +1,5 @@
 package dao
 
-import java.util.concurrent.{ArrayBlockingQueue, Executors, ThreadPoolExecutor, TimeUnit}
-
 import entities.people.Person
 import javax.inject.{Inject, Singleton}
 import play.api.db.slick.DatabaseConfigProvider
@@ -19,8 +17,7 @@ class PersonDAOImpl @Inject()(dbConfigProvider: DatabaseConfigProvider) extends 
 	private val db = dbConfig.db
 
 	override def add(person: Person): Future[String] = try {
-		var executionContext = ExecutionContext.fromExecutor(
-			new ThreadPoolExecutor(2,4, 10, TimeUnit.SECONDS, new ArrayBlockingQueue[Runnable](2), Executors.defaultThreadFactory()))
+		val executionContext = ExecutionContext.global
 		db.run(people += person)
 			.map(res => "Person successfully added")(executionContext).recover {
 			case ex: Exception => ex.getCause.getMessage
