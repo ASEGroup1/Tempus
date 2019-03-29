@@ -3,16 +3,9 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-
-
 # Serve index page from public directory
 GET /                           controllers.FrontendController.index()
 
 GET  /get-generated-schedule    controllers.ScheduleController.generateScheduleResponse
 
-GET     /*fileName.html         controllers.StaticController.displayFile(path = "public", fileName, ext = "html", contentType = "text/html")
-GET     /*fileName.js           controllers.StaticController.displayFile(path = "public", fileName , ext = "js", contentType = "text/javascript")
-GET     /*fileName.css           controllers.StaticController.displayFile(path = "public", fileName , ext = "css", contentType = "text/css")
-
-
-#GET /*file                      controllers.FrontendController.assetOrDefault(file)
+GET /*file                      controllers.FrontendController.assetOrDefault(file)
