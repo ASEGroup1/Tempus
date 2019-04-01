@@ -2,9 +2,11 @@ package controllers
 
 import entities.people.Person
 import javax.inject._
+import play.api.db.evolutions.Evolutions
 import play.api.mvc._
 import services.PersonService
 import services.generator.studentgenerator.StudentGenerator
+import slick.jdbc.JdbcProfile
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -20,6 +22,9 @@ class HomeController @Inject()(cc: ControllerComponents, personService: PersonSe
    * a path of `/`.
    */
   def index = Action {
+	  val dbConfig = dbConfigProvider.get[JdbcProfile]
+	  val db = dbConfig.
+	  Evolutions.applyEvolutions()
 	  personService.addPerson(Person(1, "James", "Fernando", ""))
     Ok("<html><head><title>Student Generator</title></head><body>" + StudentGenerator.generate(100).toString +"</body></html>").as("text/html")
   }
