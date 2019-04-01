@@ -15,6 +15,7 @@
     "react-dom": "^16.8.5",
     "react-router-dom": "^4.3.1",
     "react-scripts": "^2.1.8",
+    "superagent": "^5.0.2",
     "typescript": "^3.3.4000"
   },
   "devDependencies": {

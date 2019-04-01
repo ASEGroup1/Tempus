@@ -53,7 +53,7 @@ lazy val `ui-prod-build` = taskKey[Unit]("Run UI build when packaging the applic
 
 `ui-prod-build` := {
   implicit val userInterfaceRoot = baseDirectory.value / "React"
-  if (executeProdBuild != Success) throw new Exception("Oops! UI Build crashed.")
+  if (executeProdBuild != Success) throw new Exception("UI Build crashed.")
 }
 
 // Execute frontend prod build task prior to play dist execution.
