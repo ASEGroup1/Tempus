@@ -4,29 +4,25 @@ import java.time.temporal.ChronoUnit
 import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 
 import entities.locations.Room
+import entities.module.RequiredSession
 import entities.timing.TimePeriod
 import services.parser.TimeTableParser
 import services.scheduler.poso.{Period, ScheduledClass}
 import services.sussexroomscraper.SussexRoomScraper
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 object Scheduler {
-  val rooms = SussexRoomScraper.roomDataForSession
-  val events = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(m._1 -> _.durationInHours)).toSet
-  val scheduleDays = Array(getPeriodDefault(1), getPeriodDefault(2), getPeriodDefault(3), getPeriodDefault(4), getPeriodDefault(5))
-
   def getPeriodDefault(dayOfMonth: Int) = getPeriod(dayOfMonth, 1, 8, 20)
 
-  def getPeriod(dayOfMonth: Int, monthOfYear:Int, beginHour24: Int, endHour24: Int) =
+  def getPeriod(dayOfMonth: Int, monthOfYear: Int, beginHour24: Int, endHour24: Int) =
     new Period(OffsetDateTime.parse(s"2019-0$monthOfYear-0${dayOfMonth}T00:00:00+00:00"), new TimePeriod {
-    start = OffsetTime.of(beginHour24, 0, 0, 0, ZoneOffset.UTC)
-    end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
-  })
+      start = OffsetTime.of(beginHour24, 0, 0, 0, ZoneOffset.UTC)
+      end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
+    })
 
-  def binPackSchedule(daysToGenerate:Int): Option[List[ScheduledClass]] = {
-    val rooms = SussexRoomScraper.roomDataForSession
-    val events = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(m._1 -> _.durationInHours)).toSet
+  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[(String, Float)]): Option[List[ScheduledClass]] = {
     val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
 
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
@@ -38,7 +34,7 @@ object Scheduler {
       else availableRooms.min(Ordering by[RoomSchedule, Float] (_.timeRemaining)) + e
     })
 
-    Some(schedule.flatMap(_()).toList)
+    Some(schedule.flatMap(_ ()).toList)
   }
 
   private class RoomSchedule(val room: Room, val period: Period) {
@@ -54,4 +50,5 @@ object Scheduler {
 
     def apply() = events.map(e => new ScheduledClass(period, e._1, room, e._2)).toList
   }
+
 }

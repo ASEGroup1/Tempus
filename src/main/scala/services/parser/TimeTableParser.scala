@@ -18,15 +18,11 @@ object TimeTableParser {
 
   val schools: Map[String, School] = {
     val schoolMatcher = SchoolPattern.matcher(timeTableCsvStr)
-    var schools = mutable.Set[School]()
-    var schoolId = 0
-
+    var schools = mutable.Set[String]()
     while (schoolMatcher.find) {
-      schools += new School(schoolId, Utils.toSnake(schoolMatcher.group(1)), null)
-      schoolId += 1
+      schools += Utils.toSnake(schoolMatcher.group(1))
     }
-
-    schools.groupBy(_.schoolName).map(_._2.head).filter(!_.schoolName.contains("(")).map(s => s.schoolName -> s).toMap
+    schools.filter(!_.contains("(")).zipWithIndex.map(s => s._1 -> new School(s._2, s._1, null)).toMap
   }
 
   val modules: Map[String, Module] = {
