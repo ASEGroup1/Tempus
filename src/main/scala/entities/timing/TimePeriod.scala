@@ -10,8 +10,9 @@ class TimePeriod(
 )
 {
 	def this() = this(0,null,null) // Adds empty constructor
+  
+	def this(start: OffsetTime,	end: OffsetTime) = this(0, start, end)
 
-	def duration(): Int = if(start != null && end  != null) end.get(ChronoField.MILLI_OF_DAY) - start.get(ChronoField.MILLI_OF_DAY) else 0
-
+	def duration(): Int = {end.get(ChronoField.MILLI_OF_DAY) - start.get(ChronoField.MILLI_OF_DAY)}
 	def length = end.getHour - start.getHour
 }

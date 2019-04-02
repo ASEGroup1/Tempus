@@ -1,85 +1,55 @@
 package services.scheduler
 
-import java.time.temporal.{ChronoField, ChronoUnit}
+import java.time.temporal.ChronoUnit
 import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 
+import entities.locations.Room
+import entities.module.RequiredSession
 import entities.timing.TimePeriod
-import services.generator.eventgenerator.{Event, EventGenerator}
-import services.scheduler.poso.{Period, Room, ScheduledClass}
+import services.parser.TimeTableParser
+import services.scheduler.poso.{Period, ScheduledClass}
 import services.sussexroomscraper.SussexRoomScraper
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 object Scheduler {
+  def getPeriodDefault(dayOfMonth: Int) = getPeriod(dayOfMonth, 1, 8, 20)
 
-  def generateSchedule(eventCount: Int, roomCount: Int): Option[Seq[ScheduledClass]] = {
-    Scheduler.schedule(
-      SussexRoomScraper.roomDataForSession,
-      EventGenerator.generate(eventCount),
-      Array(
-		  new Period(OffsetDateTime.parse("2019-01-01T00:00:00+00:00"), new TimePeriod {
-			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
-			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
-		  }),
-		  new Period(OffsetDateTime.parse("2019-01-02T00:00:00+00:00"), new TimePeriod {
-			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
-			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
-		  }),
-		  new Period(OffsetDateTime.parse("2019-01-03T00:00:00+00:00"), new TimePeriod {
-			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
-			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
-		  }),
-		  new Period(OffsetDateTime.parse("2019-01-04T00:00:00+00:00"), new TimePeriod {
-			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
-			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
-		  }),
-		  new Period(OffsetDateTime.parse("2019-01-05T00:00:00+00:00"), new TimePeriod {
-			  start = OffsetTime.of(8, 0, 0, 0, ZoneOffset.UTC)
-			  end = OffsetTime.of(20, 0, 0, 0, ZoneOffset.UTC)
-		  }),
-      ))
-  }
-
-  // best fit bin packing
-  def schedule(rooms: Seq[Room], events: Seq[Event], periods: Seq[Period]): Option[Seq[ScheduledClass]] =
-    scheduleI(rooms.flatMap(r => periods.map(p => r -> p)), events)
-
-  /**
-    * @param areas  a Set of tuples of all permutations of rooms and periods
-    * @param events classes, etc.
-    */
-  def scheduleI(areas: Seq[(Room, Period)], events: Seq[Event]): Option[Seq[ScheduledClass]] = {
-    // ordered best fit bin packing, packing "events" into "room" number of bins of size "period"
-    val schedule = areas.map(a => new RoomSchedule(a._1, a._2))
-
-    // for each event (largest first), find the smallest slot (room and time) that it fits in, then add it to that slot.
-	  events.sortBy(_.duration.get(ChronoField.MILLI_OF_DAY))(Ordering[Int].reverse).foreach(e => {
-		  val availableRooms = {
-			  schedule.filter(_.timeRemaining >= e.duration.get(ChronoField.MILLI_OF_DAY))
-		  }
-
-      if (availableRooms.isEmpty) return None
-      else availableRooms.min(Ordering by[RoomSchedule, Int] (_.timeRemaining)) + e
+  def getPeriod(dayOfMonth: Int, monthOfYear: Int, beginHour24: Int, endHour24: Int) =
+    new Period(OffsetDateTime.parse(s"2019-0$monthOfYear-0${dayOfMonth}T00:00:00+00:00"), new TimePeriod {
+      start = OffsetTime.of(beginHour24, 0, 0, 0, ZoneOffset.UTC)
+      end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
     })
 
-    Some(schedule.flatMap(_()))
+
+  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[(String, Float)]): Option[List[ScheduledClass]] = {
+    val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
+
+    val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
+
+    events.foreach(e => {
+      val availableRooms = schedule.filter(_.timeRemaining >= e._2)
+
+      if (availableRooms.isEmpty) return None
+      else availableRooms.min(Ordering by[RoomSchedule, Float] (_.timeRemaining)) + e
+    })
+
+    Some(schedule.flatMap(_ ()).toList)
   }
 
   private class RoomSchedule(val room: Room, val period: Period) {
-	  var timeRemaining = period.timePeriod.duration()
-	  var durationPointer = period.timePeriod.start
-	  var events = mutable.HashMap[TimePeriod, Event]()
+    var timeRemaining = (period.timePeriod.duration() / 60 / 60 / 1000).toFloat
+    var durationPointer = period.timePeriod.start
+    var events = mutable.HashMap[TimePeriod, String]()
 
-    def +(event: Event): Unit = {
-		var duration = event.duration.get(ChronoField.MILLI_OF_DAY)
-		events += (new TimePeriod {
-			start = durationPointer
-			end = durationPointer.plus(duration, ChronoUnit.MILLIS)
-		} -> event)
-      timeRemaining -= duration
-		durationPointer = durationPointer.plus(duration, ChronoUnit.MILLIS)
+    def +(event: (String, Float)): Unit = {
+      events += new TimePeriod(durationPointer, durationPointer.plus(event._2.toLong, ChronoUnit.HOURS)) -> event._1
+      timeRemaining -= event._2
+      durationPointer = durationPointer.plus(event._2.toLong, ChronoUnit.HOURS)
     }
 
     def apply() = events.map(e => new ScheduledClass(period, e._1, room, e._2)).toList
   }
+
 }
