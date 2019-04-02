@@ -22,6 +22,7 @@ object Scheduler {
       end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
     })
 
+
   def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[(String, Float)]): Option[List[ScheduledClass]] = {
     val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
 
