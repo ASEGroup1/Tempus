@@ -20,6 +20,10 @@ libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 libraryDependencies += "com.mashape.unirest" % "unirest-java" % "1.3.0"
 
 libraryDependencies ++= Seq(
-	"com.typesafe.slick" %% "slick" % "2.1.0",
-	"org.slf4j" % "slf4j-nop" % "1.6.4"
+	"mysql" % "mysql-connector-java" % "5.1.34",
+	"com.typesafe.slick" %% "slick" % "3.3.0",
+	"com.typesafe.play" %% "play-slick" % "4.0.0",
+	"com.typesafe.play" %% "play-slick-evolutions" % "4.0.0"
 )
+
+
