@@ -6,7 +6,7 @@ import services.sussexroomscraper.SussexRoomScraper
 
 class SchedulerTests extends TestCase {
   val rooms = SussexRoomScraper.roomDataForSession
-  val events = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(m._1 -> _.durationInHours)).toSet
+  val events = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(_ -> m._2)).toSet
 
   def testIfScheduleIncludesAllEvents =
     assertEquals(1915, Scheduler.binPackSchedule(5, rooms, events).get.size)
