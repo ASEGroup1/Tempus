@@ -4,9 +4,17 @@ import services.parser.TimeTableParser
 import services.scheduler.Scheduler
 import services.sussexroomscraper.SussexRoomScraper
 
+import scala.util.Random
+
 class SchedulerTests extends TestCase {
   val rooms = SussexRoomScraper.roomDataForSession
-  val events = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(_ -> m._2)).toSet
+  val events = getMods
+
+  def getMods() ={
+    val mods = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(_ -> m._2)).toSet
+    // Temporary until a weekly approach is implemented
+    Random.shuffle(mods).drop(Math.round(mods.size/8))
+  }
 
   def testIfScheduleIncludesAllEvents =
     assertEquals(1915, Scheduler.binPackSchedule(5, rooms, events).get.size)

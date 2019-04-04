@@ -10,13 +10,21 @@ import services.scheduler.Scheduler
 import services.sussexroomscraper.SussexRoomScraper
 import views.ErrorPage
 
+import scala.util.Random
+
 @Singleton
 class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   def generateScheduleResponse = Action {
-    val schedule = Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(_ -> m._2)).toSet)
+    val schedule = Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, getMods)
 
     if(schedule.isEmpty) BadRequest(ErrorPage.badRequest("Could not generate, refresh for new random parameters.")).as("text/html")
     else Ok (Json.parse(schedule.get.sortBy(e => (e.day.calendar.getDayOfYear, e.room.roomName, e.time.start.get(ChronoField.MILLI_OF_DAY))).map(_.toJson).mkString("[", ",", "]"))).as("application/json")
+  }
+
+  def getMods() ={
+    val mods = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(_ -> m._2)).toSet
+    // Temporary until a weekly approach is implemented
+    Random.shuffle(mods).drop(Math.round(mods.size/8))
   }
 }
