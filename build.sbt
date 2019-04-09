@@ -18,6 +18,8 @@ unmanagedResourceDirectories in Test += baseDirectory.value / "conf"
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 libraryDependencies += "com.mashape.unirest" % "unirest-java" % "1.3.0"
+libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "2.6.0"
+
 
 libraryDependencies ++= Seq(
 	"mysql" % "mysql-connector-java" % "5.1.34",
