@@ -16,10 +16,11 @@ object Room {
   }
 }
 
+@SerialVersionUID(100L)
 class Room(
 	var roomName: String,
 	var roomType: RoomType,
 	var roomCapacity: Int,
 	var disabledAccess: Boolean,
 	var partitions: ListBuffer[RoomPartition]
-)
+) extends Serializable
