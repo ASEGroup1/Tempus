@@ -12,7 +12,7 @@ class SchedulerTests extends TestCase {
 
 
   def testIfScheduleIncludesAllEvents =
-    assertEquals(1915, Scheduler.binPackSchedule(5, rooms, events).get.size)
+    assertEquals(79299, Scheduler.binPackSchedule(5, rooms, events).get.size)
 
   def testIfNoEventsGenerateEmptySchedule = assertEquals(None, Scheduler.binPackSchedule(0, rooms, events))
 

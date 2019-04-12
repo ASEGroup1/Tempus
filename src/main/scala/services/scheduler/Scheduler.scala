@@ -4,9 +4,8 @@ import java.time.temporal.ChronoUnit
 import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 
 import entities.locations.Room
-import entities.module.{Module, ModuleFehqLevel, RequiredSession}
+import entities.module.{ModuleFehqLevel, RequiredSession}
 import entities.timing.TimePeriod
-import services.scheduler.Scheduler.ScheduledSession
 import services.scheduler.poso.{Period, ScheduledClass}
 
 import scala.collection.mutable
@@ -22,36 +21,39 @@ object Scheduler {
       end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
     })
 
-  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[ModuleFehqLevel]): Option[List[ScheduledClass]] ={
-    binPackSchedule(daysToGenerate, rooms, modules, Array(willFit(_,_,_)))
+  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[ModuleFehqLevel]): Option[List[ScheduledClass]] = {
+    binPackSchedule(daysToGenerate, rooms, modules, Array(willFit(_, _, _)))
   }
 
   def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[ModuleFehqLevel],
                       filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
                       weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
-                      None): Option[List[ScheduledClass]] ={
+                      None): Option[List[ScheduledClass]] = {
     // These values are an estimates
     val term1End = 12
     val startDay = getPeriod(7, 1, 0, 0)
 
-    // map required sessions to weeks occured
-    val classes = modules.flatMap(_.sessionStructure.groupBy(_.session))
+    val schedule = ListBuffer[ScheduledClass]()
 
-    val classTimes = classes.map(c => c._1 -> c._2.map(_.weekNo).sorted.toList)
+    val fmap = modules.map(m => m.sessionStructure.map(_.session -> m)).flatten.toMap
 
-    // split into terms (Really inelegant)
-    val terms = classTimes.map(c => c._2.map(c._1 -> _)).flatten.groupBy(_._2<= term1End).map(_._2.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}.map(e => e._1 -> e._2.toList.sorted))
+    // group modules into Seq(Term)[Map[Session, Seq(Weeks session runs)[Int]]]
+    modules.flatMap(_.sessionStructure.map(s => s.session -> s.weekNo)).groupBy(_._2 <= term1End).map(_._2.groupBy(_._1).map { case (k, v) => (k, v.map(_._2)) }.map(e => e._1 -> e._2.toList.sorted)).foreach(t => {
+      // For each term
 
-    val schedule = ListBuffer[ScheduledSession]()
-
-    terms.foreach(t => {
-      // build up groups of slots
-      // needs to be ammended to fix potential problems with conflicting modules
+      // Build up groups of slots
+      /* TODO:
+          look into amending this to fix potential problems with conflicting constraints, making slots unschedulable
+        */
       var slots = ListBuffer[Map[Int, RequiredSession]]()
-      t.toSeq.sortBy(-_._1.durationInHours).foreach(e =>{
+      // Starting with the longest sessions
+      t.toSeq.sortBy(-_._1.durationInHours).foreach(e => {
+        // Find the most full slot teh session can fit in to
         val options = slots.filter(l => e._2.forall(i => !l.contains(i)))
-        var choice : Map[Int, RequiredSession] = Map()
-        if (!options.isEmpty){
+        var choice: Map[Int, RequiredSession] = Map()
+        // If such a slot exists, add the session to the slot
+        // Otherwise create a new slot
+        if (!options.isEmpty) {
           choice = options.maxBy(_.size)
           slots -= choice
         }
@@ -59,43 +61,34 @@ object Scheduler {
         slots += choice
       })
 
-      // get schedule for term
+      // Get schedule for term
       val termSchedule = binPackScheduleI(daysToGenerate, rooms,
         slots.map(s => new Event(s.map(_._2.durationInHours).max, s)).toSet,
-        filters , weights)
+        filters, weights)
 
-      val fmap = modules.map(m => m.sessionStructure.map(_.session -> m)).flatten.toMap
       // unpack schedule
-      if (termSchedule.isDefined){
-        termSchedule.get.foreach(s => s.events.foreach(eo => eo._2.events.foreach( e=>
-            schedule += new ScheduledSession(s.period.calendar.getDayOfWeek.toString, e._1, s.room, eo._1, e._2, fmap(e._2))
-          )))
+      if (termSchedule.isDefined) {
+        termSchedule.get.foreach(s => s.events.foreach(eo => eo._2.events.foreach(e => {
+          val daysToAdd = (7 * e._1) + s.period.calendar.getDayOfWeek.getValue
+          schedule += new ScheduledClass(new Period(startDay.calendar.plusDays(daysToAdd), startDay.timePeriod), eo._1, s.room, e._2, fmap(e._2))
+        }
+        )))
 
-      }else{
+      } else {
         return None
       }
 
     })
 
-    Some(schedule.map(s => {
-      val daysToAdd = (7* s.week) + (s.day match {
-        case "MONDAY" => 0
-        case "TUESDAY"=> 1
-        case "WEDNESDAY"=> 2
-        case "THURSDAY"=> 3
-        case "FRIDAY"=> 4
-      })
-
-      new ScheduledClass(new Period(startDay.calendar.plusDays(daysToAdd), startDay.timePeriod), s.time, s.room, s.session, s.module)
-    }).toList)
+    Some(schedule.toList)
   }
 
 
   def binPackScheduleI(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[Event],
-                      filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
-                      weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
-                      None
-                     ): Option[List[RoomSchedule]] = {
+                       filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
+                       weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
+                       None
+                      ): Option[List[RoomSchedule]] = {
     val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
 
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
@@ -123,7 +116,9 @@ object Scheduler {
           /*TODO:
               Consider an approach that will assign free time, allowing the room to be scheduled later
               This will help prevent possible issues, where an early slot in a room is unscheduleable,
-              which blocks the room being used later
+              which blocks the room being used later.
+              e.g. It may be the case that the there are no events that can fit in a room from 11-12, but they can fit in 12-1,
+               presently, this will prevent any slots after 11 from being scheduled
            */
           scheduleMap += (mostFree -> false)
         } else {
@@ -161,7 +156,6 @@ object Scheduler {
 
   }
 
-  class Event (val duration: Float, val events:Map[Int, RequiredSession])
+  class Event(val duration: Float, val events: Map[Int, RequiredSession])
 
-  class ScheduledSession(val day: String, val week: Int, val room:Room, val time: TimePeriod, val session:RequiredSession, val module: ModuleFehqLevel)
 }
