@@ -20,6 +20,3 @@ libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test
 libraryDependencies += "com.mashape.unirest" % "unirest-java" % "1.3.0"
 libraryDependencies += "commons-dbutils" % "commons-dbutils" % "1.7"
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.15"
-
-
-
