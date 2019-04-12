@@ -30,8 +30,9 @@ object Scheduler {
                       filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
                       weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
                       None): Option[List[ScheduledClass]] ={
-    // These value is an estimate of the last week of first term
+    // These values are an estimates
     val term1End = 12
+    val startDay = getPeriod(7, 1, 0, 0)
 
     // map required sessions to weeks occured
     val classes = modules.flatMap(_.sessionStructure.groupBy(_.session))
@@ -75,8 +76,6 @@ object Scheduler {
       }
 
     })
-
-    val startDay = getPeriod(7, 1, 0, 0)
 
     Some(schedule.map(s => {
       val daysToAdd = (7* s.week) + (s.day match {
