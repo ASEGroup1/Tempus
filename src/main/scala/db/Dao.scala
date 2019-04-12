@@ -32,7 +32,7 @@ class Dao {
     bo.toByteArray
   }
 
-  private[this] def deserialize(binary: Array[Byte]) = {
+  private[this] def deserialize(binary: Array[Byte]) =
     new ObjectInputStream(new ByteArrayInputStream(binary)).readObject.asInstanceOf[List[ScheduledClass]]
-  }
+
 }
