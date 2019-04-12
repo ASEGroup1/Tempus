@@ -8,13 +8,8 @@ import scala.util.Random
 
 class SchedulerTests extends TestCase {
   val rooms = SussexRoomScraper.roomDataForSession
-  val events = getMods
+  val events = TimeTableParser.mfheq
 
-  def getMods() ={
-    val mods = TimeTableParser.modules.flatMap(m => m._2.requiredSessions.map(_ -> m._2)).toSet
-    // Temporary until a weekly approach is implemented
-    Random.shuffle(mods).drop(Math.round(mods.size/8))
-  }
 
   def testIfScheduleIncludesAllEvents =
     assertEquals(1915, Scheduler.binPackSchedule(5, rooms, events).get.size)
@@ -26,9 +21,9 @@ class SchedulerTests extends TestCase {
     var currentDay = -1
     var currentRoom = ""
 
-    Scheduler.binPackSchedule(5, rooms, events).get.groupBy(sc => (sc.room.roomName, sc.day.calendar.getDayOfMonth)).foreach(s => {
+    Scheduler.binPackSchedule(5, rooms, events).get.groupBy(sc => (sc.room.roomName, sc.day.calendar.getDayOfYear)).foreach(s => {
       s._2.sortBy(sc => (sc.time.start.getHour, sc.time.start.getMinute)).foreach(e => {
-        print(s"[Day: ${e.day.calendar.getDayOfMonth} Room: ${e.room.roomName} Start time: ${e.time.start.getHour} End time: ${e.time.end.getHour} module: ${e.className}] < ")
+        print(s"[Day: ${e.day.calendar.getDayOfYear} Room: ${e.room.roomName} Start time: ${e.time.start.getHour} End time: ${e.time.end.getHour} module: ${e.className}] < ")
 
         //When room changes reset currentEnd
         if (currentRoom != e.room.roomName) {
@@ -37,8 +32,8 @@ class SchedulerTests extends TestCase {
         }
 
         //When day changes reset currentEnd
-        if (currentDay != e.day.calendar.getDayOfMonth) {
-          currentDay = e.day.calendar.getDayOfMonth
+        if (currentDay != e.day.calendar.getDayOfYear) {
+          currentDay = e.day.calendar.getDayOfYear
           currentEnd = -1
         }
 

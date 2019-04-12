@@ -4,8 +4,9 @@ import java.time.temporal.ChronoUnit
 import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 
 import entities.locations.Room
-import entities.module.{Module, RequiredSession}
+import entities.module.{Module, ModuleFehqLevel, RequiredSession}
 import entities.timing.TimePeriod
+import services.scheduler.Scheduler.ScheduledSession
 import services.scheduler.poso.{Period, ScheduledClass}
 
 import scala.collection.mutable
@@ -21,14 +22,81 @@ object Scheduler {
       end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
     })
 
-  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[(RequiredSession, Module)]): Option[List[ScheduledClass]] =
-    binPackSchedule(daysToGenerate, rooms, events, Array(willFit(_, _, _)))
+  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[ModuleFehqLevel]): Option[List[ScheduledClass]] ={
+    binPackSchedule(daysToGenerate, rooms, modules, Array(willFit(_,_,_)))
+  }
 
-  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[(RequiredSession, Module)],
-                      filters: Seq[(Seq[RoomSchedule], Seq[(RequiredSession, Module)], RoomSchedule) => Seq[(RequiredSession, Module)]],
-                      weights: Option[Seq[(Seq[RoomSchedule], (RequiredSession, Module), RoomSchedule) => Double]] =
+  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[ModuleFehqLevel],
+                      filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
+                      weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
+                      None): Option[List[ScheduledClass]] ={
+    // These value is an estimate of the last week of first term
+    val term1End = 12
+
+    // map required sessions to weeks occured
+    val classes = modules.flatMap(_.sessionStructure.groupBy(_.session))
+
+    val classTimes = classes.map(c => c._1 -> c._2.map(_.weekNo).sorted.toList)
+
+    // split into terms (Really inelegant)
+    val terms = classTimes.map(c => c._2.map(c._1 -> _)).flatten.groupBy(_._2<= term1End).map(_._2.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}.map(e => e._1 -> e._2.toList.sorted))
+
+    val schedule = ListBuffer[ScheduledSession]()
+
+    terms.foreach(t => {
+      // build up groups of slots
+      // needs to be ammended to fix potential problems with conflicting modules
+      var slots = ListBuffer[Map[Int, RequiredSession]]()
+      t.toSeq.sortBy(-_._1.durationInHours).foreach(e =>{
+        val options = slots.filter(l => e._2.forall(i => !l.contains(i)))
+        var choice : Map[Int, RequiredSession] = Map()
+        if (!options.isEmpty){
+          choice = options.maxBy(_.size)
+          slots -= choice
+        }
+        e._2.foreach(i => choice += (i -> e._1))
+        slots += choice
+      })
+
+      // get schedule for term
+      val termSchedule = binPackScheduleI(daysToGenerate, rooms,
+        slots.map(s => new Event(s.map(_._2.durationInHours).max, s)).toSet,
+        filters , weights)
+
+      val fmap = modules.map(m => m.sessionStructure.map(_.session -> m)).flatten.toMap
+      // unpack schedule
+      if (termSchedule.isDefined){
+        termSchedule.get.foreach(s => s.events.foreach(eo => eo._2.events.foreach( e=>
+            schedule += new ScheduledSession(s.period.calendar.getDayOfWeek.toString, e._1, s.room, eo._1, e._2, fmap(e._2))
+          )))
+
+      }else{
+        return None
+      }
+
+    })
+
+    val startDay = getPeriod(7, 1, 0, 0)
+
+    Some(schedule.map(s => {
+      val daysToAdd = (7* s.week) + (s.day match {
+        case "MONDAY" => 0
+        case "TUESDAY"=> 1
+        case "WEDNESDAY"=> 2
+        case "THURSDAY"=> 3
+        case "FRIDAY"=> 4
+      })
+
+      new ScheduledClass(new Period(startDay.calendar.plusDays(daysToAdd), startDay.timePeriod), s.time, s.room, s.session, s.module)
+    }).toList)
+  }
+
+
+  def binPackScheduleI(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[Event],
+                      filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
+                      weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
                       None
-                     ): Option[List[ScheduledClass]] = {
+                     ): Option[List[RoomSchedule]] = {
     val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
 
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
@@ -64,7 +132,7 @@ object Scheduler {
           if (weights.isDefined)
             validEvents = validEvents.groupBy(s => weights.get.map(_ (schedule, s, mostFree)).sum).maxBy(_._1)._2
           // Get the longest events
-          validEvents = validEvents.groupBy(_._1.durationInHours).maxBy(_._1)._2
+          validEvents = validEvents.groupBy(_.duration).maxBy(_._1)._2
 
           // Schedule the event
           mostFree + validEvents(0)
@@ -74,40 +142,27 @@ object Scheduler {
       }
     }
 
-    Some(schedule.flatMap(_ ()).toList)
+    Some(schedule.toList)
   }
 
-  def willFit(currentSchedule: Seq[RoomSchedule], events: Seq[(RequiredSession, Module)], room: RoomSchedule): Seq[(RequiredSession, Module)] =
-    events.filter(room.timeRemaining >= _._1.durationInHours)
+  def willFit(currentSchedule: Seq[RoomSchedule], events: Seq[Event], room: RoomSchedule): Seq[Event] =
+    events.filter(room.timeRemaining >= _.duration)
 
-  def noIntersect(schedule: Seq[RoomSchedule], events: Seq[(RequiredSession, Module)], room: RoomSchedule): Seq[(RequiredSession, Module)] = {
-    // get Events that are running during the scheduleable time in the room
-    val eventsSameDay = schedule.filter(_.period.calendar.compareTo(room.period.calendar) == 0).flatMap(_.events).filter(_._1.end.compareTo(room.durationPointer) > 0).groupBy(_._2._2.moduleName)
-    events.filter(e => {
-      val simultaneousModuleEvents = eventsSameDay.get(e._2.moduleName)
-      if (simultaneousModuleEvents.isDefined) {
-        // events from the module are running that day
-        // check that they start after the current will end
-        simultaneousModuleEvents.get.forall(s => s._1.start.compareTo(room.durationPointer.plus(e._1.durationInHours.toLong, ChronoUnit.HOURS)) > 0)
-      } else {
-        // No events from the events module are running that day
-        true
-      }
-    })
-  }
 
   class RoomSchedule(val room: Room, val period: Period) {
     var timeRemaining = (period.timePeriod.duration() / 60 / 60 / 1000).toFloat
     var durationPointer = period.timePeriod.start
-    var events = mutable.HashMap[TimePeriod, (RequiredSession, Module)]()
+    var events = mutable.HashMap[TimePeriod, Event]()
 
-    def +(event: (RequiredSession, Module)): Unit = {
-      events += new TimePeriod(durationPointer, durationPointer.plus(event._1.durationInHours.toLong, ChronoUnit.HOURS)) -> event
-      timeRemaining -= event._1.durationInHours
-      durationPointer = durationPointer.plus(event._1.durationInHours.toLong, ChronoUnit.HOURS)
+    def +(event: Event): Unit = {
+      events += new TimePeriod(durationPointer, durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)) -> event
+      timeRemaining -= event.duration
+      durationPointer = durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)
     }
 
-    def apply() = events.map(e => new ScheduledClass(period, e._1, room, e._2._2.moduleName)).toList
   }
 
+  class Event (val duration: Float, val events:Map[Int, RequiredSession])
+
+  class ScheduledSession(val day: String, val week: Int, val room:Room, val time: TimePeriod, val session:RequiredSession, val module: ModuleFehqLevel)
 }

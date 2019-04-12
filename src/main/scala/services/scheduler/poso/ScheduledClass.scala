@@ -1,9 +1,11 @@
 package services.scheduler.poso
 
+import entities.module.{ModuleFehqLevel, RequiredSession}
 import entities.timing.TimePeriod
 import services.generator.eventgenerator.Event
 
-class ScheduledClass(val day: Period, val time: TimePeriod, val room: entities.locations.Room, val className: String) {
+class ScheduledClass(val day: Period, val time: TimePeriod, val room: entities.locations.Room, val session:RequiredSession, val module: ModuleFehqLevel) {
+	val className = module.baseModule.moduleName
 	override def toString: String = {
 		"%-12s %02d:%02d \t %02d:%02d \t %02d".format(className, time.start.getHour, time.start.getMinute,
 			time.end.getHour, time.end.getMinute, day.calendar.getDayOfMonth)
