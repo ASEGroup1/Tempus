@@ -9,24 +9,26 @@ import {
 import {DataManagement} from "./views/DataManagement";
 import {DSL} from "./views/DSL";
 import {Output} from "./views/Output";
+import {NavBar} from "./NavBar";
+import {SideBar} from "./SideBar";
+import {Banner} from "./Banner"
 
 class App extends Component {
 	render() {
 		return (
 			<Router>
 				<div className="App">
-					<h1 align="left" style={{marginLeft: '12px'}}>Tempus</h1>
-					<ul className="header">
-						<li><a href="/">Home</a></li>
-						<li><a href="/dataManagement">Data Management</a></li>
-						<li><a href="/dsl">DSL/Timetabling Constraints</a></li>
-						<li><a href="/outputs">View Timetables</a></li>
-					</ul>
-					<div className="content">
-						<Route exact path="/" component={Home}/>
-						<Route path="/dataManagement" component={DataManagement}/>
-						<Route path="/dsl" component={DSL}/>
-						<Route path="/outputs" component={Output}/>
+
+					<Banner></Banner>
+					<div id="outer-container">
+						<SideBar></SideBar>
+						<div className="content">
+							<Route exact path="/" component={Home}/>
+							<Route path="/dataManagement" component={DataManagement}/>
+							<Route path="/dsl" component={DSL}/>
+							<Route path="/outputs" component={Output}/>
+						</div>
+					
 					</div>
 				</div>
 			</Router>
