@@ -3,11 +3,12 @@ package entities.timing
 import java.time.OffsetTime
 import java.time.temporal.ChronoField
 
+@SerialVersionUID(100L)
 class TimePeriod(
 	var timePeriodId: Int,
 	var start: OffsetTime,
 	var end: OffsetTime
-)
+) extends Serializable
 {
 	def this() = this(0,null,null) // Adds empty constructor
   

@@ -70,7 +70,7 @@ object Scheduler {
       if (termSchedule.isDefined) {
         termSchedule.get.foreach(s => s.events.foreach(eo => eo._2.events.foreach(e => {
           val daysToAdd = (7 * e._1) + s.period.calendar.getDayOfWeek.getValue
-          schedule += new ScheduledClass(new Period(startDay.calendar.plusDays(daysToAdd), startDay.timePeriod), eo._1, s.room, e._2, fmap(e._2))
+          schedule += new ScheduledClass(new Period(startDay.calendar.plusDays(daysToAdd), startDay.timePeriod), eo._1, s.room, fmap(e._2).baseModule.moduleName)
         }
         )))
 
