@@ -9,26 +9,30 @@ import {
 import {DataManagement} from "./views/DataManagement";
 import {DSL} from "./views/DSL";
 import {Output} from "./views/Output";
-import {NavBar} from "./NavBar";
-import {SideBar} from "./SideBar";
-import {Banner} from "./Banner"
+import Navbar from 'react-bootstrap/Navbar'
+import Nav from "react-bootstrap/Nav";
+import NavDropdown from "react-bootstrap/NavDropdown";
+
 
 class App extends Component {
 	render() {
 		return (
 			<Router>
 				<div className="App">
-
-					<Banner></Banner>
-					<div id="outer-container">
-						<SideBar></SideBar>
-						<div className="content">
-							<Route exact path="/" component={Home}/>
-							<Route path="/dataManagement" component={DataManagement}/>
-							<Route path="/dsl" component={DSL}/>
-							<Route path="/outputs" component={Output}/>
-						</div>
-					
+					<Navbar bg="dark" variant="dark" sticky="top">
+						<Navbar.Brand href="#home">Tempus</Navbar.Brand>
+						<Nav className="mr-auto">
+							<Nav.Link href="/">Home</Nav.Link>
+							<Nav.Link href="/dataManagement">Data Management</Nav.Link>
+							<Nav.Link href="/dsl">DSL/Timetabling Constraints</Nav.Link>
+							<Nav.Link href="/outputs">TimeTable Outputs</Nav.Link>
+						</Nav>
+					</Navbar>
+					<div className="content">
+						<Route exact path="/" component={Home}/>
+						<Route path="/dataManagement" component={DataManagement}/>
+						<Route path="/dsl" component={DSL}/>
+						<Route path="/outputs" component={Output}/>
 					</div>
 				</div>
 			</Router>
