@@ -3,15 +3,13 @@ import "./App.css";
 import {Home} from "./views/Home"
 import {
 	Route,
-	NavLink,
 	BrowserRouter as Router
 } from "react-router-dom";
 import {DataManagement} from "./views/DataManagement";
 import {DSL} from "./views/DSL";
 import {Output} from "./views/Output";
-import Navbar from 'react-bootstrap/Navbar'
+import Navbar from "react-bootstrap/Navbar"
 import Nav from "react-bootstrap/Nav";
-import NavDropdown from "react-bootstrap/NavDropdown";
 
 
 class App extends Component {
@@ -20,9 +18,8 @@ class App extends Component {
 			<Router>
 				<div className="App">
 					<Navbar bg="dark" variant="dark" sticky="top">
-						<Navbar.Brand href="#home">Tempus</Navbar.Brand>
+						<Navbar.Brand href="/">Tempus</Navbar.Brand>
 						<Nav className="mr-auto">
-							<Nav.Link href="/">Home</Nav.Link>
 							<Nav.Link href="/dataManagement">Data Management</Nav.Link>
 							<Nav.Link href="/dsl">DSL/Timetabling Constraints</Nav.Link>
 							<Nav.Link href="/outputs">TimeTable Outputs</Nav.Link>
