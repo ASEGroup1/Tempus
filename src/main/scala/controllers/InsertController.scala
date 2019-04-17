@@ -14,16 +14,24 @@ class InsertController @Inject()(cc: ControllerComponents) extends AbstractContr
   val moduleFields = classOf[Module].getDeclaredFields.map(_.getName)
 
   def insertStudent = Action(parse.json) { request =>
-    val body = request.body.asInstanceOf[JsObject].value
-    Dao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
+    try {
+      val body = request.body.asInstanceOf[JsObject].value
+      Dao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
 
-    Ok("Inserted Student")
+      Ok(s"Inserted Student with id {${body("studentId")}")
+    } catch {
+      case e:Exception => BadRequest(e.getMessage)
+    }
   }
 
   def insertModule = Action(parse.json) { request =>
-    val body = request.body.asInstanceOf[JsObject].value
-    Dao.insert(Module(moduleFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
+    try {
+      val body = request.body.asInstanceOf[JsObject].value
+      Dao.insert(Module(moduleFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
 
-    Ok("Inserted Module")
+      Ok(s"Inserted Module with id ${body("moduleId")}")
+    } catch {
+      case e:Exception => BadRequest(e.getMessage)
+    }
   }
 }

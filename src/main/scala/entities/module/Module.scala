@@ -1,13 +1,19 @@
 package entities.module
 
 import entities.School
+import exceptions.InvalidJsonException
 import services.JsonUtils._
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 object Module {
-  def apply(json:Map[String, Any]): Module = new Module(extractInt(json("moduleId")), extractString(json("moduleCode")), extractString(json("moduleName")),
-                                                        extractString(json("moduleDescription")), null, ListBuffer(), mutable.Set())
+  def apply(json:Map[String, Any]): Module = {
+    if(json("moduleId") == null) throw new InvalidJsonException("Missing Id")
+
+    new Module(extractInt(json("moduleId")), extractString(json("moduleCode")), extractString(json("moduleName")),
+      extractString(json("moduleDescription")), null, ListBuffer(), mutable.Set())
+  }
 }
 
 class Module(
