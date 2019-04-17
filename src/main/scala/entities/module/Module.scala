@@ -1,9 +1,14 @@
 package entities.module
 
 import entities.School
-
+import services.JsonUtils._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+
+object Module {
+  def apply(json:Map[String, Any]): Module = new Module(extractInt(json("moduleId")), extractString(json("moduleCode")), extractString(json("moduleName")),
+                                                        extractString(json("moduleDescription")), null, ListBuffer(), mutable.Set())
+}
 
 class Module(
               var moduleId: Int,

@@ -4,13 +4,15 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, 
 import java.sql.DriverManager
 import java.sql.{ResultSet, SQLException}
 
+import entities.module.Module
+import entities.people.Student
 import org.apache.commons.dbutils.ResultSetHandler
 import org.apache.commons.dbutils.QueryRunner
 import services.scheduler.poso.ScheduledClass
 
 import scala.util.Random
 
-class Dao {
+object Dao {
   val run = new QueryRunner()
 
   val h = new ResultSetHandler[Array[AnyRef]]() {
@@ -18,9 +20,16 @@ class Dao {
     override def handle(rs: ResultSet): Array[AnyRef] = if (rs.next) Array(rs.getObject(2)) else null
   }
 
-  private[this] val conn =  DriverManager.getConnection(sys.env("DB_URL"), sys.env("DB_USER"), sys.env("DB_PASSWORD"))
+  //Even though these are set in environment variables there is currently a bug in intellij that sets env variables as properties instead in play
+  private[this] val conn =  DriverManager.getConnection(sys.props("DB_URL"), sys.props("DB_USER"), sys.props("DB_PASSWORD"))
 
   def insertTimeTable(timeTable: List[ScheduledClass]): Unit = run.update(conn, s"INSERT INTO TIMETABLES VALUES(${Random.nextInt},?)", serialize(timeTable))
+
+  def insert(student: Student) =
+    run.update(conn, s"INSERT INTO STUDENT VALUES(${student.studentId}, NULL, ${student.currentFehqLevelCompleted}, NULL, " +
+                                                               s"'${student.firstName}', '${student.lastName}', '${student.otherNames}')")
+  def insert(module: Module) =
+    run.update(conn, s"INSERT INTO MODULE VALUES(${module.moduleId}, '${module.moduleName}', '${module.moduleDescription}', NULL, NULL)")
 
   def retrieveTimeTable(id:Integer) =
     deserialize(run.query(conn, "SELECT * FROM TIMETABLES WHERE ID=?", h, id).head.asInstanceOf[Array[Byte]])

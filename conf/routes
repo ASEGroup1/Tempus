@@ -6,8 +6,9 @@
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
 
-GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
-GET     /test                        controllers.InsertController.sayHello
+GET     /get-generated-schedule                 controllers.ScheduleController.generateScheduleResponse
+GET     /insert-student                         controllers.InsertController.insertStudent
+GET     /insert-module                          controllers.InsertController.insertModule
 
 
 # Map static resources from the main resources folder to the root URL path

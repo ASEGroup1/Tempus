@@ -4,11 +4,11 @@ import java.util.regex.Pattern
 
 import entities.course.{Course, CourseRole}
 import entities.module.{Module, ModuleRole}
-import play.api.libs.json.{JsNumber, JsString}
+import exceptions.InvalidJsonException
 import services.Utils
 import services.generator.Generator
 import services.parser.TimeTableParser
-
+import services.JsonUtils._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
@@ -17,8 +17,7 @@ import scala.util.Random
 
 object Student extends Generator[Student] {
   def apply(json:Map[String, Any]): Student = {
-    def extractInt(value: Any):Int = if(value != null) value.asInstanceOf[JsNumber].value.toIntExact else -1
-    def extractString(value: Any):String = if(value != null) value.asInstanceOf[JsString].value.mkString else ""
+    if(json("studentId") == null) throw new InvalidJsonException("Missing Id")
 
     new Student(extractInt(json("studentId")), null, extractInt(json("currentFehqLevelCompleted")), null,
       extractInt(json("personId")), extractString(json("firstName")), extractString(json("lastName")), extractString(json("otherNames")), ListBuffer(), Set())
