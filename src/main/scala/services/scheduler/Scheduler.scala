@@ -4,7 +4,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 
 import entities.locations.Room
-import entities.module.{ModuleFehqLevel, RequiredSession}
+import entities.module.{Module, ModuleFehqLevel, RequiredSession}
 import entities.timing.TimePeriod
 import services.scheduler.poso.{Period, ScheduledClass}
 
@@ -21,11 +21,11 @@ object Scheduler {
       end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
     })
 
-  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[ModuleFehqLevel]): Option[List[ScheduledClass]] = {
+  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module]): Option[List[ScheduledClass]] = {
     binPackSchedule(daysToGenerate, rooms, modules, Array(willFit(_, _, _)))
   }
 
-  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[ModuleFehqLevel],
+  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module],
                       filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
                       weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
                       None): Option[List[ScheduledClass]] = {
@@ -70,7 +70,7 @@ object Scheduler {
       if (termSchedule.isDefined) {
         termSchedule.get.foreach(s => s.events.foreach(eo => eo._2.events.foreach(e => {
           val daysToAdd = (7 * e._1) + s.period.calendar.getDayOfWeek.getValue
-          schedule += new ScheduledClass(new Period(startDay.calendar.plusDays(daysToAdd), startDay.timePeriod), eo._1, s.room, fmap(e._2).baseModule.moduleName)
+          schedule += new ScheduledClass(new Period(startDay.calendar.plusDays(daysToAdd), startDay.timePeriod), eo._1, s.room, fmap(e._2).moduleName)
         }
         )))
 

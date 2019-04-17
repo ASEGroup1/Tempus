@@ -8,11 +8,11 @@ import scala.util.Random
 
 class SchedulerTests extends TestCase {
   val rooms = SussexRoomScraper.roomDataForSession
-  val events = TimeTableParser.mfheq
+  val events = TimeTableParser.modules
 
 
   def testIfScheduleIncludesAllEvents =
-    assertEquals(79299, Scheduler.binPackSchedule(5, rooms, events).get.size)
+    assertEquals(79302, Scheduler.binPackSchedule(5, rooms, events).get.size)
 
   def testIfNoEventsGenerateEmptySchedule = assertEquals(None, Scheduler.binPackSchedule(0, rooms, events))
 

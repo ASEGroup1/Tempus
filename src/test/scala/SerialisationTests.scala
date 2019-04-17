@@ -11,7 +11,7 @@ import services.sussexroomscraper.SussexRoomScraper
 
 class SerialisationTests extends TestCase {
   val rooms = SussexRoomScraper.roomDataForSession
-  val events = TimeTableParser.mfheq
+  val events = TimeTableParser.modules
   val dao = new Dao
 
   def testIfSerialisedItemsAreTheSameDeserialised() = {

@@ -12,10 +12,11 @@ class Module(
               var moduleDescription: String,
               var school: School,
               var terms: ListBuffer[Int], // This signifies which terms the module is auto applied to
-              var requiredSessions: mutable.Set[RequiredSession]
+              var requiredSessions: mutable.Set[RequiredSession],
+              var sessionStructure: ListBuffer[ModuleSessionStructure]
             ) {
-  def this() = this(0, "", "", "", null, null, null)
-  def this(name:String) = this(0, "", name, "", null, null, null)
+  def this() = this(0, "", "", "", null, null, null, null)
+  def this(name:String) = this(0, "", name, "", null, null, null, null)
 
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Module]
