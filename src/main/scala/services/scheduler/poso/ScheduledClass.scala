@@ -1,7 +1,6 @@
 package services.scheduler.poso
 
 import entities.timing.TimePeriod
-import services.generator.eventgenerator.Event
 
 @SerialVersionUID(100L)
 class ScheduledClass(val day: Period, val time: TimePeriod, val room: entities.locations.Room, val className: String) extends Serializable {

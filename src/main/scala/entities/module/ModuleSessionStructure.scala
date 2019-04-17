@@ -5,5 +5,6 @@ class ModuleSessionStructure(
 	var weekNo: Int,
 	var sessionType: ModuleSessionType,
 	var noOfSessions: Int,
-	var maxSessionSize: Int
+	var maxSessionSize: Int,
+	var session: RequiredSession
 )
