@@ -1,23 +1,20 @@
 package controllers
 
+import entities.people.Student
+import entities.people.Person
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json._
+import play.api.libs.json.JsObject
 import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
 class InsertController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
-  /**
-    * Create an Action to render an HTML page with a welcome message.
-    * The configuration in the `routes` file means that this method
-    * will be called when the application receives a `GET` request with
-    * a path of `/`.
-    */
   def sayHello = Action(parse.json) { request =>
-    request.body.validate[(String, Long)].map{
-      case (name, age) => Ok("Hello " + name + ", you're "+age)
-    }.recoverTotal{
-      e => BadRequest("Detected error:"+ JsError.toJson(e))
-    }
+    val body = request.body.asInstanceOf[JsObject].value
+    val student = Student(
+      (classOf[Student].getDeclaredFields.map(_.getName) ++ classOf[Person].getDeclaredFields.map(_.getName))
+        .map(f => f -> (if (body.contains(f)) body(f) else null)).toMap)
+
+    Ok("Hello")
   }
 }

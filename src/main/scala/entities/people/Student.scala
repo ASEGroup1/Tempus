@@ -4,6 +4,7 @@ import java.util.regex.Pattern
 
 import entities.course.{Course, CourseRole}
 import entities.module.{Module, ModuleRole}
+import play.api.libs.json.{JsNumber, JsString}
 import services.Utils
 import services.generator.Generator
 import services.parser.TimeTableParser
@@ -15,6 +16,14 @@ import scala.util.Random
 
 
 object Student extends Generator[Student] {
+  def apply(json:Map[String, Any]): Student = {
+    def extractInt(value: Any):Int = if(value != null) value.asInstanceOf[JsNumber].value.toIntExact else -1
+    def extractString(value: Any):String = if(value != null) value.asInstanceOf[JsString].value.mkString else ""
+
+    new Student(extractInt(json("studentId")), null, extractInt(json("currentFehqLevelCompleted")), null,
+      extractInt(json("personId")), extractString(json("firstName")), extractString(json("lastName")), extractString(json("otherNames")), ListBuffer(), Set())
+  }
+
   val studentRole = new ModuleRole(0, "Student", "")
   val modules: Map[String, Module] = TimeTableParser.modules
   val moduleChoicesStr = Source.fromFile(getClass.getResource("/input/Pathways.csv").getPath).mkString
@@ -39,4 +48,5 @@ object Student extends Generator[Student] {
 
 class Student(var studentId: Int, var course: Course, var currentFehqLevelCompleted: Int, var academicAdvisor: Staff,
               personId: Int, firstName: String, lastName: String, otherNames: String, courses: ListBuffer[(CourseRole, Course)], modules: Set[(ModuleRole, Module)]
-             ) extends Person(personId, firstName, lastName, otherNames, courses, modules)
+             ) extends Person(personId, firstName, lastName, otherNames, courses, modules) {
+}
