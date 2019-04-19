@@ -8,8 +8,11 @@ import scala.collection.mutable.ListBuffer
 
 
 object DSLParser {
-  val WHERE_MAX_EXP = 256
+  // Max number of constraints that can be defined in where
+  val WHERE_MAX_EXP = 16
 
+  // Parameters of the current filters
+  var params: Option[Map[String, ParamNode]] = None
 
   def parse(tokens: Seq[Symbol]): Seq[FilterNode] = {
     val tokenStream: ListBuffer[Symbol] = tokens.to[ListBuffer]
@@ -109,9 +112,10 @@ private object Value {
             }
           }
           parts.size match {
-            case 0 => throw new ParserException("Invalid value: " + tokens)
             case 1 => parts(0)
-            case _ => new ReferenceNode(parts)
+            case x if x > 1 && DSLParser.params.isDefined && DSLParser.params.get.contains(parts(0).string) =>
+              new ReferenceNode(DSLParser.params.get(parts(0).string), parts.drop(1))
+            case _ => throw new ParserException("Invalid value: " + tokens)
           }
     }
   }
@@ -183,10 +187,15 @@ private object FilterNode {
 
     val param1 = new ParamNode(new StringLiteralNode(paramListStream(0)))
     val param2 = if(paramListStream.size == 3){
-      Some(new ParamNode(new StringLiteralNode(paramListStream(2))))
+      val p = new ParamNode(new StringLiteralNode(paramListStream(2)))
+      DSLParser.params = Some(Map((param1.name.string -> param1), (p.name.string -> p)))
+      Some(p)
     } else {
+      DSLParser.params = Some(Map((param1.name.string -> param1)))
       None
     }
+
+
 
     val bodyTokens = extractBrace(tokens)
 
@@ -267,7 +276,7 @@ private object BranchNode {
   }
 }
 
-case class ReferenceNode(parts: Seq[StringLiteralNode]) extends Value
+case class ReferenceNode(variable: ParamNode, parts: Seq[StringLiteralNode]) extends Value
 
 case class WhereNode(condition: Seq[BooleanExpNode]) extends ASTNode
 private object WhereNode{

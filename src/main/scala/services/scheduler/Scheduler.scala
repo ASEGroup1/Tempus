@@ -4,7 +4,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 
 import entities.locations.Room
-import entities.module.{Module, ModuleFehqLevel, RequiredSession}
+import entities.module.{Module, RequiredSession}
 import entities.timing.TimePeriod
 import services.scheduler.poso.{Period, ScheduledClass}
 
@@ -22,12 +22,12 @@ object Scheduler {
     })
 
   def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module]): Option[List[ScheduledClass]] = {
-    binPackSchedule(daysToGenerate, rooms, modules, Array(willFit(_, _, _)))
+    binPackSchedule(daysToGenerate, rooms, modules, Array(willFit(_, _)))
   }
 
   def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module],
-                      filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
-                      weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
+                      filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]],
+                      weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
                       None): Option[List[ScheduledClass]] = {
     // These values are an estimates
     val term1End = 12
@@ -85,8 +85,8 @@ object Scheduler {
 
 
   def binPackScheduleI(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[Event],
-                       filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
-                       weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
+                       filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]],
+                       weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
                        None
                       ): Option[List[RoomSchedule]] = {
     val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
@@ -108,10 +108,13 @@ object Scheduler {
       } else {
         // Get the free room that has the earliest unscheduled slot (day is included)
         val mostFree = free.minBy(_._1)._2.maxBy(_.timeRemaining)
-        // Apply the filters to the unscheduled events, to find those that can be scheduled in the slot
-        var validEvents = filters.foldLeft(unProcEvents) { (r, f) => f(schedule, r, mostFree).to[ListBuffer] }
 
-        if (validEvents.isEmpty) {
+        // put scheduled and unscheduled events into an interface that maps thier values
+        val wrapped = wrap(schedule, unProcEvents, mostFree)
+        // Apply the filters to the unscheduled events, to find those that can be scheduled in the slot
+        var validEventsWrapped = filters.foldLeft(wrapped._2) { (r, f) => f(wrapped._1, r).to[ListBuffer] }
+
+        if (validEventsWrapped.isEmpty) {
           // no valid events can go in that slot
           /*TODO:
               Consider an approach that will assign free time, allowing the room to be scheduled later
@@ -124,13 +127,13 @@ object Scheduler {
         } else {
           // Apply the weighting functions
           if (weights.isDefined)
-            validEvents = validEvents.groupBy(s => weights.get.map(_ (schedule, s, mostFree)).sum).maxBy(_._1)._2
+            validEventsWrapped = validEventsWrapped.groupBy(s => weights.get.map(_ (wrapped._1, s)).sum).maxBy(_._1)._2
           // Get the longest events
-          validEvents = validEvents.groupBy(_.duration).maxBy(_._1)._2
+          validEventsWrapped = validEventsWrapped.groupBy(_.event.duration).maxBy(_._1)._2
 
           // Schedule the event
-          mostFree + validEvents(0)
-          unProcEvents -= validEvents(0)
+          mostFree + validEventsWrapped(0).event
+          unProcEvents -= validEventsWrapped(0).event
         }
 
       }
@@ -139,23 +142,136 @@ object Scheduler {
     Some(schedule.toList)
   }
 
-  def willFit(currentSchedule: Seq[RoomSchedule], events: Seq[Event], room: RoomSchedule): Seq[Event] =
-    events.filter(room.timeRemaining >= _.duration)
+  def willFit(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper]): Seq[ScheduleInterfaceMapper] =
+    possibleSlots.filter(s => s.roomSchedule.timeRemaining >= s.event.duration)
 
 
-  class RoomSchedule(val room: Room, val period: Period) {
-    var timeRemaining = (period.timePeriod.duration() / 60 / 60 / 1000).toFloat
-    var durationPointer = period.timePeriod.start
-    var events = mutable.HashMap[TimePeriod, Event]()
+  /**
+    * Function to process constraints where both the where and body functions are commutative.
+    * i.e. where(a,b) = where(b,a) and body(a,b) = body(b,a).
+    *
+    * This function will remove all possibleSlots where there is an (a,b) where one is an instance of  filledSlots and the other of possibleSlots:
+    * where(a,b) is true, and body(a,b) is false.
+    *
+    * @param filledSlots   currently scheduled events
+    * @param possibleSlots events that could be scheduled
+    * @param where
+    * @param body
+    * @return
+    */
+  def RRWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
+  // get applicable entries using the where
+    possibleSlots.filterNot(possibleSlots.map(a => (a, filledSlots.filter(b =>
+      where(a, b)
+      // get a list of all applicable entries that dont pass the constraint
+    ))).filterNot(g => {
+      val a = g._1
+      g._2.forall(b =>
+        body(a, b)
+      )
+      // remove them and return
+    }).toSet)
 
-    def +(event: Event): Unit = {
-      events += new TimePeriod(durationPointer, durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)) -> event
-      timeRemaining -= event.duration
-      durationPointer = durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)
-    }
+  /**
+    * Function to process constraints where the where function is commutative.
+    * i.e. where(a,b) = where(b,a) and body(a,b) = body(b,a).
+    *
+    * This function will remove all possibleSlots where there is an (a,b) where one is an instance of  filledSlots and the other of possibleSlots:
+    * where(a,b) is true, and body(a,b) is false.
+    *
+    * @param filledSlots   currently scheduled events
+    * @param possibleSlots events that could be scheduled
+    * @param where
+    * @param body
+    * @return
+    */
+  def RNWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
+  // get applicable entries using the where
+    possibleSlots.filterNot(possibleSlots.map(a => (a, filledSlots.filter(b =>
+      where(a, b)
+      // get a list of all applicable entries that dont pass the constraint
+      //
+    ))).filterNot(g => {
+      val a = g._1
+      g._2.forall(b =>
+        body(a, b) || body(b, a)
+      )
+    }).toSet)
 
-  }
 
-  class Event(val duration: Float, val events: Map[Int, RequiredSession])
+  /**
+    * Function to process constraints where the where function is noncommutative.
+    * i.e. if where(a,b) is true does not mean where(b,a) is true
+    *
+    * This function will remove all possibleSlots where there is an (a,b) where one is an instance of  filledSlots and the other of possibleSlots:
+    * where(a,b) is true, and body(a,b) is false.
+    *
+    * @param filledSlots   currently scheduled events
+    * @param possibleSlots events that could be scheduled
+    * @param where
+    * @param body
+    * @return
+    */
+  def NRNNWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
+    possibleSlots.filterNot((possibleSlots.map(a => (a, filledSlots.filter(b =>
+      where(a, b)
+    ))).filterNot(g => {
+      val a = g._1
+      g._2.forall(b =>
+        body(a, b)
+      )
+    }) ++ possibleSlots.map(a => (a, filledSlots.filter(b =>
+      where(b, a)
+    ))).filterNot(g => {
+      val a = g._1
+      g._2.forall(b =>
+        body(b, a)
+      )
+    })).toSet)
+
+
+  def sWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
+    possibleSlots.filterNot(possibleSlots.filter(where(_)).filterNot(body(_)).toSet)
+
+  /**
+    * A method that will allow functions to use indivdual module information.
+    * This function exsits, as there is an overhead with adding the information.
+    * @param a first parameter
+    * @param b second parameter
+    * @param func function to apply
+    * @return True, if func(a,b) is true, for every pair of events that run in the same week
+    */
+  def mapEvents(a: ScheduleInterfaceMapper, b: ScheduleInterfaceMapper, func: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Boolean = (
+    // Get each pair of sessions that happen in the same week
+    for {al <- a.event.events; bl <- b.event.events; if al._1 == bl._1}
+      // add the sessions to the interfaceMapper
+      yield (a.withRequiredSession(al), b.withRequiredSession(bl)))
+    // Check the constraint holds for all pairs
+    .forall(p => func(p._1, p._2))
+
+
+  def wrap(currentSchedule: Seq[RoomSchedule], events: Seq[Event], room: RoomSchedule): (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) =
+    (
+      currentSchedule.flatMap(s => s.events.map(t => new ScheduleInterfaceMapper(s, t._1))),
+      events.map(new ScheduleInterfaceMapper(room, _))
+    )
 
 }
+
+
+
+
+class RoomSchedule(val room: Room, val period: Period) {
+  var timeRemaining = (period.timePeriod.duration() / 60 / 60 / 1000).toFloat
+  var durationPointer = period.timePeriod.start
+  var events = mutable.HashMap[TimePeriod, Event]()
+
+  def +(event: Event): Unit = {
+    events += new TimePeriod(durationPointer, durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)) -> event
+    timeRemaining -= event.duration
+    durationPointer = durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)
+  }
+
+}
+
+class Event(val duration: Float, val events: Map[Int, RequiredSession])

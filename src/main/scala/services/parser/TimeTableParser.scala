@@ -43,11 +43,7 @@ object TimeTableParser {
 
     while (moduleMatcher.find) {
 
-      // read required session from the entry
-      val session = new RequiredSession({
-        sessionId += 1;
-        sessionId
-      }, moduleMatcher.group(4).split(":")(0).toInt - moduleMatcher.group(3).split(":")(0).toInt)
+
 
       // get or create the module
       val currentModule = modules.get(Utils.toSnake(moduleMatcher.group(1))) match {
@@ -65,6 +61,12 @@ object TimeTableParser {
           modules += (m.moduleName -> m)
           m
       }
+
+      // read required session from the entry
+      val session = new RequiredSession({
+        sessionId += 1;
+        sessionId
+      }, moduleMatcher.group(4).split(":")(0).toInt - moduleMatcher.group(3).split(":")(0).toInt, currentModule)
 
       // add required session
       currentModule.requiredSessions += session
