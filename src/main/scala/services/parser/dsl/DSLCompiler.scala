@@ -1,17 +1,41 @@
 package services.parser.dsl
 
 
+import services.parser.dsl.DSLCompiler.getClass
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 import scala.tools.reflect.ToolBox
 import services.scheduler.{ScheduleInterfaceMapper, Scheduler}
 
+
+object FilterList{
+
+  var filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = null
+
+  def getFilters(): Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = {
+    if(filters == null){
+      val dsl = "filter WillFit(e){\n\te.schedule.timeRemaining >= e.duration\n}"
+
+      filters = DSLCompiler.compile(dsl)
+    }
+    print("getFilters")
+    filters
+  }
+}
+
+
+
 object DSLCompiler {
+
+
+  def compile(code: String): Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] =
+     DSLParser.parse(DSLLexer.lex(code)).map(new FilterCompiler(_).getFunction())
 
   def main(args: Array[String]): Unit = {
 
-    val dsl = "filter TestDSL(e1, e2){\n\tif (e1.start <= e2.end){\n\t\te2.start > e1.end\n\t} else {\n\t\tTrue\n\t}\n} where (e1.module.moduleName == e2.module.moduleName)"
+    val dsl = "filter WillFit(e){\n\te.schedule.timeRemaining >= e.duration\n}"
     val lexed = DSLLexer.lex(dsl)
     println(lexed)
     val parsed = DSLParser.parse(lexed)
@@ -19,10 +43,9 @@ object DSLCompiler {
 
     val filter = new FilterCompiler(parsed(0))
 
+
     println(filter)
   }
-
-
 
   private def mapTypes(classPath: String, dslReferencePath: Seq[String], isModule: Boolean, ignore: Set[String] = Set[String]()): Map[Seq[String], MethodReference] = {
     mapTypes(classPath, dslReferencePath, if (dslReferencePath.isEmpty) "" else (dslReferencePath.mkString(".") + "."), isModule, ignore)
@@ -66,7 +89,7 @@ object DSLCompiler {
 
     // Module Specific
     map += new MethodReference(Array("week"), "%s.weekNo", true, intType).getMap()
-    map += new MethodReference(Array("duration"), "%s.requiredSession.durationInHours", true, floatType).getMap()
+    map += new MethodReference(Array("duration"), "%s.event.duration", true, floatType).getMap()
     map ++= mapTypes("entities.module.Module", Array("module"), "requiredSession.module.", true, Set("requiredSessions", "sessionStructure", "school", "terms"))
     map ++= mapTypes("entities.School", Array("school"), "requiredSession.module.school.", true, Set("mainBuilding"))
 
@@ -76,42 +99,75 @@ object DSLCompiler {
     map.toMap
   }
 
-  def compile[I](code: String): Any = {
-    val tb = runtimeMirror(getClass.getClassLoader).mkToolBox()
-    val f = tb.compile(tb.parse(code))
-    f()
-  }
-
 }
 
 class FilterCompiler(val filterNode: FilterNode){
   // if there is no where defined, then body can be moved to where
-  val bodyExp = new ExpressionCompiler(if (filterNode.where.isDefined)filterNode.body else new BooleanLiteralNode(true), filterNode.name.string+"Body", filterNode.param1)
-  val whereExp = new ExpressionCompiler(if (filterNode.where.isDefined) crushWhereList(filterNode.where.get.condition) else filterNode.body, filterNode.name.string+"Where", filterNode.param1)
 
-  val constraint: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] = {
+
+
+  val bodyExp = new ExpressionCompiler(filterNode.body, filterNode.name.string+"Body", filterNode.param1)
+  val whereExp = new ExpressionCompiler(if (filterNode.where.isDefined) crushWhereList(filterNode.where.get.condition) else new BooleanLiteralNode(true), filterNode.name.string+"Where", filterNode.param1)
+
+  val compiledFilter: CompiledFilter = {
     if (filterNode.param2.isDefined){
       val whereFunc: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean = whereExp.compileDouble(filterNode.param1, filterNode.param2.get)
       val bodyFunc: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean = bodyExp.compileDouble(filterNode.param1, filterNode.param2.get)
       if(whereExp.isCommutative){
         if(bodyExp.isCommutative){
-          Scheduler.RRWrap(_,_,whereFunc(_,_), bodyFunc(_,_))
+          new DoubleFilter(whereFunc, bodyFunc, 0)
         }else{
-          Scheduler.RNWrap(_,_,whereFunc(_,_), bodyFunc(_,_))
+          new DoubleFilter(whereFunc, bodyFunc, 1)
         }
       }else{
-        Scheduler.NRNNWrap(_,_,whereFunc(_,_), bodyFunc(_,_))
+        new DoubleFilter(whereFunc, bodyFunc, 2)
       }
     }else{
-      Scheduler.sWrap(_,_,whereExp.compileSingle(filterNode.param1),bodyExp.compileSingle(filterNode.param1))
+      new SingleFilter(whereExp.compileSingle(filterNode.param1),bodyExp.compileSingle(filterNode.param1))
     }
   }
+
+
+  trait CompiledFilter{
+    def compile:(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]
+  }
+
+  class SingleFilter(val where: (ScheduleInterfaceMapper) => Boolean, val body: (ScheduleInterfaceMapper) => Boolean) extends CompiledFilter {
+    override def compile: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] = Scheduler.sWrap(_,_,where(_), body(_))
+  }
+
+  class DoubleFilter(val where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, val body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, val t : Int) extends CompiledFilter {
+    override def compile: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] = {
+      t match {
+        case 0 =>
+          Scheduler.RRWrap(_, _, where(_, _), body(_, _))
+        case 1 =>
+          Scheduler.RNWrap(_, _, where(_, _), body(_, _))
+        case 2 =>
+          Scheduler.NRNNWrap(_,_,where(_,_), body(_,_))
+        case _ =>
+          throw new Exception("Invalid filter type")
+      }
+    }
+  }
+
+  def getFunction():(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] = {
+    compiledFilter.compile
+  }
+
 
   // convert where argument list into single and
   def crushWhereList(list: Seq[BooleanExpNode]) = list.reduce((l,r) => new BinaryOperationNode(l,r, BinOp.And))
 }
 
 class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fallBackParam: ParamNode){
+  def compileFunc[I](code: String): Any = {
+    val tb = runtimeMirror(getClass.getClassLoader).mkToolBox()
+    val f = tb.compile(tb.parse(code))
+    print("comp")
+    f()
+  }
+
   var params = Set[ParamNode]()
 
   var allExp = ListBuffer[BooleanExpNode]()
@@ -145,7 +201,7 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
       params += paramNode
     }
 
-    DSLCompiler.compile(genText()).asInstanceOf[(ScheduleInterfaceMapper) => Boolean]
+    compileFunc(genText()).asInstanceOf[(ScheduleInterfaceMapper) => Boolean]
   }
 
   def compileDouble(paramNode1: ParamNode, paramNode2: ParamNode): (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean ={
@@ -154,7 +210,7 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
       params += paramNode2
     }
 
-    DSLCompiler.compile(genText()).asInstanceOf[(ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean]
+    compileFunc(genText()).asInstanceOf[(ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean]
   }
 
   def checkCommutativity(): Boolean = {

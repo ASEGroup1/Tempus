@@ -6,6 +6,7 @@ import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 import entities.locations.Room
 import entities.module.{Module, RequiredSession}
 import entities.timing.TimePeriod
+import services.parser.dsl.FilterList
 import services.scheduler.poso.{Period, ScheduledClass}
 
 import scala.collection.mutable
@@ -13,6 +14,8 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Random
 
 object Scheduler {
+  val filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = FilterList.getFilters()
+
   def getPeriodDefault(dayOfMonth: Int) = getPeriod(dayOfMonth, 1, 8, 20)
 
   def getPeriod(dayOfMonth: Int, monthOfYear: Int, beginHour24: Int, endHour24: Int) =
@@ -21,12 +24,7 @@ object Scheduler {
       end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
     })
 
-  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module]): Option[List[ScheduledClass]] = {
-    binPackSchedule(daysToGenerate, rooms, modules, Array(willFit(_, _)))
-  }
-
   def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module],
-                      filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]],
                       weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
                       None): Option[List[ScheduledClass]] = {
     // These values are an estimates
@@ -64,7 +62,7 @@ object Scheduler {
       // Get schedule for term
       val termSchedule = binPackScheduleI(daysToGenerate, rooms,
         slots.map(s => new Event(s.map(_._2.durationInHours).max, s)).toSet,
-        filters, weights)
+        weights)
 
       // unpack schedule
       if (termSchedule.isDefined) {
@@ -85,7 +83,6 @@ object Scheduler {
 
 
   def binPackScheduleI(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[Event],
-                       filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]],
                        weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
                        None
                       ): Option[List[RoomSchedule]] = {
@@ -233,6 +230,7 @@ object Scheduler {
   def sWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
     possibleSlots.filterNot(possibleSlots.filter(where(_)).filterNot(body(_)).toSet)
 
+
   /**
     * A method that will allow functions to use indivdual module information.
     * This function exsits, as there is an overhead with adding the information.
@@ -270,6 +268,9 @@ class RoomSchedule(val room: Room, val period: Period) {
     events += new TimePeriod(durationPointer, durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)) -> event
     timeRemaining -= event.duration
     durationPointer = durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)
+    if(timeRemaining<0){
+      throw new Exception("Cannot schedule event: event overlaps room")
+    }
   }
 
 }
