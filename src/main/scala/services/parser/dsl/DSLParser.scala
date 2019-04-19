@@ -204,7 +204,7 @@ private object FilterNode {
       throw new ParserException("Malformed filter body: " + bodyTokens)
     }
 
-    val where: Option[WhereNode] = if(tokens(0).equals(WHERE)){
+    val where: Option[WhereNode] = if(!tokens.isEmpty && tokens(0).equals(WHERE)){
       Some(WhereNode.visit(tokens))
     }else{
       None
