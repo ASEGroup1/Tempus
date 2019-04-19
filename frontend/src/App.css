@@ -32,3 +32,17 @@
     }
 }
 
+.form-group {
+    margin: 1rem;
+}
+
+.float-right{
+    float: right !important;
+    margin-right: 2rem;
+}
+
+h1{
+    margin: 1rem;
+}
+
+
