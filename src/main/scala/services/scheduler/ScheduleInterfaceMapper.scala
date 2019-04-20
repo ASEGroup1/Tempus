@@ -6,6 +6,9 @@ import entities.locations.Room
 import entities.module.RequiredSession
 import entities.timing.TimePeriod
 
+/**
+  * Class used to standardise the interface of scheduled events, and unscheduled events
+  */
 class ScheduleInterfaceMapper(val room: Room, val event: Event, val period: TimePeriod, val scheduled: Boolean, val day: Int, val roomSchedule: RoomSchedule){
 
   var requiredSession: RequiredSession = _

@@ -106,7 +106,10 @@ object Scheduler {
         // Get the free room that has the earliest unscheduled slot (day is included)
         val mostFree = free.minBy(_._1)._2.maxBy(_.timeRemaining)
 
-        // put scheduled and unscheduled events into an interface that maps thier values
+        // Wrap scheduled and unscheduled events into a the standardised ScheduleInterfaceMapper
+        /*TODO:
+            Optimise wrapping, to reduce the number of elements being wrapped
+         */
         val wrapped = wrap(schedule, unProcEvents, mostFree)
         // Apply the filters to the unscheduled events, to find those that can be scheduled in the slot
         var validEventsWrapped = filters.foldLeft(wrapped._2) { (r, f) => f(wrapped._1, r).to[ListBuffer] }
@@ -139,113 +142,7 @@ object Scheduler {
     Some(schedule.toList)
   }
 
-  def willFit(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper]): Seq[ScheduleInterfaceMapper] =
-    possibleSlots.filter(s => s.roomSchedule.timeRemaining >= s.event.duration)
 
-
-  /**
-    * Function to process constraints where both the where and body functions are commutative.
-    * i.e. where(a,b) = where(b,a) and body(a,b) = body(b,a).
-    *
-    * This function will remove all possibleSlots where there is an (a,b) where one is an instance of  filledSlots and the other of possibleSlots:
-    * where(a,b) is true, and body(a,b) is false.
-    *
-    * @param filledSlots   currently scheduled events
-    * @param possibleSlots events that could be scheduled
-    * @param where
-    * @param body
-    * @return
-    */
-  def RRWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-  // get applicable entries using the where
-    possibleSlots.filterNot(possibleSlots.map(a => (a, filledSlots.filter(b =>
-      where(a, b)
-      // get a list of all applicable entries that dont pass the constraint
-    ))).filterNot(g => {
-      val a = g._1
-      g._2.forall(b =>
-        body(a, b)
-      )
-      // remove them and return
-    }).toSet)
-
-  /**
-    * Function to process constraints where the where function is commutative.
-    * i.e. where(a,b) = where(b,a) and body(a,b) = body(b,a).
-    *
-    * This function will remove all possibleSlots where there is an (a,b) where one is an instance of  filledSlots and the other of possibleSlots:
-    * where(a,b) is true, and body(a,b) is false.
-    *
-    * @param filledSlots   currently scheduled events
-    * @param possibleSlots events that could be scheduled
-    * @param where
-    * @param body
-    * @return
-    */
-  def RNWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-  // get applicable entries using the where
-    possibleSlots.filterNot(possibleSlots.map(a => (a, filledSlots.filter(b =>
-      where(a, b)
-      // get a list of all applicable entries that dont pass the constraint
-      //
-    ))).filterNot(g => {
-      val a = g._1
-      g._2.forall(b =>
-        body(a, b) || body(b, a)
-      )
-    }).toSet)
-
-
-  /**
-    * Function to process constraints where the where function is noncommutative.
-    * i.e. if where(a,b) is true does not mean where(b,a) is true
-    *
-    * This function will remove all possibleSlots where there is an (a,b) where one is an instance of  filledSlots and the other of possibleSlots:
-    * where(a,b) is true, and body(a,b) is false.
-    *
-    * @param filledSlots   currently scheduled events
-    * @param possibleSlots events that could be scheduled
-    * @param where
-    * @param body
-    * @return
-    */
-  def NRNNWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-    possibleSlots.filterNot((possibleSlots.map(a => (a, filledSlots.filter(b =>
-      where(a, b)
-    ))).filterNot(g => {
-      val a = g._1
-      g._2.forall(b =>
-        body(a, b)
-      )
-    }) ++ possibleSlots.map(a => (a, filledSlots.filter(b =>
-      where(b, a)
-    ))).filterNot(g => {
-      val a = g._1
-      g._2.forall(b =>
-        body(b, a)
-      )
-    })).toSet)
-
-
-  def sWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-    possibleSlots.filterNot(possibleSlots.filter(where(_)).filterNot(body(_)).toSet)
-
-
-  /**
-    * A method that will allow functions to use indivdual module information.
-    * This function exsits, as there is an overhead with adding the information.
-    * @param a first parameter
-    * @param b second parameter
-    * @param func function to apply
-    * @return True, if func(a,b) is true, for every pair of events that run in the same week
-    */
-  def mapEvents(a: ScheduleInterfaceMapper, b: ScheduleInterfaceMapper, func: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Boolean = (
-    // Get each pair of sessions that happen in the same week
-    for {al <- a.event.events; bl <- b.event.events; if al._1 == bl._1}
-      // add the sessions to the interfaceMapper
-      yield (a.withRequiredSession(al), b.withRequiredSession(bl)))
-    // Check the constraint holds for all pairs
-    .forall(p => func(p._1, p._2))
 
 
   def wrap(currentSchedule: Seq[RoomSchedule], events: Seq[Event], room: RoomSchedule): (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) =

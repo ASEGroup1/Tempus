@@ -15,32 +15,33 @@ object DSLParser {
   var params: Option[Map[String, ParamNode]] = None
 
   def parse(tokens: Seq[Symbol]): Seq[FilterNode] = {
-    val tokenStream: ListBuffer[Symbol] = tokens.to[ListBuffer]
     val filters = ListBuffer[FilterNode]()
+
+    val tokenStream: ListBuffer[Symbol] = tokens.to[ListBuffer]
     while (!tokenStream.isEmpty){
       filters += FilterNode.visit(tokenStream)
     }
+
     filters
   }
-
-  def main(args: Array[String]): Unit = {
-    val dsl = "def TestDSL(e1, e2){\n\tif (e1.start <= e2.stop){\n\t\t(e2.start > e1.end)\n\t} else {\n\t\tTrue\n\t}\n} where (e1.lecturer == e2.lecturer)"
-    val lexed = DSLLexer.lex(dsl)
-    val parsed = parse(lexed)
-
-    print(parsed)
-  }
 }
-
-
 
 final case class ParserException(private val message: String = "Malformed DSL",
                                  private val cause: Throwable = None.orNull)
   extends Exception(message, cause)
 
+
 sealed trait ASTNode
 private object ASTVisitor{
 
+  /**
+    * Checks the next symbol is an instance of the specified type.
+    * If the symbol is not a member of the specified type, a ParserException will be thrown
+    * @param tokens to be tested
+    * @param target type, expected to be next
+    * @tparam T
+    * @return true if the next token is the one expected
+    */
   def assertNext[T <: Symbol](tokens:Seq[Symbol], target:T) = {
     if(tokens(0).isInstanceOf[target.type]){
       true
@@ -49,17 +50,39 @@ private object ASTVisitor{
     }
   }
 
+  /**
+    * Retrieves the next symbol as an instance of the specified type
+    * @param tokens
+    * @param target
+    * @tparam T
+    * @return
+    */
   def getAs[T <: Symbol](tokens:Seq[Symbol], target:T): T = tokens(0).asInstanceOf[T]
 
+  /**
+    * Checks the next symbol is an instance of the specified type, and removes it.
+    * If the symbol is not a member of the specified type, a ParserException will be thrown.
+    *
+    * @param tokens
+    * @param target
+    * @tparam T
+    * @return
+    */
   def popSymbol[T <: Symbol](tokens: ListBuffer[Symbol], target: T): ListBuffer[Symbol] = {
     assertNext(tokens,target)
     tokens.remove(0)
     tokens
   }
 
-  def popSymbols[T <: Symbol](tokens: ListBuffer[Symbol], target: Seq[T]): ListBuffer[Symbol] = target.foldLeft(tokens){(t,s) => popSymbol(t,s)}
-
-  def extractSegment(tokens: ListBuffer[Symbol], open: Symbol, close:Symbol): ListBuffer[Symbol] = {
+  /**
+    * Will extract the section of tokens from open to close, respecting depth.
+    * If the initial symbol is not an instance of open, or there is no subsection 0-i in tokens where sub.count(open) == sub.count(close), a ParserException will be thrown
+    * @param tokens
+    * @param open
+    * @param close
+    * @return
+    */
+  private def extractSegment(tokens: ListBuffer[Symbol], open: Symbol, close:Symbol): ListBuffer[Symbol] = {
     assertNext(tokens, open)
     var depth = 0
     var i = 0
@@ -76,13 +99,25 @@ private object ASTVisitor{
         return ret.drop(1).dropRight(1)
       }
     })
-    throw new ParserException("Incomplete brackets")
+    throw new ParserException(s"""Could not find closing "$close" in "$tokens" """)
   }
 
+  /**
+    * Will extract the next section of brackets "(", ")" respecting depth
+    * @param tokens
+    * @return
+    */
   def extractBracket(tokens:ListBuffer[Symbol]) = extractSegment(tokens, OPENBRACKET, CLOSEBRACKET)
+
+  /**
+    * Will extract the next section of braces "{", "}" respecting depth
+    * @param tokens
+    * @return
+    */
   def extractBrace(tokens:ListBuffer[Symbol]) = extractSegment(tokens, OPENBRACE, CLOSEBRACE)
 }
 
+// Types
 trait Value extends ASTNode
 private object Value {
   def visit(tokens: ListBuffer[Symbol]): Value = {
@@ -123,7 +158,6 @@ private object Value {
 
 trait BooleanExpNode extends Value
 private object BooleanExpNode {
-
   def visit(tokens: ListBuffer[Symbol]): BooleanExpNode = {
     tokens(0) match{
       case NOT =>
@@ -139,7 +173,6 @@ private object BooleanExpNode {
         BooleanExpNode.visit(extract)
       case _ =>
         val left = Value.visit(tokens)
-
         val (op, isBinOp): (Any, Boolean) = tokens.remove(0) match{
           case OR =>
             (BinOp.Or,true)
@@ -160,7 +193,6 @@ private object BooleanExpNode {
           case _ =>
               throw new ParserException("""Invalid operation: "$left $op" """)
         }
-
         if (isBinOp){
           val right = BooleanExpNode.visit(tokens)
           new BinaryOperationNode(left.asInstanceOf[BooleanExpNode], right, op.asInstanceOf[BinOp])
@@ -177,14 +209,14 @@ private object BooleanExpNode {
 case class FilterNode(name: StringLiteralNode, param1: ParamNode, param2: Option[ParamNode], body: BooleanExpNode, where: Option[WhereNode]) extends ASTNode {
   def this(name: StringLiteralNode, param: ParamNode, body: BooleanExpNode, where: Option[WhereNode]) = this(name, param, None, body, where)
 }
+/*
+  'Filter' <String> '(' <ParamNode> [ ',' <ParamNode>] ')' '{' <BooleanExpNode> '}' [WhereNode]
+ */
 private object FilterNode {
-
   def visit(tokens:ListBuffer[Symbol]): FilterNode = {
     popSymbol(tokens, FILTER)
     val name = new StringLiteralNode(tokens.remove(0))
-
     val paramListStream = extractBracket(tokens)
-
     val param1 = new ParamNode(new StringLiteralNode(paramListStream(0)))
     val param2 = if(paramListStream.size == 3){
       val p = new ParamNode(new StringLiteralNode(paramListStream(2)))
@@ -195,10 +227,7 @@ private object FilterNode {
       None
     }
 
-
-
     val bodyTokens = extractBrace(tokens)
-
     val body = BooleanExpNode.visit(bodyTokens)
     if(!bodyTokens.isEmpty){
       throw new ParserException("Malformed filter body: " + bodyTokens)
@@ -215,15 +244,29 @@ private object FilterNode {
 
 
 case class ParamNode(name: StringLiteralNode) extends ASTNode
+/*
+  <String>
+ */
 
 case class BinaryOperationNode(param1: BooleanExpNode, param2: BooleanExpNode, binOp: BinOp) extends BooleanExpNode
-
+/*
+  <BooleanExpNode> <BinOp> <BooleanExpNode>
+ */
 
 case class ComparisonNode(param1:Value, param2:Value, comparator: Comparator) extends  BooleanExpNode
+/*
+  <Value> <Comparator> <Value>
+ */
 
 case class NegNode(expr: BooleanExpNode) extends BooleanExpNode
+/*
+  '!' <BooleanExpNode>
+ */
 
 case class ConditionalNode(branches: Seq[BranchNode], defaultBranch: BooleanExpNode) extends BooleanExpNode
+/*
+  'If' <BranchNode> ( 'Elif' <BranchNode>)* 'Else' '{' <BooleanExpNode> '}'
+ */
 private object ConditionalNode{
   def visit(tokens:ListBuffer[Symbol]): ConditionalNode = {
     popSymbol(tokens, IF)
@@ -258,6 +301,10 @@ private object ConditionalNode{
 
 
 case class BranchNode(condition: BooleanExpNode, body: BooleanExpNode) extends ASTNode
+/*
+  '(' <BooleanExpNode> ')' '{' <BooleanExpNode> '}'
+ */
+
 private object BranchNode {
   def visit(tokens: ListBuffer[Symbol]): BranchNode = {
     val conditionTokens = extractBracket(tokens)
@@ -277,8 +324,14 @@ private object BranchNode {
 }
 
 case class ReferenceNode(variable: ParamNode, parts: Seq[StringLiteralNode]) extends Value
+/*
+  <ParamNode> ( '.' <String>)+
+ */
 
 case class WhereNode(condition: Seq[BooleanExpNode]) extends ASTNode
+/*
+  'Where' '(' <BooleanExpNode> ( ',' <BooleanExpNode> )* ')'
+ */
 private object WhereNode{
   def visit(tokens:ListBuffer[Symbol]): WhereNode = {
     popSymbol(tokens, WHERE)

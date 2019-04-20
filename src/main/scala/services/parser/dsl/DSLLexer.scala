@@ -3,42 +3,40 @@ package services.parser.dsl
 object DSLLexer {
 
   // Literals
-  val CAPWORD_REG = raw"([A-Z][A-Za-z0-9]*)(.*)".r
-  val UNCAPWORD_REG = raw"([a-z][A-Za-z0-9]*)(.*)".r
-  val INTLITERAL_REG = raw"([+-]?\\d+)(.*)".r
-  val BOOLEANLITERAL_REG = raw"(?i)(TRUE|FALSE)(.*)".r
-  val FLOATLITERAL_REG = raw"(([+-]?(\\d+\\.)?\\d+))(.*)".r
-  val CHARLITERAL_REG = raw"('.')(.*)".r
-
+  private val CAPWORD_REG = raw"([A-Z][A-Za-z0-9]*)(.*)".r
+  private val UNCAPWORD_REG = raw"([a-z][A-Za-z0-9]*)(.*)".r
+  private val INTLITERAL_REG = raw"([+-]?\\d+)(.*)".r
+  private val BOOLEANLITERAL_REG = raw"(?i)(TRUE|FALSE)(.*)".r
+  private val FLOATLITERAL_REG = raw"(([+-]?(\\d+\\.)?\\d+))(.*)".r
+  private val CHARLITERAL_REG = raw"('.')(.*)".r
 
   // Keywords
-  val DEF_REG = raw"(?i)(FILTER)".r
-  val IF_REG = raw"(?i)(IF)".r
-  val ELIF_REG = raw"(?i)(ELIF)".r
-  val ELSE_REG = raw"(?i)(ELSE)".r
-  val WHERE_REG = raw"(?i)(WHERE)".r
+  private val DEF_REG = raw"(?i)(FILTER)".r
+  private val IF_REG = raw"(?i)(IF)".r
+  private val ELIF_REG = raw"(?i)(ELIF)".r
+  private val ELSE_REG = raw"(?i)(ELSE)".r
+  private val WHERE_REG = raw"(?i)(WHERE)".r
 
   // Punctuation
-  val OPENBRACKET_REG = raw"[(](.*)".r
-  val CLOSEBRACKET_REG = raw"[)](.*)".r
-  val COMMA_REG = raw"[,](.*)".r
-  val OPENBRACE_REG = raw"[{](.*)".r
-  val CLOSEBRACE_REG = raw"[}](.*)".r
-  val DOT_REG = raw"[.](.*)".r
+  private val OPENBRACKET_REG = raw"[(](.*)".r
+  private val CLOSEBRACKET_REG = raw"[)](.*)".r
+  private val COMMA_REG = raw"[,](.*)".r
+  private val OPENBRACE_REG = raw"[{](.*)".r
+  private val CLOSEBRACE_REG = raw"[}](.*)".r
+  private val DOT_REG = raw"[.](.*)".r
 
   // Boolean Logic
-  val NOT_REG = raw"!(.*)".r
-  val AND_REG = raw"[&]{2}(.*)".r
-  val OR_REG = raw"[|]{2}(.*)".r
-
+  private val NOT_REG = raw"!(.*)".r
+  private val AND_REG = raw"[&]{2}(.*)".r
+  private val OR_REG = raw"[|]{2}(.*)".r
 
   // Comparators
-  val EQ_REG = raw"==(.*)".r
-  val NE_REG = raw"!=(.*)".r
-  val GT_REG = raw">(.*)".r
-  val GE_REG = raw">=(.*)".r
-  val LT_REG = raw"<(.*)".r
-  val LE_REG = raw"<=(.*)".r
+  private val EQ_REG = raw"==(.*)".r
+  private val NE_REG = raw"!=(.*)".r
+  private val GT_REG = raw">(.*)".r
+  private val GE_REG = raw">=(.*)".r
+  private val LT_REG = raw"<(.*)".r
+  private val LE_REG = raw"<=(.*)".r
 
 
   def lex(dsl: String): Seq[Symbol] = dsl.split("\\s+").flatMap(processToken(_))
@@ -84,12 +82,13 @@ object DSLLexer {
       // Misc
       case "\\s*" => Array[Symbol]()
       case "" => Array[Symbol]()
-      case _ => throw new IllegalArgumentException("Invalid token: " + token)
+      case _ => throw new IllegalArgumentException(s"""Invalid token: "$token"""")
     }
   }
 }
 
 
+// Symbol Instances
 sealed trait Symbol
 
 // Literals
@@ -107,7 +106,6 @@ case class FLOATLITERAL(float:Float) extends Symbol{
 case class CHARLITERAL(char:Char) extends Symbol{
   def this(str: String) = this(str.charAt(1))
 }
-
 
 // Keywords
 case object FILTER extends Symbol
@@ -128,7 +126,6 @@ case object DOT extends Symbol
 case object NOT extends Symbol
 case object AND extends Symbol
 case object OR extends Symbol
-
 
 // Comparators
 case object EQ extends Symbol
