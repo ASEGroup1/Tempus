@@ -89,11 +89,14 @@ object Scheduler {
     val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
 
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
+    val wrappedSchedules: ListBuffer[ScheduleInterfaceMapper] = ListBuffer()
 
     // Events that have not been scheduled, shuffled to help distribute across the week
     var unProcEvents = Random.shuffle(events).to[ListBuffer]
     // Room schedules mapped to whether they contain space
     var scheduleMap = schedule.map((_ -> true)).toMap
+
+
     while (!unProcEvents.isEmpty) {
       // get the unfilled rooms
       val free = scheduleMap.filter(_._2).map(_._1).groupBy(_.period.calendar)
@@ -107,12 +110,8 @@ object Scheduler {
         val mostFree = free.minBy(_._1)._2.maxBy(_.timeRemaining)
 
         // Wrap scheduled and unscheduled events into a the standardised ScheduleInterfaceMapper
-        /*TODO:
-            Optimise wrapping, to reduce the number of elements being wrapped
-         */
-        val wrapped = wrap(schedule, unProcEvents, mostFree)
         // Apply the filters to the unscheduled events, to find those that can be scheduled in the slot
-        var validEventsWrapped = filters.foldLeft(wrapped._2) { (r, f) => f(wrapped._1, r).to[ListBuffer] }
+        var validEventsWrapped = filters.foldLeft(unProcEvents.map(new ScheduleInterfaceMapper(mostFree, _))) { (r, f) => f(wrappedSchedules, r).to[ListBuffer] }
 
         if (validEventsWrapped.isEmpty) {
           // no valid events can go in that slot
@@ -127,13 +126,14 @@ object Scheduler {
         } else {
           // Apply the weighting functions
           if (weights.isDefined)
-            validEventsWrapped = validEventsWrapped.groupBy(s => weights.get.map(_ (wrapped._1, s)).sum).maxBy(_._1)._2
+            validEventsWrapped = validEventsWrapped.groupBy(s => weights.get.map(_ (wrappedSchedules, s)).sum).maxBy(_._1)._2
           // Get the longest events
           validEventsWrapped = validEventsWrapped.groupBy(_.event.duration).maxBy(_._1)._2
 
           // Schedule the event
           mostFree + validEventsWrapped(0).event
           unProcEvents -= validEventsWrapped(0).event
+          wrappedSchedules += validEventsWrapped(0)
         }
 
       }
@@ -141,20 +141,7 @@ object Scheduler {
 
     Some(schedule.toList)
   }
-
-
-
-
-  def wrap(currentSchedule: Seq[RoomSchedule], events: Seq[Event], room: RoomSchedule): (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) =
-    (
-      currentSchedule.flatMap(s => s.events.map(t => new ScheduleInterfaceMapper(s, t._1))),
-      events.map(new ScheduleInterfaceMapper(room, _))
-    )
-
 }
-
-
-
 
 class RoomSchedule(val room: Room, val period: Period) {
   var timeRemaining = (period.timePeriod.duration() / 60 / 60 / 1000).toFloat
