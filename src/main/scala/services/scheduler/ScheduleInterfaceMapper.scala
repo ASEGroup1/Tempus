@@ -28,5 +28,12 @@ class ScheduleInterfaceMapper(val room: Room, val event: Event, val period: Time
     this.weekNo = weekNo
   }
 
+  def this(room: Room, event: Event, period: TimePeriod, scheduled: Boolean, day: Int, roomSchedule: RoomSchedule, requiredSession: RequiredSession) = {
+    this(room, event, period, scheduled, day, roomSchedule)
+    this.requiredSession = requiredSession
+  }
+
   def withRequiredSession(session: (Int, RequiredSession)): ScheduleInterfaceMapper = new ScheduleInterfaceMapper(room, event, period, scheduled, day, roomSchedule, session._2, session._1)
+
+  def withRequiredSession(session: RequiredSession): ScheduleInterfaceMapper = new ScheduleInterfaceMapper(room, event, period, scheduled, day, roomSchedule, session)
 }

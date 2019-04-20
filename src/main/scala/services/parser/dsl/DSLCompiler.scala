@@ -1,6 +1,8 @@
 package services.parser.dsl
 
 
+import services.parser.dsl.ReferenceType.ReferenceType
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import services.scheduler.{ScheduleInterfaceMapper, Scheduler}
@@ -14,9 +16,19 @@ object FilterList {
 
   def getFilters(): Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = {
     if (filters == null) {
-      val dsl = "filter WillFit(e){\n\te.schedule.timeRemaining >= e.duration\n}"
+      val dsl =
+        """
+          |filter WillFit(e){
+          |	e.schedule.timeRemaining >= e.duration
+          |}
+          |
+          |filter ModuleSepperance (a,b){
+          |		b.start > a.end
+          |} where (a.module.moduleName == b.module.moduleName, a.day == b.day, a.start <= b.end)
+        """.stripMargin
 
       filters = DSLCompiler.compile(dsl)
+      println("Compiled Filters")
     }
     print("getFilters")
     filters
@@ -36,14 +48,14 @@ object DSLCompiler {
     * @param dslReferencePath path the dsl must specify to reach the class
     *                         E.g. if Array("a", "b") was specified, then to reference a member of the class m of a parameter p
     *                         p.a.b.m must be used.
-    * @param isModule
-    *                         If the module information will need to be extracted to read the value
+    * @param referenceType
+    *                         Are there any special features about the reference
     * @param ignore
     *                         List of fields that should be ignored
     * @return
     */
-  private def mapTypes(classPath: String, dslReferencePath: Seq[String], isModule: Boolean, ignore: Set[String] = Set[String]()): Map[Seq[String], MethodReference] = {
-    mapTypes(classPath, dslReferencePath, if (dslReferencePath.isEmpty) "" else (dslReferencePath.mkString(".") + "."), isModule, ignore)
+  private def mapTypes(classPath: String, dslReferencePath: Seq[String], ignore: Set[String] = Set[String](), referenceType: ReferenceType = ReferenceType.None): Map[Seq[String], MethodReference] = {
+    mapTypes(classPath, dslReferencePath, if (dslReferencePath.isEmpty) "" else (dslReferencePath.mkString(".") + "."), ignore, referenceType)
   }
 
   /**
@@ -54,15 +66,15 @@ object DSLCompiler {
     *                         E.g. if Array("a", "b") was specified, then to reference a member of the class m of a parameter p
     *                         p.a.b.m must be used.
     * @param referencePath    path from ScheduleInterfaceMapper to reach the instance of the target class
-    * @param isModule
-    *                         If the module information will need to be extracted to read the value
+    * @param referenceType
+    *                         Are there any special features about the reference
     * @param ignore
     *                         List of fields that should be ignored
     * @return
     */
-  private def mapTypes(classPath: String, dslReferencePath: Seq[String], referencePath: String, isModule: Boolean, ignore: Set[String]): Map[Seq[String], MethodReference] = {
+  private def mapTypes(classPath: String, dslReferencePath: Seq[String], referencePath: String, ignore: Set[String], referenceType: ReferenceType): Map[Seq[String], MethodReference] = {
     Class.forName(classPath).getDeclaredFields.filterNot(ignore contains _.getName).map(f =>
-      new MethodReference(dslReferencePath ++ Array(f.getName), "%s." + referencePath + f.getName, isModule, f.getType).getMap()
+      new MethodReference(dslReferencePath ++ Array(f.getName), "%s." + referencePath + f.getName, referenceType, f.getType).getMap()
     ).toMap
   }
 
@@ -79,7 +91,7 @@ object DSLCompiler {
     val floatType = 0.1f.getClass
 
     // Room
-    map ++ mapTypes("entities.locations.Room", Array("room"), false, Set("roomType", "partitions", "serialVersionUID"))
+    map ++ mapTypes("entities.locations.Room", Array("room"), Set("roomType", "partitions", "serialVersionUID"))
     map += new MethodReference("room.type", "%s.room.roomType.name", stringType).getMap()
 
     // Time
@@ -97,13 +109,13 @@ object DSLCompiler {
     map += new MethodReference("day", "%s.day", intType).getMap()
 
     // Schedule
-    map += new MethodReference(Array("schedule", "timeRemaining"), "%s.roomSchedule.timeRemaining", false, floatType).getMap()
+    map += new MethodReference("schedule.timeRemaining", "%s.roomSchedule.timeRemaining", floatType).getMap()
     map += new MethodReference("duration", "%s.event.duration", floatType).getMap()
 
     // Module Specific
-    map += new MethodReference("week", "%s.weekNo", intType, true).getMap()
-    map ++= mapTypes("entities.module.Module", Array("module"), "requiredSession.module.", true, Set("requiredSessions", "sessionStructure", "school", "terms"))
-    map ++= mapTypes("entities.School", Array("school"), "requiredSession.module.school.", true, Set("mainBuilding"))
+    map += new MethodReference("week", "%s.weekNo", intType, ReferenceType.Week).getMap()
+    map ++= mapTypes("entities.module.Module", Array("module"), "requiredSession.module.", Set("requiredSessions", "sessionStructure", "school", "terms"), ReferenceType.Module)
+    map ++= mapTypes("entities.School", Array("school"), "requiredSession.module.school.", Set("mainBuilding"), ReferenceType.Module)
 
     map.toMap
   }
@@ -313,10 +325,16 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
   private var allExp = ListBuffer[BooleanExpNode]()
 
   /**
-    * If the module information is used.
-    * If this is true, the ScheduleInterfaceMapper's will need to be compared on a weekly basis.
+    * 0:
+    *   No extraction
+    * 1:
+    *   Unique modules required
+    * 2:
+    *   Every week must be extracted
     */
-  var requiresModuleExtraction = false
+  var extractionLevel = 0
+
+  var requiresWeekExtraction = false
 
   /**
     * Body of the function
@@ -350,7 +368,17 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
     }
 
     val func = compileFunc(genFunctionString()).asInstanceOf[(ScheduleInterfaceMapper) => Boolean]
-    if (requiresModuleExtraction) mapEventsSingle(_,func(_)) else func
+
+    extractionLevel match {
+      case 0 =>
+        func
+      case 1 =>
+        mapEventsSingleUniq(_,func(_))
+      case 2=>
+        mapEventsSingle(_,func(_))
+      case _ =>
+        throw new Exception("Illegal extraction level")
+    }
   }
 
   def compileDouble(paramNode1: ParamNode, paramNode2: ParamNode): (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean = {
@@ -360,7 +388,16 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
     }
 
     val func = compileFunc(genFunctionString()).asInstanceOf[(ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean]
-    if (requiresModuleExtraction) mapEventsDouble(_,_,func(_,_)) else func
+    extractionLevel match {
+      case 0 =>
+        func
+      case 1 =>
+        mapEventsDoubleUniq(_, _, func(_, _))
+      case 2 =>
+        mapEventsDouble(_, _, func(_, _))
+      case _ =>
+        throw new Exception("Illegal extraction level")
+    }
   }
 
   /**
@@ -371,6 +408,8 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
     * @return True, if func(a) is true, for every event in a
     */
   private def mapEventsSingle(a: ScheduleInterfaceMapper, func: (ScheduleInterfaceMapper) => Boolean): Boolean = a.event.events.map(a.withRequiredSession(_)).forall(func(_))
+
+  private def mapEventsSingleUniq(a: ScheduleInterfaceMapper, func: (ScheduleInterfaceMapper) => Boolean): Boolean = a.event.events.values.toSeq.distinct.map(a.withRequiredSession(_)).forall(func(_))
 
   /**
     * A method that will allow functions to use indivdual module information.
@@ -385,6 +424,13 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
     for {al <- a.event.events; bl <- b.event.events; if al._1 == bl._1}
     // add the sessions to the interfaceMapper
       yield (a.withRequiredSession(al), b.withRequiredSession(bl)))
+    // Check the constraint holds for all pairs
+    .forall(p => func(p._1, p._2))
+
+  private def mapEventsDoubleUniq(a: ScheduleInterfaceMapper, b: ScheduleInterfaceMapper, func: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Boolean =
+    a.event.events.keySet.filter(b.event.events.keySet.contains(_)).map(e => (a.event.events.get(e).get,b.event.events.get(e).get)).toList.distinct.distinct.map(e =>
+    // add the sessions to the interfaceMapper
+    (a.withRequiredSession(e._1), b.withRequiredSession(e._2)))
     // Check the constraint holds for all pairs
     .forall(p => func(p._1, p._2))
 
@@ -453,18 +499,30 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
     val ref = DSLCompiler.referenceTable(referenceNode.parts.map(_.string))
 
     params += referenceNode.variable
-    if (ref.isModule) {
-      requiresModuleExtraction = true
+
+    ref.referenceType match {
+      case ReferenceType.None =>
+      case services.parser.dsl.ReferenceType.Module =>
+        if(extractionLevel==0)
+          extractionLevel = 1
+      case services.parser.dsl.ReferenceType.Week =>
+        if(extractionLevel<2)
+          extractionLevel = 2
     }
 
     referenceNode.variable.name.string.formatted(ref.codeReference)
   }
 }
 
-class MethodReference(val dslReference: Seq[String], val codeReference: String, val isModule: Boolean, val resolvedType: Class[_]) {
-  def this(dslPath: String, codeReference: String, retType: Class[_], isModule: Boolean = false) = this(dslPath.split('.'), codeReference, isModule, retType)
+class MethodReference(val dslReference: Seq[String], val codeReference: String, val referenceType: ReferenceType, val resolvedType: Class[_]) {
+  def this(dslPath: String, codeReference: String, retType: Class[_], referenceType: ReferenceType = ReferenceType.None) = this(dslPath.split('.'), codeReference, referenceType, retType)
 
   def getMap(): (Seq[String], MethodReference) = (dslReference, this)
 
-  override def toString = s"MethodReference($dslReference, $codeReference, $isModule, $resolvedType)"
+  override def toString = s"MethodReference($dslReference, $codeReference, $referenceType, $resolvedType)"
+}
+
+object ReferenceType extends Enumeration{
+  type ReferenceType = Value
+  val None, Module, Week = Value
 }
