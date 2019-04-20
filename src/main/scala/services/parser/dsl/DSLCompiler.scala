@@ -182,13 +182,11 @@ class FilterCompiler(val filterNode: FilterNode) {
   private def applyWhereDouble(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean):Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] =
     possibleSlots.map(a => (a, filledSlots.filter(b =>
       where(a, b)
-      // get a list of all applicable entries that dont pass the constraint
     )))
 
   private def applyWhereDoubleI(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean):Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] =
     possibleSlots.map(a => (a, filledSlots.filter(b =>
       where(b, a)
-      // get a list of all applicable entries that dont pass the constraint
     )))
 
   private def applyWhereDoubleNone(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper]): Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] = possibleSlots.map((_, filledSlots))
@@ -239,8 +237,6 @@ class FilterCompiler(val filterNode: FilterNode) {
       )
       // remove them and return
     }).toSet)
-
-  // get a list of all applicable entries (a,b) that dont pass the constraint
 
   /**
     * Function to process constraints where the where function is non-commutative.
