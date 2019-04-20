@@ -7,7 +7,16 @@
 GET     /                           controllers.HomeController.index
 
 GET     /get-generated-schedule                 controllers.ScheduleController.generateScheduleResponse
-GET     /insert-student                         controllers.InsertController.insertStudent
+
+#CRUD
+
+#Student
+GET     /student/create                         controllers.StudentController.create
+GET     /student/read/:id                     controllers.StudentController.read(id: Int)
+GET     /student/delete/:id                     controllers.StudentController.delete(id: Int)
+
+
+
 GET     /insert-module                          controllers.InsertController.insertModule
 
 

@@ -1,5 +1,6 @@
 package entities.people
 
+import java.sql.ResultSet
 import java.util.regex.Pattern
 
 import entities.course.{Course, CourseRole}
@@ -9,6 +10,7 @@ import services.Utils
 import services.generator.Generator
 import services.parser.TimeTableParser
 import services.JsonUtils._
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
@@ -16,12 +18,16 @@ import scala.util.Random
 
 
 object Student extends Generator[Student] {
-  def apply(json:Map[String, Any]): Student = {
-    if(json("studentId") == null) throw new InvalidJsonException("Missing Id")
+  def apply(json: Map[String, Any]): Student = {
+    if (json("studentId") == null) throw new InvalidJsonException("Missing Id")
 
     new Student(extractInt(json("studentId")), null, extractInt(json("currentFehqLevelCompleted")), null,
       extractInt(json("personId")), extractString(json("firstName")), extractString(json("lastName")), extractString(json("otherNames")), ListBuffer(), Set())
   }
+
+  def apply(queryResults: ResultSet): Student = new Student(queryResults.getObject(1).asInstanceOf[Int], null, queryResults.getObject(3).asInstanceOf[Int],
+    null, queryResults.getObject(1).asInstanceOf[Int], queryResults.getObject(5).asInstanceOf[String], queryResults.getObject(6).asInstanceOf[String],
+    queryResults.getObject(7).asInstanceOf[String], null, null)
 
   val studentRole = new ModuleRole(0, "Student", "")
   val modules: Map[String, Module] = TimeTableParser.modules
