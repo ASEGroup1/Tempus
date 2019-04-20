@@ -28,7 +28,7 @@ object Dao {
   //Even though these are set in environment variables there is currently a bug in intellij that sets env variables as properties instead in play
   private[this] val conn =  DriverManager.getConnection(sys.props("DB_URL"), sys.props("DB_USER"), sys.props("DB_PASSWORD"))
 
-  def removeStudent(id: Int) =
+  def deleteStudent(id: Int) =
     //Update method returns number of rows updated
     run.update(conn, s"DELETE FROM STUDENT WHERE ID = $id") == 1
 

@@ -13,6 +13,7 @@ GET     /get-generated-schedule                 controllers.ScheduleController.g
 #Student
 GET     /student/create                         controllers.StudentController.create
 GET     /student/read/:id                     controllers.StudentController.read(id: Int)
+GET     /student/update/:id                     controllers.StudentController.update(id: Int)
 GET     /student/delete/:id                     controllers.StudentController.delete(id: Int)
 
 

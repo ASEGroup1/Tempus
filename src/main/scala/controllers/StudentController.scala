@@ -30,8 +30,21 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
     else BadRequest(s"""{"message":"Could not find student with id $id"}""")
   }
 
+  def update(id: Int) = Action(parse.json) { request =>
+    try {
+      val body = request.body.asInstanceOf[JsObject].value
+      if(!Dao.deleteStudent(id)) BadRequest(s"""{"message":"Could not find student with id $id"}""")
+      else {
+        Dao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
+        Ok(s"Updated Student with id ${body("studentId")}")
+      }
+    } catch {
+      case e: Exception => BadRequest(e.getMessage)
+    }
+  }
+
   def delete(id: Int) = Action {
-    if (Dao.removeStudent(id)) Ok(s"Removed student with id $id")
+    if (Dao.deleteStudent(id)) Ok(s"Removed student with id $id")
     else BadRequest(s"Could not remove student with id $id, ensure student exists")
   }
 }
