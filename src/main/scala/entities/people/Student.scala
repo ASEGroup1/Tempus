@@ -19,9 +19,10 @@ import scala.util.Random
 
 object Student extends Generator[Student] {
   def apply(json: Map[String, Any]): Student = {
-    if (json("studentId") == null) throw new InvalidJsonException("Missing Id")
+    var studentId = json("studentId").asInstanceOf[Int]
+    if (studentId == null) studentId = Random.nextInt
 
-    new Student(extractInt(json("studentId")), null, extractInt(json("currentFehqLevelCompleted")), null,
+    new Student(studentId, null, extractInt(json("currentFehqLevelCompleted")), null,
       extractInt(json("personId")), extractString(json("firstName")), extractString(json("lastName")), extractString(json("otherNames")), ListBuffer(), Set())
   }
 
