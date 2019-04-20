@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import "./App.css";
-import {Home} from "./views/Home"
+import {Home} from "./views/Home";
 import {
 	Route,
 	BrowserRouter as Router
@@ -8,7 +8,7 @@ import {
 import {DataManagement} from "./views/DataManagement";
 import {DSL} from "./views/DSL";
 import {Output} from "./views/Output";
-import Navbar from "react-bootstrap/Navbar"
+import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 
 
