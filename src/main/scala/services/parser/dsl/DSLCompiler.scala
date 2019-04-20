@@ -115,8 +115,6 @@ object DSLCompiler {
   * @param filterNode to convert into a function
   */
 class FilterCompiler(val filterNode: FilterNode) {
-  private val bodyExp = new ExpressionCompiler(filterNode.body, filterNode.name.string + "Body", filterNode.param1)
-  private val whereExp = new ExpressionCompiler(if (filterNode.where.isDefined) crushWhereList(filterNode.where.get.condition) else new BooleanLiteralNode(true), filterNode.name.string + "Where", filterNode.param1)
 
   /**
     * Will convert the where list to a single boolean expression
@@ -126,10 +124,12 @@ class FilterCompiler(val filterNode: FilterNode) {
   private def crushWhereList(list: Seq[BooleanExpNode]) = list.reduce((l, r) => new BinaryOperationNode(l, r, BinOp.And))
 
   private val compiledFilter: CompiledFilter = {
+    val bodyExp = new ExpressionCompiler(filterNode.body, filterNode.name.string + "Body", filterNode.param1)
+    val whereExp = if (filterNode.where.isDefined) Some(new ExpressionCompiler(crushWhereList(filterNode.where.get.condition), filterNode.name.string + "Where", filterNode.param1)) else None
     if (filterNode.param2.isDefined) {
-      val whereFunc: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean = whereExp.compileDouble(filterNode.param1, filterNode.param2.get)
+      val whereFunc: Option[(ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean] = if (whereExp.isDefined) Some(whereExp.get.compileDouble(filterNode.param1, filterNode.param2.get)) else None
       val bodyFunc: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean = bodyExp.compileDouble(filterNode.param1, filterNode.param2.get)
-      if (whereExp.isCommutative) {
+      if (!whereExp.isDefined || whereExp.get.isCommutative) {
         if (bodyExp.isCommutative) {
           new DoubleFilter(whereFunc, bodyFunc, 0)
         } else {
@@ -139,7 +139,7 @@ class FilterCompiler(val filterNode: FilterNode) {
         new DoubleFilter(whereFunc, bodyFunc, 2)
       }
     } else {
-      new SingleFilter(whereExp.compileSingle(filterNode.param1), bodyExp.compileSingle(filterNode.param1))
+      new SingleFilter(if (whereExp.isDefined) applyWhereSingle(_,whereExp.get.compileSingle(filterNode.param1)) else applyWhereSingleNone(_), bodyExp.compileSingle(filterNode.param1))
     }
   }
 
@@ -153,27 +153,45 @@ class FilterCompiler(val filterNode: FilterNode) {
   /**
     * CompiledFilter with only one parameter
     */
-  class SingleFilter(val where: (ScheduleInterfaceMapper) => Boolean, val body: (ScheduleInterfaceMapper) => Boolean) extends CompiledFilter {
+  class SingleFilter(val where: (Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper], val body: (ScheduleInterfaceMapper) => Boolean) extends CompiledFilter {
     override def compile: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] = sWrap(_, _, where(_), body(_))
   }
 
   /**
     * CompiledFilter with two parameters
     */
-  class DoubleFilter(val where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, val body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, val t: Int) extends CompiledFilter {
+  class DoubleFilter(val where: Option[(ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean], val body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, val t: Int) extends CompiledFilter {
     override def compile: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] = {
+      val whereFunc = if (where.isDefined) applyWhereDouble(_, _, where.get) else applyWhereDoubleNone(_, _)
       t match {
         case 0 =>
-          RRWrap(_, _, where(_, _), body(_, _))
+          RRWrap(_, _, whereFunc(_, _), body(_, _))
         case 1 =>
-          RNWrap(_, _, where(_, _), body(_, _))
+          RNWrap(_, _, whereFunc(_, _), body(_, _))
         case 2 =>
-          NXWrap(_, _, where(_, _), body(_, _))
+          if (!where.isDefined)
+              throw new Exception("Cannot have NX filter, if where is not defined")
+          NXWrap(_, _, whereFunc(_, _), applyWhereDoubleI(_, _, where.get),body(_, _))
         case _ =>
           throw new Exception("Invalid filter type")
       }
     }
   }
+
+
+  private def applyWhereDouble(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean):Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] =
+    possibleSlots.map(a => (a, filledSlots.filter(b =>
+      where(a, b)
+      // get a list of all applicable entries that dont pass the constraint
+    )))
+
+  private def applyWhereDoubleI(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean):Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] =
+    possibleSlots.map(a => (a, filledSlots.filter(b =>
+      where(b, a)
+      // get a list of all applicable entries that dont pass the constraint
+    )))
+
+  private def applyWhereDoubleNone(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper]): Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] = possibleSlots.map((_, filledSlots))
 
   /**
     * Function to process constraints where both the where and body functions are commutative.
@@ -188,18 +206,16 @@ class FilterCompiler(val filterNode: FilterNode) {
     * @param body
     * @return
     */
-  private def RRWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
+  private def RRWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])], body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
   // get applicable entries using the where
-    possibleSlots.filterNot(possibleSlots.map(a => (a, filledSlots.filter(b =>
-      where(a, b)
-      // get a list of all applicable entries that dont pass the constraint
-    ))).filterNot(g => {
+    possibleSlots.filterNot(where(filledSlots, possibleSlots).filterNot(g => {
       val a = g._1
       g._2.forall(b =>
         body(a, b)
       )
       // remove them and return
     }).toSet)
+
 
   /**
     * Function to process constraints where the where function is commutative.
@@ -214,12 +230,9 @@ class FilterCompiler(val filterNode: FilterNode) {
     * @param body
     * @return
     */
-  private def RNWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-  // get applicable entries using the where
-    possibleSlots.filterNot(possibleSlots.map(a => (a, filledSlots.filter(b =>
-      where(a, b)
-      // get a list of all applicable entries that dont pass the constraint
-    ))).filterNot(g => {
+  private def RNWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])], body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
+    // get applicable entries using the where
+    possibleSlots.filterNot(where(filledSlots, possibleSlots).filterNot(g => {
       val a = g._1
       g._2.forall(b =>
         body(a, b) || body(b, a)
@@ -227,6 +240,7 @@ class FilterCompiler(val filterNode: FilterNode) {
       // remove them and return
     }).toSet)
 
+  // get a list of all applicable entries (a,b) that dont pass the constraint
 
   /**
     * Function to process constraints where the where function is non-commutative.
@@ -241,21 +255,16 @@ class FilterCompiler(val filterNode: FilterNode) {
     * @param body
     * @return
     */
-  private def NXWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-  // get applicable entries (a,b) using the where
-    possibleSlots.filterNot((possibleSlots.map(a => (a, filledSlots.filter(b =>
-      where(a, b)
-      // get a list of all applicable entries (a,b) that dont pass the constraint
-    ))).filterNot(g => {
+  private def NXWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])], whereI: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])], body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
+    // get applicable entries (a,b) using the where
+
+    possibleSlots.filterNot((where(filledSlots, possibleSlots).filterNot(g => {
       val a = g._1
       g._2.forall(b =>
         body(a, b)
       )
       // get applicable entries (b,a) using the where
-    }) ++ possibleSlots.map(a => (a, filledSlots.filter(b =>
-      where(b, a)
-      // get a list of all applicable entries (b,a) that dont pass the constraint
-    ))).filterNot(g => {
+    }) ++ where(filledSlots, possibleSlots).filterNot(g => {
       val a = g._1
       g._2.forall(b =>
         body(b, a)
@@ -272,8 +281,11 @@ class FilterCompiler(val filterNode: FilterNode) {
     * @param body
     * @return
     */
-  private def sWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper) => Boolean, body: (ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-    possibleSlots.filterNot(possibleSlots.filter(where(_)).filterNot(body(_)).toSet)
+  private def sWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper], body: (ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
+    possibleSlots.filterNot(where(possibleSlots).filterNot(body(_)).toSet)
+
+  private def applyWhereSingle(possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] = possibleSlots.filter(where(_))
+  private def applyWhereSingleNone(possibleSlots: Seq[ScheduleInterfaceMapper]): Seq[ScheduleInterfaceMapper] = possibleSlots
 
 
   def getFunction(): (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] =
