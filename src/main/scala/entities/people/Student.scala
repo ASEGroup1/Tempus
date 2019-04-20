@@ -26,9 +26,7 @@ object Student extends Generator[Student] {
       extractInt(json("personId")), extractString(json("firstName")), extractString(json("lastName")), extractString(json("otherNames")), ListBuffer(), Set())
   }
 
-  def apply(queryResults: ResultSet): Student = new Student(queryResults.getObject(1).asInstanceOf[Int], null, queryResults.getObject(3).asInstanceOf[Int],
-    null, queryResults.getObject(1).asInstanceOf[Int], queryResults.getObject(5).asInstanceOf[String], queryResults.getObject(6).asInstanceOf[String],
-    queryResults.getObject(7).asInstanceOf[String], null, null)
+  def apply(qr: ResultSet): Student = new Student(qr.getInt(1), null, qr.getInt(3), null, qr.getInt(1), qr.getString(5), qr.getString(6), qr.getString(7), null, null)
 
   val studentRole = new ModuleRole(0, "Student", "")
   val modules: Map[String, Module] = TimeTableParser.modules

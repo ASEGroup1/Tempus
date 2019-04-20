@@ -1,12 +1,12 @@
-package controllers
+package controllers.crud
 
 import db.Dao
 import entities.people.{Person, Student}
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.JsObject
-import play.api.mvc.{AbstractController, ControllerComponents}
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization.write
+import play.api.libs.json.JsObject
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
 class StudentController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
@@ -33,7 +33,7 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
   def update(id: Int) = Action(parse.json) { request =>
     try {
       val body = request.body.asInstanceOf[JsObject].value
-      if(!Dao.deleteStudent(id)) BadRequest(s"""{"message":"Could not find student with id $id"}""")
+      if(!Dao.delete(id, "MODULE")) BadRequest(s"""{"message":"Could not find student with id $id"}""")
       else {
         Dao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
         Ok(s"Updated Student with id ${body("studentId")}")
@@ -44,7 +44,7 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def delete(id: Int) = Action {
-    if (Dao.deleteStudent(id)) Ok(s"Removed student with id $id")
+    if (Dao.delete(id, "STUDENT")) Ok(s"Removed student with id $id")
     else BadRequest(s"Could not remove student with id $id, ensure student exists")
   }
 }
