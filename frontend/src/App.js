@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import {DataManagement} from "./views/DataManagement";
 import {DSL} from "./views/DSL";
-import {Output} from "./views/Output";
+import {Timetables} from "./views/Timetables";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 
@@ -22,14 +22,14 @@ class App extends Component {
 						<Nav className="mr-auto">
 							<Nav.Link href="/dataManagement">Data Management</Nav.Link>
 							<Nav.Link href="/dsl">DSL/Timetabling Constraints</Nav.Link>
-							<Nav.Link href="/outputs">TimeTable Outputs</Nav.Link>
+							<Nav.Link href="/timetables">TimeTable Outputs</Nav.Link>
 						</Nav>
 					</Navbar>
 					<div className="content">
 						<Route exact path="/" component={Home}/>
 						<Route path="/dataManagement" component={DataManagement}/>
 						<Route path="/dsl" component={DSL}/>
-						<Route path="/outputs" component={Output}/>
+						<Route path="/timetables" component={Timetables}/>
 					</div>
 				</div>
 			</Router>
