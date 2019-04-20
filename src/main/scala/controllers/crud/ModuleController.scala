@@ -1,6 +1,6 @@
 package controllers.crud
 
-import db.Dao
+import db.ModuleDao
 import entities.module.Module
 import javax.inject.{Inject, Singleton}
 import org.json4s.DefaultFormats
@@ -17,7 +17,7 @@ class ModuleController @Inject()(cc: ControllerComponents) extends AbstractContr
   def create = Action(parse.json) { request =>
     try {
       val body = request.body.asInstanceOf[JsObject].value
-      Dao.insert(Module(moduleFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
+      ModuleDao.insert(Module(moduleFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
 
       Ok(s"Inserted Module with id ${body("moduleId")}")
     } catch {
@@ -26,7 +26,7 @@ class ModuleController @Inject()(cc: ControllerComponents) extends AbstractContr
   }
 
   def read(id: Int) = Action {
-    val module = Dao.getModule(id)
+    val module = ModuleDao.get(id)
     if (module != null) Ok(write(module))
     else BadRequest(s"""{"message":"Could not find module with id $id"}""")
   }
@@ -34,9 +34,9 @@ class ModuleController @Inject()(cc: ControllerComponents) extends AbstractContr
   def update(id: Int) = Action(parse.json) { request =>
     try {
       val body = request.body.asInstanceOf[JsObject].value
-      if(!Dao.delete(id, "MODULE")) BadRequest(s"""{"message":"Could not find student with id $id"}""")
+      if(!ModuleDao.delete(id)) BadRequest(s"""{"message":"Could not find student with id $id"}""")
       else {
-        Dao.insert(Module(moduleFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
+        ModuleDao.insert(Module(moduleFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
         Ok(s"Updated Student with id ${body("moduleId")}")
       }
     } catch {
@@ -45,7 +45,7 @@ class ModuleController @Inject()(cc: ControllerComponents) extends AbstractContr
   }
 
   def delete(id: Int) = Action {
-    if (Dao.delete(id, "MODULE")) Ok(s"Removed module with id $id")
+    if (ModuleDao.delete(id)) Ok(s"Removed module with id $id")
     else BadRequest(s"Could not remove module with id $id, ensure module exists")
   }
 }

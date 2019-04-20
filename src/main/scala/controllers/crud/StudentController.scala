@@ -1,6 +1,6 @@
 package controllers.crud
 
-import db.Dao
+import db.{Dao, StudentDao}
 import entities.people.{Person, Student}
 import javax.inject.{Inject, Singleton}
 import org.json4s.DefaultFormats
@@ -16,7 +16,7 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
   def create = Action(parse.json) { request =>
     try {
       val body = request.body.asInstanceOf[JsObject].value
-      Dao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
+      StudentDao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
 
       Ok(s"Inserted Student with id ${body("studentId")}")
     } catch {
@@ -25,7 +25,7 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def read(id: Int) = Action {
-    val student = Dao.getStudent(id)
+    val student = StudentDao.get(id)
     if (student != null) Ok(write(student))
     else BadRequest(s"""{"message":"Could not find student with id $id"}""")
   }
@@ -33,9 +33,9 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
   def update(id: Int) = Action(parse.json) { request =>
     try {
       val body = request.body.asInstanceOf[JsObject].value
-      if(!Dao.delete(id, "MODULE")) BadRequest(s"""{"message":"Could not find student with id $id"}""")
+      if(!StudentDao.delete(id)) BadRequest(s"""{"message":"Could not find student with id $id"}""")
       else {
-        Dao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
+        StudentDao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
         Ok(s"Updated Student with id ${body("studentId")}")
       }
     } catch {
@@ -44,7 +44,7 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
   }
 
   def delete(id: Int) = Action {
-    if (Dao.delete(id, "STUDENT")) Ok(s"Removed student with id $id")
+    if (StudentDao.delete(id)) Ok(s"Removed student with id $id")
     else BadRequest(s"Could not remove student with id $id, ensure student exists")
   }
 }

@@ -11,16 +11,16 @@ GET     /get-generated-schedule                 controllers.ScheduleController.g
 #CRUD
 
 #Student
-GET     /student/create                         controllers.crud.StudentController.create
-GET     /student/read/:id                     controllers.crud.StudentController.read(id: Int)
-GET     /student/update/:id                     controllers.crud.StudentController.update(id: Int)
-GET     /student/delete/:id                     controllers.crud.StudentController.delete(id: Int)
+PUT     /student/                         controllers.crud.StudentController.create
+GET     /student/:id                     controllers.crud.StudentController.read(id: Int)
+POST     /student/:id                     controllers.crud.StudentController.update(id: Int)
+DELETE     /student/:id                     controllers.crud.StudentController.delete(id: Int)
 
 #Module
-GET     /module/create                         controllers.crud.ModuleController.create
-GET     /module/read/:id                     controllers.crud.ModuleController.read(id: Int)
-GET     /module/update/:id                     controllers.crud.ModuleController.update(id: Int)
-GET     /module/delete/:id                     controllers.crud.ModuleController.delete(id: Int)
+PUT     /module/                         controllers.crud.ModuleController.create
+GET     /module/:id                     controllers.crud.ModuleController.read(id: Int)
+POST     /module/:id                     controllers.crud.ModuleController.update(id: Int)
+DELETE    /module/:id                     controllers.crud.ModuleController.delete(id: Int)
 
 # Map static resources from the main resources folder to the root URL path
 GET     /*fileName.html         controllers.StaticController.displayFile(path = "src/main/resources/static/pages", fileName, ext = "html", contentType = "text/html")
