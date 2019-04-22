@@ -134,6 +134,7 @@ object Scheduler {
           mostFree + validEventsWrapped(0).event
           unProcEvents -= validEventsWrapped(0).event
           wrappedSchedules += validEventsWrapped(0)
+
         }
 
       }
@@ -152,7 +153,7 @@ class RoomSchedule(val room: Room, val period: Period) {
     events += new TimePeriod(durationPointer, durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)) -> event
     timeRemaining -= event.duration
     durationPointer = durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)
-    if(timeRemaining<0){
+    if (timeRemaining < 0) {
       throw new Exception("Cannot schedule event: event overlaps room")
     }
   }

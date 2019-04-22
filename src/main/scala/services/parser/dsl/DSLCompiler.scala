@@ -22,15 +22,11 @@ object FilterList {
           |	e.schedule.timeRemaining >= e.duration
           |}
           |
-          |filter ModuleSepperance (a,b){
-          |		b.start > a.end
-          |} where (a.module.moduleName == b.module.moduleName, a.day == b.day, a.start <= b.end)
         """.stripMargin
 
       filters = DSLCompiler.compile(dsl)
       println("Compiled Filters")
     }
-    print("getFilters")
     filters
   }
 }
@@ -124,12 +120,14 @@ object DSLCompiler {
 
 /**
   * Class to convert a FilterNode into a compiled function
+  *
   * @param filterNode to convert into a function
   */
-class FilterCompiler(val filterNode: FilterNode) {
+private class FilterCompiler(val filterNode: FilterNode) {
 
   /**
     * Will convert the where list to a single boolean expression
+    *
     * @param list
     * @return
     */
@@ -139,19 +137,24 @@ class FilterCompiler(val filterNode: FilterNode) {
     val bodyExp = new ExpressionCompiler(filterNode.body, filterNode.name.string + "Body", filterNode.param1)
     val whereExp = if (filterNode.where.isDefined) Some(new ExpressionCompiler(crushWhereList(filterNode.where.get.condition), filterNode.name.string + "Where", filterNode.param1)) else None
     if (filterNode.param2.isDefined) {
+      // if  the filter expresses a relation between two events
       val whereFunc: Option[(ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean] = if (whereExp.isDefined) Some(whereExp.get.compileDouble(filterNode.param1, filterNode.param2.get)) else None
       val bodyFunc: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean = bodyExp.compileDouble(filterNode.param1, filterNode.param2.get)
       if (!whereExp.isDefined || whereExp.get.isCommutative) {
         if (bodyExp.isCommutative) {
+          // if the where and body are both commutative functions
           new DoubleFilter(whereFunc, bodyFunc, 0)
         } else {
+          // if only the where function is commutative
           new DoubleFilter(whereFunc, bodyFunc, 1)
         }
       } else {
+        // if the where function is not commutative
         new DoubleFilter(whereFunc, bodyFunc, 2)
       }
     } else {
-      new SingleFilter(if (whereExp.isDefined) applyWhereSingle(_,whereExp.get.compileSingle(filterNode.param1)) else applyWhereSingleNone(_), bodyExp.compileSingle(filterNode.param1))
+      // if the filter expresses a constraint on a single event
+      new SingleFilter(if (whereExp.isDefined) applyWhereSingle(_, whereExp.get.compileSingle(filterNode.param1)) else applyWhereSingleNone(_), bodyExp.compileSingle(filterNode.param1))
     }
   }
 
@@ -182,8 +185,8 @@ class FilterCompiler(val filterNode: FilterNode) {
           RNWrap(_, _, whereFunc(_, _), body(_, _))
         case 2 =>
           if (!where.isDefined)
-              throw new Exception("Cannot have NX filter, if where is not defined")
-          NXWrap(_, _, whereFunc(_, _), applyWhereDoubleI(_, _, where.get),body(_, _))
+            throw new Exception("Cannot have NX filter, if where is not defined")
+          NXWrap(_, _, whereFunc(_, _), applyWhereDoubleI(_, _, where.get), body(_, _))
         case _ =>
           throw new Exception("Invalid filter type")
       }
@@ -191,12 +194,12 @@ class FilterCompiler(val filterNode: FilterNode) {
   }
 
 
-  private def applyWhereDouble(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean):Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] =
+  private def applyWhereDouble(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] =
     possibleSlots.map(a => (a, filledSlots.filter(b =>
       where(a, b)
     )))
 
-  private def applyWhereDoubleI(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean):Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] =
+  private def applyWhereDoubleI(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])] =
     possibleSlots.map(a => (a, filledSlots.filter(b =>
       where(b, a)
     )))
@@ -241,7 +244,7 @@ class FilterCompiler(val filterNode: FilterNode) {
     * @return
     */
   private def RNWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])], body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-    // get applicable entries using the where
+  // get applicable entries using the where
     possibleSlots.filterNot(where(filledSlots, possibleSlots).filterNot(g => {
       val a = g._1
       g._2.forall(b =>
@@ -264,7 +267,7 @@ class FilterCompiler(val filterNode: FilterNode) {
     * @return
     */
   private def NXWrap(filledSlots: Seq[ScheduleInterfaceMapper], possibleSlots: Seq[ScheduleInterfaceMapper], where: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])], whereI: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[(ScheduleInterfaceMapper, Seq[ScheduleInterfaceMapper])], body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] =
-    // get applicable entries (a,b) using the where
+  // get applicable entries (a,b) using the where
 
     possibleSlots.filterNot((where(filledSlots, possibleSlots).filterNot(g => {
       val a = g._1
@@ -283,7 +286,8 @@ class FilterCompiler(val filterNode: FilterNode) {
 
   /**
     * Function to process constraints which use a single parameter
-    * @param filledSlots currently scheduled events
+    *
+    * @param filledSlots   currently scheduled events
     * @param possibleSlots events that could be scheduled
     * @param where
     * @param body
@@ -293,6 +297,7 @@ class FilterCompiler(val filterNode: FilterNode) {
     possibleSlots.filterNot(where(possibleSlots).filterNot(body(_)).toSet)
 
   private def applyWhereSingle(possibleSlots: Seq[ScheduleInterfaceMapper], where: (ScheduleInterfaceMapper) => Boolean): Seq[ScheduleInterfaceMapper] = possibleSlots.filter(where(_))
+
   private def applyWhereSingleNone(possibleSlots: Seq[ScheduleInterfaceMapper]): Seq[ScheduleInterfaceMapper] = possibleSlots
 
 
@@ -302,15 +307,19 @@ class FilterCompiler(val filterNode: FilterNode) {
 
 /**
   * Class to convert a BooleanExpNode into a compiled function
+  *
   * @param toCompile
-  * @param name of the generated function
+  * @param name          of the generated function
   * @param fallBackParam a parameter to use as a fallback, if the expression does not use any.
   */
-class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fallBackParam: ParamNode) {
+private class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fallBackParam: ParamNode) {
+
   import scala.reflect.runtime.universe._
   import scala.tools.reflect.ToolBox
+
   /**
     * Compile's the specified string into a function
+    *
     * @param code to compile
     * @return the compiled function
     */
@@ -326,11 +335,11 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
 
   /**
     * 0:
-    *   No extraction
+    * No extraction
     * 1:
-    *   Unique modules required
+    * Unique modules required
     * 2:
-    *   Every week must be extracted
+    * Every week must be extracted
     */
   var extractionLevel = 0
 
@@ -348,11 +357,12 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
     */
   var isCommutative: Boolean = {
     // Todo: implement this method to improve efficiency
-    params.size<2
+    params.size < 2
   }
 
   /**
     * Generates the scala code for the function as a string.
+    *
     * @return the scala code
     */
   private def genFunctionString(): String = {
@@ -373,9 +383,9 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
       case 0 =>
         func
       case 1 =>
-        mapEventsSingleUniq(_,func(_))
-      case 2=>
-        mapEventsSingle(_,func(_))
+        mapEventsSingleUniq(_, func(_))
+      case 2 =>
+        mapEventsSingle(_, func(_))
       case _ =>
         throw new Exception("Illegal extraction level")
     }
@@ -403,7 +413,8 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
   /**
     * A method that will allow functions to use indivdual module information.
     * This function exsits, as there is an overhead with adding the information.
-    * @param a parameter
+    *
+    * @param a    parameter
     * @param func function to apply
     * @return True, if func(a) is true, for every event in a
     */
@@ -414,8 +425,9 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
   /**
     * A method that will allow functions to use indivdual module information.
     * This function exsits, as there is an overhead with adding the information.
-    * @param a first parameter
-    * @param b second parameter
+    *
+    * @param a    first parameter
+    * @param b    second parameter
     * @param func function to apply
     * @return True, if func(a,b) is true, for every pair of events that run in the same week
     */
@@ -427,12 +439,20 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
     // Check the constraint holds for all pairs
     .forall(p => func(p._1, p._2))
 
+  /**
+    * Same as mapEventsDouble, however, only unique pairs are compared
+    *
+    * @param a
+    * @param b
+    * @param func
+    * @return
+    */
   private def mapEventsDoubleUniq(a: ScheduleInterfaceMapper, b: ScheduleInterfaceMapper, func: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean): Boolean =
-    a.event.events.keySet.filter(b.event.events.keySet.contains(_)).map(e => (a.event.events.get(e).get,b.event.events.get(e).get)).toList.distinct.distinct.map(e =>
-    // add the sessions to the interfaceMapper
-    (a.withRequiredSession(e._1), b.withRequiredSession(e._2)))
-    // Check the constraint holds for all pairs
-    .forall(p => func(p._1, p._2))
+    a.event.events.keySet.filter(b.event.events.keySet.contains(_)).map(e => (a.event.events.get(e).get, b.event.events.get(e).get)).toList.distinct.distinct.map(e =>
+      // add the sessions to the interfaceMapper
+      (a.withRequiredSession(e._1), b.withRequiredSession(e._2)))
+      // Check the constraint holds for all pairs
+      .forall(p => func(p._1, p._2))
 
   private def compileBooleanExp(booleanExpNode: BooleanExpNode): String = {
     booleanExpNode match {
@@ -503,10 +523,10 @@ class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String, val fa
     ref.referenceType match {
       case ReferenceType.None =>
       case services.parser.dsl.ReferenceType.Module =>
-        if(extractionLevel==0)
+        if (extractionLevel == 0)
           extractionLevel = 1
       case services.parser.dsl.ReferenceType.Week =>
-        if(extractionLevel<2)
+        if (extractionLevel < 2)
           extractionLevel = 2
     }
 
@@ -522,7 +542,7 @@ class MethodReference(val dslReference: Seq[String], val codeReference: String, 
   override def toString = s"MethodReference($dslReference, $codeReference, $referenceType, $resolvedType)"
 }
 
-object ReferenceType extends Enumeration{
+object ReferenceType extends Enumeration {
   type ReferenceType = Value
   val None, Module, Week = Value
 }

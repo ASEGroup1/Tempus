@@ -3,10 +3,8 @@ package services.parser
 import java.util.regex.Pattern
 
 import entities.School
-import entities.course.Course
 import entities.locations.Building
 import entities.module._
-import entities.people.Person
 import services.Utils
 
 import scala.collection.mutable
@@ -28,7 +26,7 @@ object TimeTableParser {
     schools.filter(!_.contains("(")).zipWithIndex.map(s => s._1 -> new School(s._2, s._1, null)).toMap
   }
 
-  val moduleNames:Map[String, Module] = {
+  val moduleNames: Map[String, Module] = {
     val modules = mutable.Map[String, Module]()
     val moduleMatcher = TimeTablePattern.matcher(timeTableCsvStr)
 
@@ -43,8 +41,6 @@ object TimeTableParser {
 
     while (moduleMatcher.find) {
 
-
-
       // get or create the module
       val currentModule = modules.get(Utils.toSnake(moduleMatcher.group(1))) match {
         case Some(module) =>
@@ -52,7 +48,8 @@ object TimeTableParser {
         case None =>
           // create the module
           val m = new Module({
-            moduleId += 1; moduleId
+            moduleId += 1;
+            moduleId
           }, moduleMatcher.group(7), Utils.toSnake(moduleMatcher.group(1)), "",
             if (schools.contains(Utils.toSnake(moduleMatcher.group(8)))) schools(Utils.toSnake(moduleMatcher.group(8))) else nullSchool,
             ListBuffer(2),
@@ -72,7 +69,9 @@ object TimeTableParser {
       currentModule.requiredSessions += session
 
       // add session structure of required session
-      currentModule.sessionStructure ++= moduleMatcher.group(6).zipWithIndex.filter(_._1 == '1').map(_._2).map(w => new ModuleSessionStructure({mssId +=1 ; mssId}, w,
+      currentModule.sessionStructure ++= moduleMatcher.group(6).zipWithIndex.filter(_._1 == '1').map(_._2).map(w => new ModuleSessionStructure({
+        mssId += 1; mssId
+      }, w,
         nullModuleSessionType, 1, nullInt, session))
     }
 

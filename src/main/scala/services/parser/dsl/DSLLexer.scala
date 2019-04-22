@@ -42,7 +42,7 @@ object DSLLexer {
   def lex(dsl: String): Seq[Symbol] = dsl.split("\\s+").flatMap(processToken(_))
 
   private def processToken(token: String): Seq[Symbol] = {
-    token match{
+    token match {
       // Comparators
       case EQ_REG(c) => Array(EQ) ++ processToken(c)
       case NE_REG(c) => Array(NE) ++ processToken(c)
@@ -75,9 +75,9 @@ object DSLLexer {
       case BOOLEANLITERAL_REG(v, c) => Array(new BOOLEANLITERAL(v)) ++ processToken(c)
       case CAPWORD_REG(v, c) => Array(CAPWORD(v)) ++ processToken(c)
       case UNCAPWORD_REG(v, c) => Array(UNCAPWORD(v)) ++ processToken(c)
-      case FLOATLITERAL_REG(v, c) => Array(new FLOATLITERAL(v))++ processToken(c)
-      case INTLITERAL_REG(v, c) => Array(new INTLITERAL(v))++ processToken(c)
-      case CHARLITERAL_REG(v, c) => Array(new CHARLITERAL(v))++ processToken(c)
+      case FLOATLITERAL_REG(v, c) => Array(new FLOATLITERAL(v)) ++ processToken(c)
+      case INTLITERAL_REG(v, c) => Array(new INTLITERAL(v)) ++ processToken(c)
+      case CHARLITERAL_REG(v, c) => Array(new CHARLITERAL(v)) ++ processToken(c)
 
       // Misc
       case "\\s*" => Array[Symbol]()
@@ -93,44 +93,65 @@ sealed trait Symbol
 
 // Literals
 case class CAPWORD(str: String) extends Symbol
+
 case class UNCAPWORD(str: String) extends Symbol
-case class INTLITERAL(int: Int) extends Symbol{
+
+case class INTLITERAL(int: Int) extends Symbol {
   def this(str: String) = this(str.toInt)
 }
+
 case class BOOLEANLITERAL(bool: Boolean) extends Symbol {
   def this(str: String) = this(str.toBoolean)
 }
-case class FLOATLITERAL(float:Float) extends Symbol{
+
+case class FLOATLITERAL(float: Float) extends Symbol {
   def this(str: String) = this(str.toFloat)
 }
-case class CHARLITERAL(char:Char) extends Symbol{
+
+case class CHARLITERAL(char: Char) extends Symbol {
   def this(str: String) = this(str.charAt(1))
 }
 
 // Keywords
 case object FILTER extends Symbol
+
 case object IF extends Symbol
+
 case object ELIF extends Symbol
-case object ELSE extends  Symbol
-case object WHERE extends  Symbol
+
+case object ELSE extends Symbol
+
+case object WHERE extends Symbol
 
 // Punctuation
 case object OPENBRACKET extends Symbol
-case object CLOSEBRACKET extends  Symbol
+
+case object CLOSEBRACKET extends Symbol
+
 case object COMMA extends Symbol
+
 case object OPENBRACE extends Symbol
+
 case object CLOSEBRACE extends Symbol
+
 case object DOT extends Symbol
 
 // Boolean Logic
 case object NOT extends Symbol
+
 case object AND extends Symbol
+
 case object OR extends Symbol
 
 // Comparators
 case object EQ extends Symbol
+
 case object NE extends Symbol
+
 case object GT extends Symbol
+
 case object GE extends Symbol
+
 case object LT extends Symbol
+
 case object LE extends Symbol
