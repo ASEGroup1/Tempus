@@ -1,9 +1,11 @@
 {
-  "name": "frontend",
+  "name": "tempus_web_ui",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "axios": "^0.18.0",
     "react": "^16.8.6",
+    "react-bootstrap": "^1.0.0-beta.8",
     "react-dom": "^16.8.6",
     "react-scripts": "2.1.8",
     "superagent": "^5.0.2"
