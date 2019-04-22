@@ -4,3 +4,4 @@ project/project/
 project/target/
 target/
 src/main/resources/static/js/lib/
+src/main/resources/input/*.csv
