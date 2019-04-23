@@ -10,4 +10,5 @@ object ModuleDao extends Dao[Module] {
 
   def insert(module: Module) =
     run.update(conn, s"INSERT INTO MODULE VALUES(${module.moduleId}, '${module.moduleCode}', '${module.moduleName}', '${module.moduleDescription}', NULL, NULL)")
+
 }

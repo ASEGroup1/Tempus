@@ -1,6 +1,6 @@
 package controllers.crud
 
-import db.ModuleDao
+import db.{ModuleDao, StudentDao}
 import entities.module.Module
 import javax.inject.{Inject, Singleton}
 import org.json4s.DefaultFormats
@@ -12,7 +12,6 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 class ModuleController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
   implicit val formats: DefaultFormats = DefaultFormats
   val moduleFields = classOf[Module].getDeclaredFields.map(_.getName)
-
 
   def create = Action(parse.json) { request =>
     try {
@@ -47,5 +46,12 @@ class ModuleController @Inject()(cc: ControllerComponents) extends AbstractContr
   def delete(id: Int) = Action {
     if (ModuleDao.delete(id)) Ok(s"Removed module with id $id")
     else BadRequest(s"Could not remove module with id $id, ensure module exists")
+  }
+
+  def getModuleWithStudent(id: Int) = Action {
+    try Ok(write(ModuleDao.get(id) -> StudentDao.getStudentsInModule(id)))
+    catch {
+      case e: Exception => BadRequest(e.getMessage)
+    }
   }
 }

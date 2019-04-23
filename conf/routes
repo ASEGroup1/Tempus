@@ -19,8 +19,12 @@ DELETE     /student/:id                     controllers.crud.StudentController.d
 #Module
 PUT     /module/                         controllers.crud.ModuleController.create
 GET     /module/:id                     controllers.crud.ModuleController.read(id: Int)
+GET     /module/with-students/:id       controllers.crud.ModuleController.getModuleWithStudent(id: Int)
 POST     /module/:id                     controllers.crud.ModuleController.update(id: Int)
 DELETE    /module/:id                     controllers.crud.ModuleController.delete(id: Int)
+
+#Mapping
+PUT     /student/map/:studentId/:moduleId               controllers.crud.StudentController.map(studentId: Int, moduleId: Int)
 
 # Map static resources from the main resources folder to the root URL path
 GET     /*fileName.html         controllers.StaticController.displayFile(path = "src/main/resources/static/pages", fileName, ext = "html", contentType = "text/html")
