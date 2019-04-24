@@ -4,8 +4,9 @@ import java.time.temporal.ChronoUnit
 import java.time.{OffsetDateTime, OffsetTime, ZoneOffset}
 
 import entities.locations.Room
-import entities.module.{Module, ModuleFehqLevel, RequiredSession}
+import entities.module.{Module, RequiredSession}
 import entities.timing.TimePeriod
+import services.parser.dsl.FilterList
 import services.scheduler.poso.{Period, ScheduledClass}
 
 import scala.collection.mutable
@@ -13,6 +14,8 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Random
 
 object Scheduler {
+  val filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = FilterList.getFilters()
+
   def getPeriodDefault(dayOfMonth: Int) = getPeriod(dayOfMonth, 1, 8, 20)
 
   def getPeriod(dayOfMonth: Int, monthOfYear: Int, beginHour24: Int, endHour24: Int) =
@@ -21,13 +24,8 @@ object Scheduler {
       end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
     })
 
-  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module]): Option[List[ScheduledClass]] = {
-    binPackSchedule(daysToGenerate, rooms, modules, Array(willFit(_, _, _)))
-  }
-
   def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module],
-                      filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
-                      weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
+                      weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
                       None): Option[List[ScheduledClass]] = {
     // These values are an estimates
     val term1End = 12
@@ -64,7 +62,7 @@ object Scheduler {
       // Get schedule for term
       val termSchedule = binPackScheduleI(daysToGenerate, rooms,
         slots.map(s => new Event(s.map(_._2.durationInHours).max, s)).toSet,
-        filters, weights)
+        weights)
 
       // unpack schedule
       if (termSchedule.isDefined) {
@@ -85,18 +83,20 @@ object Scheduler {
 
 
   def binPackScheduleI(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[Event],
-                       filters: Seq[(Seq[RoomSchedule], Seq[Event], RoomSchedule) => Seq[Event]],
-                       weights: Option[Seq[(Seq[RoomSchedule], Event, RoomSchedule) => Double]] =
+                       weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
                        None
                       ): Option[List[RoomSchedule]] = {
     val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
 
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
+    val wrappedSchedules: ListBuffer[ScheduleInterfaceMapper] = ListBuffer()
 
     // Events that have not been scheduled, shuffled to help distribute across the week
     var unProcEvents = Random.shuffle(events).to[ListBuffer]
     // Room schedules mapped to whether they contain space
     var scheduleMap = schedule.map((_ -> true)).toMap
+
+
     while (!unProcEvents.isEmpty) {
       // get the unfilled rooms
       val free = scheduleMap.filter(_._2).map(_._1).groupBy(_.period.calendar)
@@ -108,10 +108,12 @@ object Scheduler {
       } else {
         // Get the free room that has the earliest unscheduled slot (day is included)
         val mostFree = free.minBy(_._1)._2.maxBy(_.timeRemaining)
-        // Apply the filters to the unscheduled events, to find those that can be scheduled in the slot
-        var validEvents = filters.foldLeft(unProcEvents) { (r, f) => f(schedule, r, mostFree).to[ListBuffer] }
 
-        if (validEvents.isEmpty) {
+        // Wrap scheduled and unscheduled events into a the standardised ScheduleInterfaceMapper
+        // Apply the filters to the unscheduled events, to find those that can be scheduled in the slot
+        var validEventsWrapped = filters.foldLeft(unProcEvents.map(new ScheduleInterfaceMapper(mostFree, _))) { (r, f) => f(wrappedSchedules, r).to[ListBuffer] }
+
+        if (validEventsWrapped.isEmpty) {
           // no valid events can go in that slot
           /*TODO:
               Consider an approach that will assign free time, allowing the room to be scheduled later
@@ -124,13 +126,15 @@ object Scheduler {
         } else {
           // Apply the weighting functions
           if (weights.isDefined)
-            validEvents = validEvents.groupBy(s => weights.get.map(_ (schedule, s, mostFree)).sum).maxBy(_._1)._2
+            validEventsWrapped = validEventsWrapped.groupBy(s => weights.get.map(_ (wrappedSchedules, s)).sum).maxBy(_._1)._2
           // Get the longest events
-          validEvents = validEvents.groupBy(_.duration).maxBy(_._1)._2
+          validEventsWrapped = validEventsWrapped.groupBy(_.event.duration).maxBy(_._1)._2
 
           // Schedule the event
-          mostFree + validEvents(0)
-          unProcEvents -= validEvents(0)
+          mostFree + validEventsWrapped(0).event
+          unProcEvents -= validEventsWrapped(0).event
+          wrappedSchedules += validEventsWrapped(0)
+
         }
 
       }
@@ -138,24 +142,22 @@ object Scheduler {
 
     Some(schedule.toList)
   }
+}
 
-  def willFit(currentSchedule: Seq[RoomSchedule], events: Seq[Event], room: RoomSchedule): Seq[Event] =
-    events.filter(room.timeRemaining >= _.duration)
+class RoomSchedule(val room: Room, val period: Period) {
+  var timeRemaining = (period.timePeriod.duration() / 60 / 60 / 1000).toFloat
+  var durationPointer = period.timePeriod.start
+  var events = mutable.HashMap[TimePeriod, Event]()
 
-
-  class RoomSchedule(val room: Room, val period: Period) {
-    var timeRemaining = (period.timePeriod.duration() / 60 / 60 / 1000).toFloat
-    var durationPointer = period.timePeriod.start
-    var events = mutable.HashMap[TimePeriod, Event]()
-
-    def +(event: Event): Unit = {
-      events += new TimePeriod(durationPointer, durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)) -> event
-      timeRemaining -= event.duration
-      durationPointer = durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)
+  def +(event: Event): Unit = {
+    events += new TimePeriod(durationPointer, durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)) -> event
+    timeRemaining -= event.duration
+    durationPointer = durationPointer.plus(event.duration.toLong, ChronoUnit.HOURS)
+    if (timeRemaining < 0) {
+      throw new Exception("Cannot schedule event: event overlaps room")
     }
-
   }
 
-  class Event(val duration: Float, val events: Map[Int, RequiredSession])
-
 }
+
+class Event(val duration: Float, val events: Map[Int, RequiredSession])
