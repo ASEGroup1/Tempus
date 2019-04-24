@@ -7,11 +7,11 @@ scalaVersion := "2.12.8"
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 libraryDependencies += guice
 
-scalaSource in Compile := baseDirectory.value / "src/main/scala/"
-resourceDirectory in Compile := baseDirectory.value / "src/main/resources"
+scalaSource in Compile := baseDirectory.value / "app/"
+resourceDirectory in Compile := baseDirectory.value / "app/resources"
 
-scalaSource in Test := baseDirectory.value / "src/test/scala/"
-resourceDirectory in Test := baseDirectory.value / "src/test/resources"
+scalaSource in Test := baseDirectory.value / "test/"
+resourceDirectory in Test := baseDirectory.value / "test/resources"
 
 unmanagedResourceDirectories in Compile += baseDirectory.value / "conf"
 unmanagedResourceDirectories in Test += baseDirectory.value / "conf"
