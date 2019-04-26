@@ -12,30 +12,18 @@ import services.scheduler.{ScheduleInterfaceMapper, Scheduler}
   */
 object FilterList {
 
-  private var filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = null
+  val defaultDSL = "filter WillFit(e){\n\te.schedule.timeRemaining >= e.duration\n}"
 
-  def getFilters(): Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = {
-    if (filters == null) {
-      val dsl =
-        """
-          |filter WillFit(e){
-          |	e.schedule.timeRemaining >= e.duration
-          |}
-          |
-        """.stripMargin
+  var filters: Map[String, (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = DSLCompiler.compile(defaultDSL)
 
-      filters = DSLCompiler.compile(dsl)
-      println("Compiled Filters")
-    }
-    filters
-  }
+  def getFilters():Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = filters.values.toSeq
 }
 
 object DSLCompiler {
 
 
-  def compile(code: String): Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] =
-    DSLParser.parse(DSLLexer.lex(code)).map(new FilterCompiler(_).getFunction())
+  def compile(code: String): Map[String, (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] =
+    DSLParser.parse(DSLLexer.lex(code)).map(new FilterCompiler(_).getFunction()).toMap
 
   /**
     * Uses reflection to generate MethodReference's using fields of a class
@@ -301,8 +289,8 @@ private class FilterCompiler(val filterNode: FilterNode) {
   private def applyWhereSingleNone(possibleSlots: Seq[ScheduleInterfaceMapper]): Seq[ScheduleInterfaceMapper] = possibleSlots
 
 
-  def getFunction(): (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] =
-    compiledFilter.compile
+  def getFunction(): (String, (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]) =
+    (filterNode.name.string, compiledFilter.compile)
 }
 
 /**
