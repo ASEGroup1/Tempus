@@ -21,208 +21,202 @@ export class Rooms extends React.Component {
                 ["-","-","-","-","-"],
                 ["-","-","-","-","-"],
                 ["-","-","-","-","-"]
-            ]};
+                ],
+                weeks: [1,2,3,4,5,6,7,8,9,10,11,12]
+        };
     }
 
-
     getSchedule(week) {
-        if (week === 1) {
-            this.setState({displayData: [
-                    ["Week 1","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-",""],
-                    ["ESRS","-","-","-","-"],
-                    ["ESRS","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","Web Apps & Services","-","-"],
-                    ["-","-","Web Apps & Services","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 2) {
-            this.setState({displayData: [
-                    ["Week 2","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-",<div><h1>Hi</h1><p>bye</p></div>,"-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 3) {
-            this.setState({displayData: [
-                    ["Week 3","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 4) {
-            this.setState({displayData: [
-                    ["Week 4","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 5) {
-            this.setState({displayData: [
-                    ["Week 5","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 6) {
-            this.setState({displayData: [
-                    ["Week 6","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 7) {
-            this.setState({displayData: [
-                    ["Week 7","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 8) {
-            this.setState({displayData: [
-                    ["Week 8","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 9) {
-            this.setState({displayData: [
-                    ["Week 9","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 10) {
-            this.setState({displayData: [
-                    ["Week 10","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 11) {
-            this.setState({displayData: [
-                    ["Week 11","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else if (week === 12) {
-            this.setState({displayData: [
-                    ["Week 12","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-        } else {
-            this.setState({displayData: [
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"],
-                    ["-","-","-","-","-"]
-                ]});
-            alert("Error");
+        switch (week) {
+            case 1:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 2:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 3:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 4:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 5:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 6:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 7:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 8:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 9:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 10:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 11:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            case 12:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        if (!(i===0 && j===0)) {
+                            this.state.displayData[i][j] = this.getCellData();
+                        } else {
+                            this.state.displayData[i][j] = "Week " + week;
+                        }
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                break;
+            default:
+                for (let i=0; i<12; i++) {
+                    for (let j=0; j<5; j++) {
+                        this.state.displayData[i][j] = "-";
+                    }
+                }
+                this.setState({displayData: this.state.displayData});
+                alert("Error");
+                break;
         }
+    }
+
+    getCellData() {
+        return "-";
+    }
+
+    genTable() {
+        let fullTable = [];
+        let body = [];
+        let time = 8;
+        let head = [];
+        const days = ["","Monday","Tuesday","Wednesday","Thursday","Friday"];
+
+
+        for (let i=0; i<6; i++) {
+            head.push(<th>{days[i]}</th>);
+        }
+
+        fullTable.push(<thead><tr>{head}</tr></thead>);
+
+        for (let i=0; i<12; i++) {
+            let rows = [];
+            for (let j=0; j<6; j++) {
+                if (j!==0) {
+                    rows.push(<td>{this.state.displayData[i][j-1]}</td>);
+                } else {
+                    rows.push(<td>{time}:00</td>);
+                    time++;
+                }
+            }
+            body.push(<tr>{rows}</tr>);
+        }
+
+        fullTable.push(<tbody>{body}</tbody>);
+        return fullTable;
     }
 
     render() {
@@ -231,128 +225,11 @@ export class Rooms extends React.Component {
             <div>
                 <p>Timetable - Rooms</p>
                 <ButtonGroup>
-                    <Button onClick={()=> this.getSchedule(1)}>1</Button>
-                    <Button onClick={()=> this.getSchedule(2)}>2</Button>
-                    <Button onClick={()=> this.getSchedule(3)}>3</Button>
-                    <Button onClick={()=> this.getSchedule(4)}>4</Button>
-                    <Button onClick={()=> this.getSchedule(5)}>5</Button>
-                    <Button onClick={()=> this.getSchedule(6)}>6</Button>
-                    <Button onClick={()=> this.getSchedule(7)}>7</Button>
-                    <Button onClick={()=> this.getSchedule(8)}>8</Button>
-                    <Button onClick={()=> this.getSchedule(9)}>9</Button>
-                    <Button onClick={()=> this.getSchedule(10)}>10</Button>
-                    <Button onClick={()=> this.getSchedule(11)}>11</Button>
-                    <Button onClick={()=> this.getSchedule(12)}>12</Button>
+                    {this.state.weeks.map(w => (<Button onClick={() => this.getSchedule(w)}>{w}</Button>))}
                 </ButtonGroup>
                 <p></p>
                 <Table striped bordered hover variant="dark">
-                    <thead>
-                    <tr>
-                        <th></th>
-                        <th>Monday</th>
-                        <th>Tuesday</th>
-                        <th>Wednesday</th>
-                        <th>Thursday</th>
-                        <th>Friday</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>08:00</td>
-                        <td>{this.state.displayData[0][0]}</td>
-                        <td>{this.state.displayData[0][1]}</td>
-                        <td>{this.state.displayData[0][2]}</td>
-                        <td>{this.state.displayData[0][3]}</td>
-                        <td>{this.state.displayData[0][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>09:00</td>
-                        <td>{this.state.displayData[1][0]}</td>
-                        <td>{this.state.displayData[1][1]}</td>
-                        <td>{this.state.displayData[1][2]}</td>
-                        <td>{this.state.displayData[1][3]}</td>
-                        <td>{this.state.displayData[1][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>10:00</td>
-                        <td>{this.state.displayData[2][0]}</td>
-                        <td>{this.state.displayData[2][1]}</td>
-                        <td>{this.state.displayData[2][2]}</td>
-                        <td>{this.state.displayData[2][3]}</td>
-                        <td>{this.state.displayData[2][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>11:00</td>
-                        <td>{this.state.displayData[3][0]}</td>
-                        <td>{this.state.displayData[3][1]}</td>
-                        <td>{this.state.displayData[3][2]}</td>
-                        <td>{this.state.displayData[3][3]}</td>
-                        <td>{this.state.displayData[3][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>12:00</td>
-                        <td>{this.state.displayData[4][0]}</td>
-                        <td>{this.state.displayData[4][1]}</td>
-                        <td>{this.state.displayData[4][2]}</td>
-                        <td>{this.state.displayData[4][3]}</td>
-                        <td>{this.state.displayData[4][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>13:00</td>
-                        <td>{this.state.displayData[5][0]}</td>
-                        <td>{this.state.displayData[5][1]}</td>
-                        <td>{this.state.displayData[5][2]}</td>
-                        <td>{this.state.displayData[5][3]}</td>
-                        <td>{this.state.displayData[5][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>14:00</td>
-                        <td>{this.state.displayData[6][0]}</td>
-                        <td>{this.state.displayData[6][1]}</td>
-                        <td>{this.state.displayData[6][2]}</td>
-                        <td>{this.state.displayData[6][3]}</td>
-                        <td>{this.state.displayData[6][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>15:00</td>
-                        <td>{this.state.displayData[7][0]}</td>
-                        <td>{this.state.displayData[7][1]}</td>
-                        <td>{this.state.displayData[7][2]}</td>
-                        <td>{this.state.displayData[7][3]}</td>
-                        <td>{this.state.displayData[7][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>16:00</td>
-                        <td>{this.state.displayData[8][0]}</td>
-                        <td>{this.state.displayData[8][1]}</td>
-                        <td>{this.state.displayData[8][2]}</td>
-                        <td>{this.state.displayData[8][3]}</td>
-                        <td>{this.state.displayData[8][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>17:00</td>
-                        <td>{this.state.displayData[9][0]}</td>
-                        <td>{this.state.displayData[9][1]}</td>
-                        <td>{this.state.displayData[9][2]}</td>
-                        <td>{this.state.displayData[9][3]}</td>
-                        <td>{this.state.displayData[9][4]}</td>
-                    </tr><tr>
-                        <td>18:00</td>
-                        <td>{this.state.displayData[10][0]}</td>
-                        <td>{this.state.displayData[10][1]}</td>
-                        <td>{this.state.displayData[10][2]}</td>
-                        <td>{this.state.displayData[10][3]}</td>
-                        <td>{this.state.displayData[10][4]}</td>
-                    </tr>
-                    <tr>
-                        <td>19:00</td>
-                        <td>{this.state.displayData[11][0]}</td>
-                        <td>{this.state.displayData[11][1]}</td>
-                        <td>{this.state.displayData[11][2]}</td>
-                        <td>{this.state.displayData[11][3]}</td>
-                        <td>{this.state.displayData[11][4]}</td>
-                    </tr>
-                    </tbody>
+                    {this.genTable()}
                 </Table>
             </div>
         );
