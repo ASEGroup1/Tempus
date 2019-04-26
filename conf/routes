@@ -14,6 +14,9 @@ POST    /dsl/set          controllers.DSLController.setDSL()
 GET     /dsl/add          controllers.DSLController.getDSLForm(controller ="/dsl/add")
 POST    /dsl/add          controllers.DSLController.addDSL()
 
+GET     /dsl/remove          controllers.DSLController.getDSLForm(controller ="/dsl/remove")
+POST    /dsl/remove          controllers.DSLController.removeDSL()
+
 GET     /dsl              controllers.DSLController.getCurrentDSL()
 
 # Map static resources from the main resources folder to the root URL path

@@ -36,6 +36,18 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
     }
   }
 
+  def removeDSL() = Action {implicit request =>
+    try{
+      println("Appending to DSL")
+      val filtersToRemove = Form("dsl" -> text).bindFromRequest.get.split("\\s*;\\s*")
+      FilterList.filters --= filtersToRemove
+      Ok("Removed filters: \""+filtersToRemove.mkString("\", \"")+"\"\nCurrent Filters: " + getDSLText)
+    } catch{
+      case e:Exception =>
+        BadRequest(e.getMessage)
+    }
+  }
+
   def getCurrentDSL() = Action {
     Ok("Current filters: " + getDSLText)
   }
