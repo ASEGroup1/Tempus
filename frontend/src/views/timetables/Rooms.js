@@ -10,6 +10,7 @@ const WEEK_LENGTH = 5;
 
 export class Rooms extends React.Component {
 
+	roomId = "1B2";
 	fullTimetable = [];
 
 	constructor(props) {
@@ -26,14 +27,10 @@ export class Rooms extends React.Component {
 	};
 
 	generateSchedule(w) {
-		//avoids splice changing values
-		let fullTimeTable = this.state.fullTimetable;
+		let fullTimetable = this.state.fullTimetable;
 
-		this.setState({
-			timetable: fullTimeTable["1B2"].splice((this.state.weekIndex - 1) * WEEK_LENGTH, WEEK_LENGTH),
-			weekIndex: w
-		});
-		console.debug(this.state.timetable)
+		this.setState({timetable: this.state.fullTimetable[this.roomId].slice(w * WEEK_LENGTH -1, w * WEEK_LENGTH  + WEEK_LENGTH- 1)});
+		console.debug(fullTimetable[this.roomId], this.state.timetable, w * WEEK_LENGTH -1, w * WEEK_LENGTH + WEEK_LENGTH - 1)
 	}
 
 	genTable() {
@@ -48,11 +45,10 @@ export class Rooms extends React.Component {
 
 		for (let i = 0; i <= 11; i++) {
 			let rows = [];
-			for (let j = 0; j <= 4; j++) {
-				rows.push((j !== 0) ? <td>{this.state.timetable[j][i]}</td> : <td>{++time}:00</td>);
-			}
+			for (let j = 0; j <= 4; j++)
+				rows.push(<td>{this.state.timetable[j][i]}</td>);
 
-
+			rows.unshift(<td>{++time}:00</td>);
 			body.push(<tr>{rows}</tr>);
 		}
 
@@ -63,7 +59,7 @@ export class Rooms extends React.Component {
 
 	render() {
 		return (
-			(Object.keys(this.state.timetable).length > 0) ?
+			(this.state.timetable.length > 0) ?
 				<div>
 					<p>Timetable - Rooms</p>
 					<ButtonGroup>
