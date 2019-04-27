@@ -2,236 +2,78 @@ import React from "react";
 import Table from "react-bootstrap/Table";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
+import {getTimetable} from "../../RequestManager";
 
+const weeks = Array.apply(null, {length: 13}).map(Number.call, Number).splice(1);
+const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+const WEEK_LENGTH = 5;
 
 export class Rooms extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {displayData: [
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"],
-                ["-","-","-","-","-"]
-                ],
-                weeks: [1,2,3,4,5,6,7,8,9,10,11,12]
-        };
-    }
+	fullTimetable = [];
 
-    getSchedule(week) {
-        switch (week) {
-            case 1:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 2:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 3:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 4:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 5:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 6:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 7:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 8:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 9:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 10:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 11:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            case 12:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        if (!(i===0 && j===0)) {
-                            this.state.displayData[i][j] = this.getCellData();
-                        } else {
-                            this.state.displayData[i][j] = "Week " + week;
-                        }
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                break;
-            default:
-                for (let i=0; i<12; i++) {
-                    for (let j=0; j<5; j++) {
-                        this.state.displayData[i][j] = "-";
-                    }
-                }
-                this.setState({displayData: this.state.displayData});
-                alert("Error");
-                break;
-        }
-    }
+	constructor(props) {
+		super(props);
 
-    getCellData() {
-        return "-";
-    }
+		this.populateRoomTimetable();
+		this.state = {timetable: [], fullTimetable: {}, weekIndex: 1};
+	}
 
-    genTable() {
-        let fullTable = [];
-        let body = [];
-        let time = 8;
-        let head = [];
-        const days = ["","Monday","Tuesday","Wednesday","Thursday","Friday"];
+	populateRoomTimetable = async () => {
+		await this.setState({fullTimetable: await getTimetable()});
+		console.debug(this.state.fullTimetable);
+		this.generateSchedule(1);
+	};
+
+	generateSchedule(w) {
+		//avoids splice changing values
+		let fullTimeTable = this.state.fullTimetable;
+
+		this.setState({
+			timetable: fullTimeTable["1B2"].splice((this.state.weekIndex - 1) * WEEK_LENGTH, WEEK_LENGTH),
+			weekIndex: w
+		});
+		console.debug(this.state.timetable)
+	}
+
+	genTable() {
+		let body = [];
+		let time = 8;
+		let head = [];
+
+		for (let i = 0; i < 6; i++)
+			head.push(<th>{DAYS[i]}</th>);
+
+		let fullTable = [(<thead><tr>{head}</tr></thead>)];
+
+		for (let i = 0; i <= 11; i++) {
+			let rows = [];
+			for (let j = 0; j <= 4; j++) {
+				rows.push((j !== 0) ? <td>{this.state.timetable[j][i]}</td> : <td>{++time}:00</td>);
+			}
 
 
-        for (let i=0; i<6; i++) {
-            head.push(<th>{days[i]}</th>);
-        }
+			body.push(<tr>{rows}</tr>);
+		}
 
-        fullTable.push(<thead><tr>{head}</tr></thead>);
+		fullTable.push(<tbody>{body}</tbody>);
 
-        for (let i=0; i<12; i++) {
-            let rows = [];
-            for (let j=0; j<6; j++) {
-                if (j!==0) {
-                    rows.push(<td>{this.state.displayData[i][j-1]}</td>);
-                } else {
-                    rows.push(<td>{time}:00</td>);
-                    time++;
-                }
-            }
-            body.push(<tr>{rows}</tr>);
-        }
+		return fullTable;
+	}
 
-        fullTable.push(<tbody>{body}</tbody>);
-        return fullTable;
-    }
-
-    render() {
-
-        return (
-            <div>
-                <p>Timetable - Rooms</p>
-                <ButtonGroup>
-                    {this.state.weeks.map(w => (<Button onClick={() => this.getSchedule(w)}>{w}</Button>))}
-                </ButtonGroup>
-                <p></p>
-                <Table striped bordered hover variant="dark">
-                    {this.genTable()}
-                </Table>
-            </div>
-        );
-    }
+	render() {
+		return (
+			(Object.keys(this.state.timetable).length > 0) ?
+				<div>
+					<p>Timetable - Rooms</p>
+					<ButtonGroup>
+						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
+					</ButtonGroup>
+					<br/>
+					<Table striped bordered hover variant="dark">
+						{this.genTable()}
+					</Table>
+				</div> : ""
+		);
+	}
 }

@@ -7,6 +7,7 @@
 GET     /                           controllers.HomeController.index
 
 GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
+GET     /get-generated-schedule-json                      controllers.ScheduleController.generateScheduleForTable
 
 # Map static resources from the main resources folder to the root URL path
 GET     /*fileName.html         controllers.StaticController.displayFile(path = "src/main/resources/static/pages", fileName, ext = "html", contentType = "text/html")
