@@ -3,22 +3,9 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# An example controller showing a sample home page
-#GET     /                           controllers.HomeController.index
-
-
-
 GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
 
-# Map static resources from the main resources folder to the root URL path
-#GET     /*fileName.html         controllers.StaticController.displayFile(path = "/public", fileName, ext = "html", contentType = "text/html")
-#GET     /*fileName.js           controllers.StaticController.displayFile(path = "/public", fileName , ext = "js", contentType = "text/javascript")
-#GET     /*fileName.css           controllers.StaticController.displayFile(path = "/public", fileName , ext = "css", contentType = "text/css")
-#GET     /*fileName.map           controllers.StaticController.displayFile(path = "/public", fileName , ext = "map", contentType = "application/json")
-#GET     /*fileName.json           controllers.StaticController.displayFile(path = "/public", fileName , ext = "json", contentType = "application/json")
-#GET     /*fileName.ico           controllers.StaticController.displayFile(path = "/public", fileName , ext = "ico", contentType = "image/x-icon")
-
-#
+# For retriving and displaying frontend pages
 GET     /                       controllers.FrontendController.index
 GET     /*file                      controllers.FrontendController.assetOrDefault(file)
 
