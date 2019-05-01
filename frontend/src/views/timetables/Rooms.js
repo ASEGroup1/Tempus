@@ -4,6 +4,7 @@ import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 import {getTimetable} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
+import SelectSearch from "react-select-search";
 
 const weeks = Array.apply(null, {length: 13}).map(Number.call, Number).splice(1);
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -65,7 +66,8 @@ export class Rooms extends React.Component {
 					<ButtonGroup>
 						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
 					</ButtonGroup>
-					<Dropdown style={{float: 'right'}}>
+
+					<Dropdown style={{float: 'right', height: '500px', width: '200px', overflowY: 'scroll'}}>
 						<Dropdown.Toggle>Rooms</Dropdown.Toggle>
 
 						<Dropdown.Menu>
@@ -73,7 +75,7 @@ export class Rooms extends React.Component {
 						</Dropdown.Menu>
 					</Dropdown>
 					<br/>
-					<Table striped bordered hover variant="dark">
+					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '300px'}}>
 						{this.genTable()}
 					</Table>
 				</div> : ""

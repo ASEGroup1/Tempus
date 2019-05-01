@@ -8,6 +8,7 @@
     "react-bootstrap": "^1.0.0-beta.8",
     "react-dom": "^16.8.6",
     "react-scripts": "2.1.8",
+    "react-select-search": "^0.9.6",
     "superagent": "^5.0.2"
   },
   "scripts": {
