@@ -27,11 +27,15 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
     else Ok (Json.parse(schedule.get.sortBy(e => (e.day.calendar.getDayOfYear, e.room.roomName, e.time.start.get(ChronoField.MILLI_OF_DAY))).map(_.toJson).mkString("[", ",", "]"))).as("application/json")
   }
 
-  def generateScheduleForTable = Action {
-    Ok(write(scheduleToJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get)))
+  def generateScheduleForRoomTable = Action {
+    Ok(write(scheduleToRoomJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get)))
   }
 
-  def scheduleToJson(schedule: List[ScheduledClass]) = {
+  def generateScheduleForStudentTable = Action {
+    Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get, TimeTableParser.getGeneratedStudentsModuleNames)))
+  }
+
+  def scheduleToRoomJson(schedule: List[ScheduledClass]) = {
     //Converts into list of strings with string count corresponding to length in hours, this is necessary input for table
     def getStringCountCorrespondingToLength(scheduledClass: ScheduledClass) =
       for (_ <- 0 until scheduledClass.time.end.getHour - scheduledClass.time.start.getHour)
@@ -41,5 +45,16 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
     schedule.sortBy(sc => (sc.day.calendar, sc.time.start)).groupBy(_.room)
       //Room schedules by day so 2D array is created
       .map(ss => ss._1.roomName -> ss._2.groupBy(_.day.calendar.getDayOfYear).map(_._2.flatMap(getStringCountCorrespondingToLength)))
+  }
+
+  def scheduleToStudentJson(schedule: List[ScheduledClass], moduleNames: List[String]) = {
+    def getStringCountCorrespondingToLength(scheduledClass: ScheduledClass) =
+      for (_ <- 0 until scheduledClass.time.end.getHour - scheduledClass.time.start.getHour)
+        yield Utils.toNatLang(scheduledClass.className)
+
+    //Room schedules
+    schedule.filter(sc => moduleNames.contains(sc.className)).sortBy(sc => (sc.day.calendar, sc.time.start))
+      //Room schedules by day so 2D array is created
+     .flatMap(getStringCountCorrespondingToLength)
   }
 }
