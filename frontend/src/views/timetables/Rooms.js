@@ -67,7 +67,7 @@ export class Rooms extends React.Component {
 						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
 					</ButtonGroup>
 
-					<Dropdown style={{float: 'right', height: '500px', width: '200px', overflowY: 'scroll'}}>
+					<Dropdown style={{float:'left', height: '800px', width: '200px',  zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Rooms</Dropdown.Toggle>
 
 						<Dropdown.Menu>
