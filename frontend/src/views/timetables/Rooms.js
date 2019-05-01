@@ -3,21 +3,18 @@ import Table from "react-bootstrap/Table";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 import {getTimetable} from "../../RequestManager";
+import Dropdown from "react-bootstrap/Dropdown";
 
 const weeks = Array.apply(null, {length: 13}).map(Number.call, Number).splice(1);
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const WEEK_LENGTH = 5;
 
 export class Rooms extends React.Component {
-
-	roomId = "1B2";
-	fullTimetable = [];
-
 	constructor(props) {
 		super(props);
 
 		this.populateRoomTimetable();
-		this.state = {timetable: [], fullTimetable: {}, weekIndex: 1};
+		this.state = {timetable: [], fullTimetable: {}, weekIndex: 1, roomId: "1B2"};
 	}
 
 	populateRoomTimetable = async () => {
@@ -27,10 +24,7 @@ export class Rooms extends React.Component {
 	};
 
 	generateSchedule(w) {
-		let fullTimetable = this.state.fullTimetable;
-
-		this.setState({timetable: this.state.fullTimetable[this.roomId].slice(w * WEEK_LENGTH -1, w * WEEK_LENGTH  + WEEK_LENGTH- 1)});
-		console.debug(fullTimetable[this.roomId], this.state.timetable, w * WEEK_LENGTH -1, w * WEEK_LENGTH + WEEK_LENGTH - 1)
+		this.setState({timetable: this.state.fullTimetable[this.state.roomId].slice(w * WEEK_LENGTH -1, w * WEEK_LENGTH  + WEEK_LENGTH- 1)});
 	}
 
 	genTable() {
@@ -57,14 +51,27 @@ export class Rooms extends React.Component {
 		return fullTable;
 	}
 
+	changeRoom(room) {
+		this.setState({roomId: room});
+		this.generateSchedule(this.state.weekIndex);
+	}
+
 	render() {
 		return (
 			(this.state.timetable.length > 0) ?
 				<div>
-					<p>Timetable - Rooms</p>
+					<h1>Timetable for room {this.state.roomId}</h1>
+
 					<ButtonGroup>
 						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
 					</ButtonGroup>
+					<Dropdown style={{float: 'right'}}>
+						<Dropdown.Toggle>Rooms</Dropdown.Toggle>
+
+						<Dropdown.Menu>
+							{Object.keys(this.state.fullTimetable).map(r => <Dropdown.Item onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
+						</Dropdown.Menu>
+					</Dropdown>
 					<br/>
 					<Table striped bordered hover variant="dark">
 						{this.genTable()}

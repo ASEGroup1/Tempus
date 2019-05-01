@@ -8,6 +8,7 @@ import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
+import services.Utils
 import services.parser.TimeTableParser
 import services.scheduler.Scheduler
 import services.scheduler.poso.ScheduledClass
@@ -34,7 +35,7 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
     //Converts into list of strings with string count corresponding to length in hours, this is necessary input for table
     def getStringCountCorrespondingToLength(scheduledClass: ScheduledClass) =
       for (_ <- 0 until scheduledClass.time.end.getHour - scheduledClass.time.start.getHour)
-        yield scheduledClass.className
+        yield Utils.toNatLang(scheduledClass.className)
 
     //Room schedules
     schedule.sortBy(sc => (sc.day.calendar, sc.time.start)).groupBy(_.room)
