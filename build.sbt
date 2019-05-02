@@ -22,4 +22,5 @@ libraryDependencies += "commons-dbutils" % "commons-dbutils" % "1.7"
 libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.15"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.6.9"
 libraryDependencies += "org.json4s" %% "json4s-native" % "3.6.5"
+libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.12.8"
 

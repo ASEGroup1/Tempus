@@ -29,7 +29,7 @@ object Student extends Generator[Student] {
   def apply(qr: ResultSet): Student = new Student(qr.getInt(1), null, qr.getInt(3), null, qr.getInt(1), qr.getString(5), qr.getString(6), qr.getString(7), null, null)
 
   val studentRole = new ModuleRole(0, "Student", "")
-  val modules: Map[String, Module] = TimeTableParser.modules
+  val modules: Map[String, Module] = TimeTableParser.moduleNames
   val moduleChoicesStr = Source.fromFile(getClass.getResource("/input/Pathways.csv").getPath).mkString
   val PathwayPattern = Pattern.compile("([A-Z][0-9]{4}[A-Z]-.*?),[A-Z][0-9]+(.*)")
 

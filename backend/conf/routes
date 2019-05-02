@@ -1,0 +1,15 @@
+
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
+
+# For retriving and displaying frontend pages
+GET     /                       controllers.FrontendController.index
+GET     /*file                      controllers.FrontendController.assetOrDefault(file)
+
+
+
+
+
