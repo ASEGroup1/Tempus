@@ -8,16 +8,19 @@ GET     /                           controllers.HomeController.index
 
 GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
 
-GET     /dsl/set          controllers.DSLController.getDSLForm(controller = "/dsl/set")
-POST    /dsl/set          controllers.DSLController.setDSL()
+# DSL Functions
+GET     /dsl/set            controllers.DSLController.getDSLForm(controller = "/dsl/set")
+POST    /dsl/set            controllers.DSLController.setDSL()
 
-GET     /dsl/add          controllers.DSLController.getDSLForm(controller ="/dsl/add")
-POST    /dsl/add          controllers.DSLController.addDSL()
+GET     /dsl/add            controllers.DSLController.getDSLForm(controller ="/dsl/add")
+POST    /dsl/add            controllers.DSLController.addDSL()
 
-GET     /dsl/remove          controllers.DSLController.getDSLForm(controller ="/dsl/remove")
-POST    /dsl/remove          controllers.DSLController.removeDSL()
+GET     /dsl/remove         controllers.DSLController.getDSLForm(controller ="/dsl/remove")
+POST    /dsl/remove         controllers.DSLController.removeDSL()
 
-GET     /dsl              controllers.DSLController.getCurrentDSL()
+GET     /dsl/references     controllers.DSLController.getDSLReferenceObjects()
+
+GET     /dsl                controllers.DSLController.getCurrentDSL()
 
 # Map static resources from the main resources folder to the root URL path
 GET     /*fileName.html         controllers.StaticController.displayFile(path = "src/main/resources/static/pages", fileName, ext = "html", contentType = "text/html")

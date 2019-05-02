@@ -3,6 +3,7 @@ package controllers
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
 import services.parser.dsl.{DSLCompiler, FilterList}
 
@@ -11,7 +12,7 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
 
   def setDSL() = Action {implicit request =>
     try{
-      FilterList.filters = DSLCompiler.compile(Form("dsl" -> text).bindFromRequest.get)
+      FilterList.setFilters(Form("dsl" -> text).bindFromRequest.get)
       Ok("New filters: " + getDSLText)
     } catch{
       case e:Exception =>
@@ -25,9 +26,8 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
 
   def addDSL() = Action {implicit request =>
     try{
-      val newFilters = DSLCompiler.compile(Form("dsl" -> text).bindFromRequest.get)
-      FilterList.filters ++= newFilters
-      Ok("Added filters: \""+newFilters.keySet.mkString("\", \"")+"\"\nCurrent Filters: " + getDSLText)
+      val newFilters = FilterList.addFilters(Form("dsl" -> text).bindFromRequest.get)
+      Ok("Added filters: \""+newFilters.mkString("\", \"")+"\"\nCurrent Filters: " + getDSLText)
     } catch{
       case e:Exception =>
         BadRequest(e.getMessage)
@@ -37,7 +37,7 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
   def removeDSL() = Action {implicit request =>
     try{
       val filtersToRemove = Form("dsl" -> text).bindFromRequest.get.split("\\s*;\\s*")
-      FilterList.filters --= filtersToRemove
+      FilterList.removeFilters(filtersToRemove)
       Ok("Removed filters: \""+filtersToRemove.mkString("\", \"")+"\"\nCurrent Filters: " + getDSLText)
     } catch{
       case e:Exception =>
@@ -46,9 +46,30 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
   }
 
   def getCurrentDSL() = Action {
-    Ok("Current filters: " + getDSLText)
+    println(getDSLNamesJSON)
+    Ok(Json.parse(getDSLNamesJSON)).as("application/json")
   }
 
-  private def getDSLText = "\""+FilterList.filters.keySet.mkString("\", \"")+"\""
+  def getDSLReferenceObjects() = Action {
+    Ok (Json.parse(DSLCompiler.referenceTable.values.map(_.toJson).mkString("[", ",", "]"))).as("application/json")
+  }
+
+
+
+  private def getDSLNamesJSON: String = {
+    val info = FilterList.getFilterInfo
+
+    val map = info.map(f => {
+      "\"" + f._1 + "\": \"" + f._2 + "\""
+    })
+
+    val mappedString = map.mkString(", ")
+
+    val res = "{" + mappedString.replaceAll("\"", "\\\"").replaceAll("\r\n", "\\\\n") + "}"
+    res
+  }
+
+  private def getDSLText = "\""+FilterList.getFilterNames.mkString("\", \"")+"\""
+
 
 }
