@@ -1,9 +1,25 @@
 package entities.module
 
+import java.sql.ResultSet
+
 import entities.School
+import services.JsonUtils._
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
+
+object Module {
+  def apply(json:Map[String, Any]): Module = {
+    var moduleId = extractInt(json("moduleId"))
+    if(moduleId == null) moduleId = Random.nextInt
+
+    new Module(moduleId, extractString(json("moduleCode")), extractString(json("moduleName")),
+      extractString(json("moduleDescription")), null, ListBuffer(), mutable.Set())
+  }
+
+  def apply(qr: ResultSet): Module = new Module(qr.getInt(1), qr.getString(2), qr.getString(3), qr.getString(4), null, null, null)
+}
 
 class Module(
               var moduleId: Int,

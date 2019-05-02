@@ -1,38 +1,21 @@
 package db
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 import java.sql.DriverManager
-import java.sql.{ResultSet, SQLException}
 
-import org.apache.commons.dbutils.ResultSetHandler
-import org.apache.commons.dbutils.QueryRunner
-import services.scheduler.poso.ScheduledClass
+import org.apache.commons.dbutils.{QueryRunner, ResultSetHandler}
 
-import scala.util.Random
-
-class Dao {
+trait Dao[T] {
+  val tableName: String
+  val handler: ResultSetHandler[Array[AnyRef]]
+  //Even though these are set in environment variables there is currently a bug in intellij that sets env variables as properties instead in play
+  val conn = DriverManager.getConnection(sys.props("DB_URL"), sys.props("DB_USER"), sys.props("DB_PASSWORD"))
   val run = new QueryRunner()
 
-  val h = new ResultSetHandler[Array[AnyRef]]() {
-    @throws[SQLException]
-    override def handle(rs: ResultSet): Array[AnyRef] = if (rs.next) Array(rs.getObject(2)) else null
-  }
+  def insert(data: T)
 
-  private[this] val conn =  DriverManager.getConnection(sys.env("DB_URL"), sys.env("DB_USER"), sys.env("DB_PASSWORD"))
+  def delete(id: Int) =
+  //Update method returns number of rows updated
+    run.update(conn, s"DELETE FROM $tableName WHERE ID = $id") == 1
 
-  def insertTimeTable(timeTable: List[ScheduledClass]): Unit = run.update(conn, s"INSERT INTO TIMETABLES VALUES(${Random.nextInt},?)", serialize(timeTable))
-
-  def retrieveTimeTable(id:Integer) =
-    deserialize(run.query(conn, "SELECT * FROM TIMETABLES WHERE ID=?", h, id).head.asInstanceOf[Array[Byte]])
-
-  private[this] def serialize(obj: Any) = {
-    val bo = new ByteArrayOutputStream
-    new ObjectOutputStream(bo).writeObject(obj)
-
-    bo.toByteArray
-  }
-
-  private[this] def deserialize(binary: Array[Byte]) =
-    new ObjectInputStream(new ByteArrayInputStream(binary)).readObject.asInstanceOf[List[ScheduledClass]]
-
+  def get(id: Int) = run.query(conn, s"SELECT * FROM $tableName WHERE ID = $id", handler).head
 }
