@@ -5,4 +5,5 @@ target
 tmp
 dist
 .cache
-app/resources/inpu/*.csv
+app/resources/input/*.csv
+.idea/
