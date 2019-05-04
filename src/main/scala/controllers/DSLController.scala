@@ -57,16 +57,9 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
 
 
   private def getDSLNamesJSON: String = {
-    val info = FilterList.getFilterInfo
-
-    val map = info.map(f => {
+    "{" + FilterList.getFilterInfo.map(f => {
       "\"" + f._1 + "\": \"" + f._2 + "\""
-    })
-
-    val mappedString = map.mkString(", ")
-
-    val res = "{" + mappedString.replaceAll("\"", "\\\"").replaceAll("\r\n", "\\\\n") + "}"
-    res
+    }).mkString(", ").replaceAll("\"", "\\\"").replaceAll("\r\n", "\\\\n") + "}"
   }
 
   private def getDSLText = "\""+FilterList.getFilterNames.mkString("\", \"")+"\""

@@ -44,8 +44,6 @@ object DSLCompiler {
   def compile(code: String): ListBuffer[CompiledFilter] =
     DSLParser.parse(DSLLexer.lex(code)).map(new FilterCompiler(_).getCompiledFilter).to[ListBuffer]
 
-     // .getFunction()).to[ListBuffer]
-
   /**
     * Uses reflection to generate MethodReference's using fields of a class
     *

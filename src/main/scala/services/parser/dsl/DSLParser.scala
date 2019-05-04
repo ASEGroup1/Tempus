@@ -340,7 +340,7 @@ private object ConditionalNode {
 
 case class BranchNode(condition: BooleanExpNode, body: BooleanExpNode) extends ASTNode{
   override def toString: String = {
-    s"""($condition)
+    s"""($condition) {
        |  $body
        }
      """.stripMargin
