@@ -10,6 +10,7 @@ import {DSL} from "./views/DSL";
 import {Output} from "./views/Output";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
+import {AddDSL} from "./views/AddDSL";
 
 
 class App extends Component {
@@ -29,6 +30,7 @@ class App extends Component {
 						<Route exact path="/" component={Home}/>
 						<Route path="/dataManagement" component={DataManagement}/>
 						<Route path="/dsl" component={DSL}/>
+						<Route path="/add-dsl" component={AddDSL}/>
 						<Route path="/outputs" component={Output}/>
 					</div>
 				</div>
