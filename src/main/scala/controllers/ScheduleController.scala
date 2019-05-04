@@ -32,7 +32,9 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   }
 
   def generateScheduleForStudentTable = Action {
-    Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get, TimeTableParser.getGeneratedStudentsModuleNames)))
+    val moduleNames = TimeTableParser.getGeneratedStudentsModuleNames
+    Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get
+      .filter(sc => moduleNames.contains(sc.className)).sortBy(sc => (sc.day.calendar, sc.time.start)), TimeTableParser.getGeneratedStudentsModuleNames)))
   }
 
   def scheduleToRoomJson(schedule: List[ScheduledClass]) = {
@@ -48,13 +50,14 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   }
 
   def scheduleToStudentJson(schedule: List[ScheduledClass], moduleNames: List[String]) = {
-    def getStringCountCorrespondingToLength(scheduledClass: ScheduledClass) =
-      for (_ <- 0 until scheduledClass.time.end.getHour - scheduledClass.time.start.getHour)
-        yield Utils.toNatLang(scheduledClass.className)
+    def getSessionName(bounds: List[(Int, Int, String)], time: Int) = {
+      val intersectingSessions = bounds.filter(b => b._1 < time && b._2 > time)
+      if(intersectingSessions.isEmpty) " - " else intersectingSessions.head._3
+    }
 
-    //Room schedules
-    schedule.filter(sc => moduleNames.contains(sc.className)).sortBy(sc => (sc.day.calendar, sc.time.start))
-      //Room schedules by day so 2D array is created
-     .flatMap(getStringCountCorrespondingToLength)
+    //Creates bounds for each session
+    schedule.groupBy(_.day.calendar.getDayOfYear).map(day => day._2.map(sc => (sc.time.start.getHour, sc.time.end.getHour, sc.className)))
+      //populates timetable with session if the time intersects, otherwise with nothing
+      .map(dayBounds => for (time <- 8 to 20) yield getSessionName(dayBounds, time))
   }
 }

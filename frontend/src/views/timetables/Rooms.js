@@ -15,7 +15,7 @@ export class Rooms extends React.Component {
 		super(props);
 
 		this.populateRoomTimetable();
-		this.state = {timetable: [], fullTimetable: {}, weekIndex: 1, roomId: "1B2"};
+		this.state = {timetable: [], fullTimetable: {}, weekIndex: 1};
 	}
 
 	populateRoomTimetable = async () => {
@@ -25,7 +25,7 @@ export class Rooms extends React.Component {
 	};
 
 	generateSchedule(w) {
-		this.setState({timetable: this.state.fullTimetable[this.state.roomId].slice(w * WEEK_LENGTH -1, w * WEEK_LENGTH  + WEEK_LENGTH- 1)});
+		this.setState({timetable: this.state.fullTimetable.slice(w * WEEK_LENGTH -1, w * WEEK_LENGTH  + WEEK_LENGTH- 1)});
 	}
 
 	genTable() {
@@ -61,7 +61,7 @@ export class Rooms extends React.Component {
 		return (
 			(this.state.timetable.length > 0) ?
 				<div>
-					<h1>Timetable for room {this.state.roomId}</h1>
+					<h1>Timetable for room </h1>
 
 					<ButtonGroup>
 						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
