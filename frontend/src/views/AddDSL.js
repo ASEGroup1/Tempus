@@ -109,7 +109,7 @@ class DSLCreation extends React.Component{
             </Form.Group>
             </Form>
             <Button onClick = {() => {
-                NetLib.postToServer("dsl/add", {dsl: this.state.dslText}).then(() =>this.setState({redirect: true}))
+                NetLib.post("dsl/add", {dsl: this.state.dslText}).then(() =>this.setState({redirect: true}))
 
             }}>Submit </Button>
         </div>

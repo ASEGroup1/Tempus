@@ -97,7 +97,7 @@ class DSLDelete extends React.Component{
 				</Form.Group>
 
 				<Button type="submit" onClick = {() => {
-					NetLib.postToServer("dsl/remove", {dsl: this.text}).then(this.callback)
+					NetLib.post("dsl/remove", {dsl: this.text}).then(this.callback)
                 }}> Delete</Button>
 
 			</Form>
@@ -122,7 +122,7 @@ class DSLUpload extends React.Component{
             </Form.Group>
 
             <Button type="submit" onClick = {() => {
-                NetLib.postToServer("dsl/add", {dsl: this.text}).then(this.callback)
+                NetLib.post("dsl/add", {dsl: this.text}).then(this.callback)
             }}> Upload</Button>
 
         </Form>
