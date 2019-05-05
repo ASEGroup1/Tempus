@@ -12,13 +12,13 @@ import scala.util.Random
 object Module {
   def apply(json:Map[String, Any]): Module = {
     var moduleId = extractInt(json("moduleId"))
-    if(moduleId == null) moduleId = Random.nextInt
+    if(moduleId == -1) moduleId = Random.nextInt
 
     new Module(moduleId, extractString(json("moduleCode")), extractString(json("moduleName")),
-      extractString(json("moduleDescription")), null, ListBuffer(), mutable.Set())
+      extractString(json("moduleDescription")), null, ListBuffer(), mutable.Set(), null)
   }
 
-  def apply(qr: ResultSet): Module = new Module(qr.getInt(1), qr.getString(2), qr.getString(3), qr.getString(4), null, null, null)
+  def apply(qr: ResultSet): Module = new Module(qr.getInt(1), qr.getString(2), qr.getString(3), qr.getString(4), null, null, null, null)
 }
 
 class Module(
