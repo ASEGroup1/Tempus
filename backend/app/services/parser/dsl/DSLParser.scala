@@ -216,6 +216,12 @@ private object BooleanExpNode {
 // Structures
 case class FilterNode(name: StringLiteralNode, param1: ParamNode, param2: Option[ParamNode], body: BooleanExpNode, where: Option[WhereNode]) extends ASTNode {
   def this(name: StringLiteralNode, param: ParamNode, body: BooleanExpNode, where: Option[WhereNode]) = this(name, param, None, body, where)
+
+  override def toString: String = {
+    s"""filter ${name}(${param1}${if (param2.isDefined) s", ${param2.get}" else ""}) {
+       |  $body
+       |} ${if (where.isDefined) where.get else ""}""".stripMargin
+  }
 }
 
 /*
@@ -252,31 +258,50 @@ private object FilterNode {
 }
 
 
-case class ParamNode(name: StringLiteralNode) extends ASTNode
+case class ParamNode(name: StringLiteralNode) extends ASTNode{
+  override def toString: String = name.toString
+}
 
 /*
   <String>
  */
 
-case class BinaryOperationNode(param1: BooleanExpNode, param2: BooleanExpNode, binOp: BinOp) extends BooleanExpNode
+case class BinaryOperationNode(param1: BooleanExpNode, param2: BooleanExpNode, binOp: BinOp) extends BooleanExpNode{
+  override def toString: String =
+    s"$param1 $binOp $param2"
+}
 
 /*
   <BooleanExpNode> <BinOp> <BooleanExpNode>
  */
 
-case class ComparisonNode(param1: Value, param2: Value, comparator: Comparator) extends BooleanExpNode
+case class ComparisonNode(param1: Value, param2: Value, comparator: Comparator) extends BooleanExpNode{
+  override def toString: String =
+    s"$param1 $comparator $param2"
+}
 
 /*
   <Value> <Comparator> <Value>
  */
 
-case class NegNode(expr: BooleanExpNode) extends BooleanExpNode
+case class NegNode(expr: BooleanExpNode) extends BooleanExpNode{
+  override def toString: String = "!"+expr
+}
 
 /*
   '!' <BooleanExpNode>
  */
 
-case class ConditionalNode(branches: Seq[BranchNode], defaultBranch: BooleanExpNode) extends BooleanExpNode
+case class ConditionalNode(branches: Seq[BranchNode], defaultBranch: BooleanExpNode) extends BooleanExpNode{
+  override def toString: String = {
+    s"""if ${branches(0)}
+       ${branches.drop(1).map("elif "+ _).mkString("\n")}
+     else {
+       |  $defaultBranch
+       }
+     """.stripMargin
+  }
+}
 
 /*
   'If' <BranchNode> ( 'Elif' <BranchNode>)* 'Else' '{' <BooleanExpNode> '}'
@@ -313,7 +338,14 @@ private object ConditionalNode {
 }
 
 
-case class BranchNode(condition: BooleanExpNode, body: BooleanExpNode) extends ASTNode
+case class BranchNode(condition: BooleanExpNode, body: BooleanExpNode) extends ASTNode{
+  override def toString: String = {
+    s"""($condition) {
+       |  $body
+       }
+     """.stripMargin
+  }
+}
 
 /*
   '(' <BooleanExpNode> ')' '{' <BooleanExpNode> '}'
@@ -337,13 +369,21 @@ private object BranchNode {
   }
 }
 
-case class ReferenceNode(variable: ParamNode, parts: Seq[StringLiteralNode]) extends Value
+case class ReferenceNode(variable: ParamNode, parts: Seq[StringLiteralNode]) extends Value{
+  override def toString: String = {
+    s"$variable.${parts.mkString(".")}"
+  }
+}
 
 /*
   <ParamNode> ( '.' <String>)+
  */
 
-case class WhereNode(condition: Seq[BooleanExpNode]) extends ASTNode
+case class WhereNode(condition: Seq[BooleanExpNode]) extends ASTNode{
+  override def toString: String = {
+    s"where (${condition.mkString(", ")})"
+  }
+}
 
 /*
   'Where' '(' <BooleanExpNode> ( ',' <BooleanExpNode> )* ')'
@@ -372,11 +412,17 @@ private object WhereNode {
 }
 
 // Literals
-case class IntegerLiteralNode(int: Int) extends Value
+case class IntegerLiteralNode(int: Int) extends Value {
+  override def toString: String = int.toString
+}
 
-case class BooleanLiteralNode(bool: Boolean) extends BooleanExpNode
+case class BooleanLiteralNode(bool: Boolean) extends BooleanExpNode{
+  override def toString: String = bool.toString
+}
 
-case class FloatLiteralNode(float: Float) extends Value
+case class FloatLiteralNode(float: Float) extends Value{
+  override def toString: String = float.toString
+}
 
 case class StringLiteralNode(string: String) extends Value {
   def this(str: UNCAPWORD) = this(str.str)
@@ -390,17 +436,27 @@ case class StringLiteralNode(string: String) extends Value {
       case _ => throw new ParserException("Cannot convert \"" + sym + "\" to StringLiteral")
     }
   )
+
+  override def toString: String = string
 }
 
-case class CharLiteralNode(char: Char) extends Value
+case class CharLiteralNode(char: Char) extends Value{
+  override def toString: String = char.toString
+}
 
 
 object Comparator extends Enumeration {
   type Comparator = Value
-  val Eq, Ne, Gt, Lt, Ge, Le = Value
+  val Eq = Value("==")
+  val Ne = Value("!=")
+  val Gt = Value(">")
+  val Lt = Value("<")
+  val Ge = Value(">=")
+  val Le = Value("<=")
 }
 
 object BinOp extends Enumeration {
   type BinOp = Value
-  val Or, And = Value
+  val Or = Value("||")
+  val And = Value("&&")
 }

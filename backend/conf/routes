@@ -5,6 +5,22 @@
 
 GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
 
+
+# DSL Functions
+GET     /dsl/set            controllers.DSLController.getDSLForm(controller = "/dsl/set")
+POST    /dsl/set            controllers.DSLController.setDSL()
+
+GET     /dsl/add            controllers.DSLController.getDSLForm(controller ="/dsl/add")
+POST    /dsl/add            controllers.DSLController.addDSL()
+
+GET     /dsl/remove         controllers.DSLController.getDSLForm(controller ="/dsl/remove")
+POST    /dsl/remove         controllers.DSLController.removeDSL()
+
+GET     /dsl/references     controllers.DSLController.getDSLReferenceObjects()
+
+GET     /dsl                controllers.DSLController.getCurrentDSL()
+
+
 #CRUD
 
 #Student
@@ -20,7 +36,7 @@ POST     /module/:id                     controllers.crud.ModuleController.updat
 DELETE    /module/:id                     controllers.crud.ModuleController.delete(id: Int)
 
 # For retriving and displaying frontend pages
-GET     /                       controllers.FrontendController.index
+GET     /                           controllers.FrontendController.index
 GET     /*file                      controllers.FrontendController.assetOrDefault(file)
 
 

@@ -1,0 +1,31 @@
+
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# An example controller showing a sample home page
+GET     /                           controllers.HomeController.index
+
+GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
+
+# DSL Functions
+GET     /dsl/set            controllers.DSLController.getDSLForm(controller = "/dsl/set")
+POST    /dsl/set            controllers.DSLController.setDSL()
+
+GET     /dsl/add            controllers.DSLController.getDSLForm(controller ="/dsl/add")
+POST    /dsl/add            controllers.DSLController.addDSL()
+
+GET     /dsl/remove         controllers.DSLController.getDSLForm(controller ="/dsl/remove")
+POST    /dsl/remove         controllers.DSLController.removeDSL()
+
+GET     /dsl/references     controllers.DSLController.getDSLReferenceObjects()
+
+GET     /dsl                controllers.DSLController.getCurrentDSL()
+
+# Map static resources from the main resources folder to the root URL path
+GET     /*fileName.html         controllers.StaticController.displayFile(path = "src/main/resources/static/pages", fileName, ext = "html", contentType = "text/html")
+GET     /*fileName.js           controllers.StaticController.displayFile(path = "src/main/resources/static/js", fileName , ext = "js", contentType = "text/javascript")
+GET     /*fileName.css           controllers.StaticController.displayFile(path = "src/main/resources/static/styles", fileName , ext = "css", contentType = "text/css")
+
+# Map all static resources with unknown extentions to be rendered thier without MIME specified
+GET     /*fileName              controllers.StaticController.display(path = "src/main/resources/static", fileName , contentType = "")
