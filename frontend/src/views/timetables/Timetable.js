@@ -10,22 +10,42 @@ const weeks = Array.apply(null, {length: 13}).map(Number.call, Number).splice(1)
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const WEEK_LENGTH = 5;
 
-export class Rooms extends React.Component {
+const TIMETABLE_TYPE = {
+	ROOM: 0,
+	STUDENT: 1
+};
+
+export class Timetable extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.populateRoomTimetable();
-		this.state = {timetable: [], fullTimetable: {}, weekIndex: 1};
+		this.populateTimetable();
+		this.state = {
+			timetable: [],
+			fullRoomTimetable: {},
+			fullStudentTimetable: {},
+			weekIndex: 1,
+			timetableType: TIMETABLE_TYPE.STUDENT,
+			room: ""
+		};
 	}
 
-	populateRoomTimetable = async () => {
-		await this.setState({fullTimetable: await getTimetable()});
-		console.debug(this.state.fullTimetable);
+	populateTimetable = async () => {
+		await this.setState({
+			fullRoomTimetable: await getTimetable('room'),
+			fullStudentTimetable: await getTimetable('student')
+		});
+		console.debug(this.state.fullRoomTimetable, this.state.fullStudentTimetable);
 		this.generateSchedule(1);
 	};
 
 	generateSchedule(w) {
-		this.setState({timetable: this.state.fullTimetable.slice(w * WEEK_LENGTH -1, w * WEEK_LENGTH  + WEEK_LENGTH- 1)});
+
+		this.setState({
+			timetable: this.state.fullStudentTimetable.slice((w - 1) * WEEK_LENGTH, (w - 1) * WEEK_LENGTH + WEEK_LENGTH),
+			weekIndex: w
+		});
+		console.debug((w - 1) * WEEK_LENGTH, (w - 1) * WEEK_LENGTH + WEEK_LENGTH, this.state.timetable);
 	}
 
 	genTable() {
@@ -36,7 +56,9 @@ export class Rooms extends React.Component {
 		for (let i = 0; i < 6; i++)
 			head.push(<th>{DAYS[i]}</th>);
 
-		let fullTable = [(<thead><tr>{head}</tr></thead>)];
+		let fullTable = [(<thead>
+		<tr>{head}</tr>
+		</thead>)];
 
 		for (let i = 0; i <= 11; i++) {
 			let rows = [];
@@ -67,11 +89,13 @@ export class Rooms extends React.Component {
 						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
 					</ButtonGroup>
 
-					<Dropdown style={{float:'left', height: '800px', width: '200px',  zIndex: 50, background: 'transparent'}}>
+					<Dropdown
+						style={{float: 'left', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Rooms</Dropdown.Toggle>
 
 						<Dropdown.Menu>
-							{Object.keys(this.state.fullTimetable).map(r => <Dropdown.Item onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
+							{Object.keys(this.state.fullRoomTimetable).map(r => <Dropdown.Item
+								onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
 						</Dropdown.Menu>
 					</Dropdown>
 					<br/>

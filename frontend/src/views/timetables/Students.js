@@ -18,13 +18,13 @@ export class Students extends React.Component {
     }
 
     populateRoomTimetable = async () => {
-        await this.setState({fullTimetable: await getTimetable()});
-        console.debug(this.state.fullTimetable);
+        await this.setState({fullRoomTimetable: await getTimetable()});
+        console.debug(this.state.fullRoomTimetable);
         this.generateSchedule(1);
     };
 
     generateSchedule(w) {
-        this.setState({timetable: this.state.fullTimetable[this.state.roomId].slice(w * WEEK_LENGTH -1, w * WEEK_LENGTH  + WEEK_LENGTH- 1)});
+        this.setState({timetable: this.state.fullRoomTimetable[this.state.roomId].slice(w * WEEK_LENGTH -1, w * WEEK_LENGTH  + WEEK_LENGTH- 1)});
     }
 
     genTable() {
@@ -70,7 +70,7 @@ export class Students extends React.Component {
                         <Dropdown.Toggle>Rooms</Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                            {Object.keys(this.state.fullTimetable).map(r => <Dropdown.Item onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
+                            {Object.keys(this.state.fullRoomTimetable).map(r => <Dropdown.Item onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
                         </Dropdown.Menu>
                     </Dropdown>
                     <br/>

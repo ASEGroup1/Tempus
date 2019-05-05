@@ -8,7 +8,7 @@ import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
-import services.Utils
+import services.Utils._
 import services.parser.TimeTableParser
 import services.scheduler.Scheduler
 import services.scheduler.poso.ScheduledClass
@@ -41,7 +41,7 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
     //Converts into list of strings with string count corresponding to length in hours, this is necessary input for table
     def getStringCountCorrespondingToLength(scheduledClass: ScheduledClass) =
       for (_ <- 0 until scheduledClass.time.end.getHour - scheduledClass.time.start.getHour)
-        yield Utils.toNatLang(scheduledClass.className)
+        yield toNatLang(scheduledClass.className)
 
     //Room schedules
     schedule.sortBy(sc => (sc.day.calendar, sc.time.start)).groupBy(_.room)
@@ -52,7 +52,7 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   def scheduleToStudentJson(schedule: List[ScheduledClass], moduleNames: List[String]) = {
     def getSessionName(bounds: List[(Int, Int, String)], time: Int) = {
       val intersectingSessions = bounds.filter(b => b._1 < time && b._2 > time)
-      if(intersectingSessions.isEmpty) " - " else intersectingSessions.head._3
+      if(intersectingSessions.isEmpty) " - " else toNatLang(intersectingSessions.head._3)
     }
 
     //Creates bounds for each session
