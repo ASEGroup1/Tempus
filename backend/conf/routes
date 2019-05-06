@@ -1,0 +1,29 @@
+
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
+
+#CRUD
+
+#Student
+PUT     /student/                         controllers.crud.StudentController.create
+GET     /student/:id                     controllers.crud.StudentController.read(id: Int)
+POST     /student/:id                     controllers.crud.StudentController.update(id: Int)
+DELETE     /student/:id                     controllers.crud.StudentController.delete(id: Int)
+
+#Module
+PUT     /module/                         controllers.crud.ModuleController.create
+GET     /module/:id                     controllers.crud.ModuleController.read(id: Int)
+POST     /module/:id                     controllers.crud.ModuleController.update(id: Int)
+DELETE    /module/:id                     controllers.crud.ModuleController.delete(id: Int)
+
+# For retriving and displaying frontend pages
+GET     /                       controllers.FrontendController.index
+GET     /*file                      controllers.FrontendController.assetOrDefault(file)
+
+
+
+
+
