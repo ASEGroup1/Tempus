@@ -29,7 +29,7 @@ export class ConditionalConstraint extends React.Component{
                 </tr>
                 <tr>
                     <td>
-                        <div >
+                        <div>
                             <p>Else:</p>
                             <Constraint callback = {(text) =>{this.defaultBranchText = text; this.update()}}/>
                         </div>

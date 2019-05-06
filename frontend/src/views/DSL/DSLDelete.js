@@ -2,6 +2,7 @@ import React from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import * as NetLib from "../../lib/NetworkLib";
+import Col from "react-bootstrap/Col";
 
 export class DSLDelete extends React.Component{
     constructor(props){
@@ -12,17 +13,17 @@ export class DSLDelete extends React.Component{
 
 
     render(){
-        return <Form>
-            <Form.Group controlId="DeleteList">
-                <Form.Label>Delete:</Form.Label>
-                <Form.Control as="textarea" onChange={(event) => this.text = event.target.value}/>
-            </Form.Group>
+        return (
+            <Form inline>
+                <Form.Group controlId="DeleteList">
+                    <Form.Label style={{marginRight: 10}}>Delete Filters:</Form.Label>
+                    <Form.Control placeholder="FilterName; FilterName2; ..." as="textarea" onChange={(event) => this.text = event.target.value}/>
+                </Form.Group>
 
-            <Button type="submit" onClick = {() => {
-                NetLib.post("dsl/remove", {dsl: this.text}).then(this.callback)
-            }}> Delete</Button>
-
-        </Form>
+                <Button type="submit" onClick = {() => {
+                    NetLib.post("dsl/remove", {dsl: this.text}).then(this.callback)
+                }}> Delete</Button>
+            </Form>
+        )
     }
-
 }

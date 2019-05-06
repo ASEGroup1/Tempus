@@ -19,9 +19,10 @@ export class AddDSL extends React.Component{
     }
 
     render() {
-        return Utils.validArgs.length ? <DSLCreation/> : <p>Loading</p>
+        return(
+            Utils.validArgs.length ? <DSLCreation/> : <p>Loading</p>
+        )
     }
-
 }
 
 

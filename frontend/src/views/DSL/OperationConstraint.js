@@ -219,7 +219,7 @@ export class OperationConstraint extends React.Component{
     }
 
     render() {
-        return  <Form
+        return  <Form inline
             noValidate
             onChange={e => this.handleChange(e)}>
             <Form.Row>

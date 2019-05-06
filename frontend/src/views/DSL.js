@@ -3,6 +3,7 @@ import * as NetLib from '../lib/NetworkLib.js';
 import Button from "react-bootstrap/Button";
 import {DSLDelete} from "./DSL/DSLDelete.js";
 import {DSLUpload} from "./DSL/DSLUpload.js";
+import Table from "react-bootstrap/Table";
 
 import {Redirect} from "react-router-dom";
 
@@ -32,30 +33,32 @@ export class DSL extends React.Component {
 
 				{this.state.addRedirect? <Redirect to={"/add-dsl"} /> : null}
 				<div>
-                    <h2>Current Filters: </h2>
-					{this.state.list? <table align={"left"}>
-						<thead>
-						<tr>
-							<th>Filter Name</th>
-							<th>Filter Code</th>
-						</tr>
-						</thead>
-						<tbody>
-						{this.buildTable()}
-						</tbody>
-					</table>
-					:
-						"Loading"
-					}
-                    <Button onClick = {() => {this.setState({addRedirect: true})}}> Add DSL </Button>
+
+					<p>
+						<h2>DSL/Timetabling Constraints</h2>
+						<p>Current Filters:</p>
+						{this.state.list? <Table striped bordered hover variant="dark">
+							<thead>
+								<tr>
+									<th>Filter Name</th>
+									<th>Filter Code</th>
+								</tr>
+							</thead>
+							<tbody>
+								{this.buildTable()}
+							</tbody>
+						</Table>
+						:
+							"Loading"
+						}
+					</p>
                 </div>
+				<p><Button onClick = {() => {this.setState({addRedirect: true})}}> Add Filter </Button></p>
                 <div>
+					<DSLDelete callback = {() => this.update()}/>
                     <DSLUpload callback = {() => this.update()}/>
                 </div>
-                <div>
-                    <DSLDelete callback = {() => this.update()}/>
-                </div>
-		</div>
+			</div>
 		)
 	}
 
