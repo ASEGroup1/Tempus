@@ -1,3 +1,8 @@
+* {
+    font-family: 'HankenBook';
+    font-size: 14pt;
+}
+
 .App {
     text-align: center;
 }

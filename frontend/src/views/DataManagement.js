@@ -12,7 +12,7 @@ export class DataManagement extends React.Component {
 		return (
 			<div>
 			<Navbar bg="dark" variant="dark" sticky="top">
-				<Navbar.Brand href="/dataManagement"><FontAwesomeIcon icon="database"/> &nbsp; Data Management</Navbar.Brand>
+				<Navbar.Brand href="/dataManagement"><h4><FontAwesomeIcon icon="database"/> &nbsp; Data Management</h4></Navbar.Brand>
 				<Nav className="mr-auto">
 					<Nav.Link href="/dataManagement/students"><FontAwesomeIcon icon="user-graduate"/>&nbsp; Students</Nav.Link>
 					<Nav.Link href="/dataManagement/modules"><FontAwesomeIcon icon="chalkboard-teacher"/>&nbsp;Modules</Nav.Link>
