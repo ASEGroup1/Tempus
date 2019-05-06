@@ -87,7 +87,7 @@ export class Timetable extends React.Component {
 		return (
 			(this.state.timetable.length > 0) ?
 				<div>
-					<h1>Timetable for {this.state.timetableType}</h1>
+					<h1>Timetable for {this.state.timetableType} {this.state.timetableType === TIMETABLE_TYPE.ROOM ? "- " + this.room : ""}</h1>
 					<Dropdown
 						style={{float: 'left', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Timetable Types</Dropdown.Toggle>
