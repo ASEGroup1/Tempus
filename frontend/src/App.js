@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import {DataManagement} from "./views/DataManagement";
 import {DSL} from "./views/DSL";
-import {Output} from "./views/Output";
+import {Timetables} from "./views/Timetables";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -33,7 +33,7 @@ class App extends Component {
 						<Route exact path="/" component={Home}/>
 						<Route path="/dataManagement" component={DataManagement}/>
 						<Route path="/dsl" component={DSL}/>
-						<Route path="/outputs" component={Output}/>
+						<Route path="/timetables" component={Timetables}/>
 					</div>
 				</div>
 			</Router>
