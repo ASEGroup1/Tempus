@@ -41,6 +41,13 @@ export class Timetable extends React.Component {
 		this.generateSchedule(1);
 	};
 
+	newStudent = async () => {
+		this.setState({fullStudentTimetable: [], timetable: []});
+		await this.setState({
+			fullStudentTimetable: await getTimetable('student')
+		})
+	};
+
 	generateSchedule(w) {
 		this.setState({
 			timetable: (this.timetableType === TIMETABLE_TYPE.ROOM ? this.state.fullRoomTimetable[this.room] : this.state.fullStudentTimetable)
@@ -48,7 +55,7 @@ export class Timetable extends React.Component {
 			weekIndex: w
 		});
 		console.debug(this.state.timetable);
-	}
+	};
 
 	genTable() {
 		let body = [];
@@ -114,7 +121,7 @@ export class Timetable extends React.Component {
 							{Object.keys(this.state.fullRoomTimetable).map(r => <Dropdown.Item
 								onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
 						</Dropdown.Menu>
-					</Dropdown> : ""}
+					</Dropdown> : <Button style={{float: 'right'}} onClick={() => this.newStudent()}>Generate new student</Button>}
 					<br/>
 					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '300px'}}>
 						{this.genTable()}

@@ -52,7 +52,7 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   def scheduleToStudentJson(schedule: List[ScheduledClass], moduleNames: List[String]) = {
     def getSessionName(bounds: List[(Int, Int, String)], time: Int) = {
       val intersectingSessions = bounds.filter(b => b._1 < time && b._2 > time)
-      if(intersectingSessions.isEmpty) " - " else toNatLang(intersectingSessions.head._3)
+      if(intersectingSessions.isEmpty) "" else toNatLang(intersectingSessions.head._3)
     }
 
     //Creates bounds for each session
