@@ -51,15 +51,18 @@ object TimeTableParser {
     val nullSchool = new School(0, "null", new Building(0, "null", ListBuffer()))
 
     while (moduleMatcher.find) {
+      def getTerms(wkPtn: String): ListBuffer[Int] = {
+        var terms = ListBuffer[Int]()
 
-      // read required session from the entry
-      val session = new RequiredSession({
-        sessionId += 1
-        sessionId
-      }, moduleMatcher.group(4).split(":")(0).toInt - moduleMatcher.group(3).split(":")(0).toInt)
+        if(wkPtn.substring(0, 12).contains('1')) terms += 1
+        if(wkPtn.substring(19, 32).contains('1')) terms += 2
+        if(wkPtn.substring(32, wkPtn.length - 1).contains('1')) terms += 3
+
+        terms
+      }
 
       // get or create the module
-      lazy val currentModule = modules.get(Utils.toSnake(moduleMatcher.group(1))) match {
+      val currentModule = modules.get(Utils.toSnake(moduleMatcher.group(1))) match {
         case Some(module) =>
           module
         case None =>
@@ -76,15 +79,11 @@ object TimeTableParser {
           m
       }
 
-      def getTerms(wkPtn: String): ListBuffer[Int] = {
-        var terms = ListBuffer[Int]()
-
-        if(wkPtn.substring(0, 12).contains('1')) terms += 1
-        if(wkPtn.substring(19, 32).contains('1')) terms += 2
-        if(wkPtn.substring(32, wkPtn.length - 1).contains('1')) terms += 3
-
-        terms
-      }
+      // read required session from the entry
+      val session = new RequiredSession({
+        sessionId += 1
+        sessionId
+      }, moduleMatcher.group(4).split(":")(0).toInt - moduleMatcher.group(3).split(":")(0).toInt, currentModule)
 
       // add required session
       currentModule.requiredSessions += session
@@ -99,5 +98,5 @@ object TimeTableParser {
     modules.toMap
   }
 
-  val modules: Set[Module] = moduleMap.map(_._2).toSet
+  val modules: Set[Module] = moduleMap.values.toSet
 }
