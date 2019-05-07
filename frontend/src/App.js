@@ -26,7 +26,7 @@ class App extends Component {
 						<Nav className="mr-auto">
 							<Nav.Link href="/dataManagement"><FontAwesomeIcon icon="database"/> &nbsp;Data Management</Nav.Link>
 							<Nav.Link href="/dsl"><FontAwesomeIcon icon="wrench"/> &nbsp;Custom Constraints</Nav.Link>
-							<Nav.Link href="/outputs"><FontAwesomeIcon icon="calendar-alt"/> &nbsp;Timetable</Nav.Link>
+							<Nav.Link href="/timetables"><FontAwesomeIcon icon="calendar-alt"/> &nbsp;Timetable</Nav.Link>
 						</Nav>
 					</Navbar>
 					<div className="content">

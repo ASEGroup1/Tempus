@@ -5,6 +5,7 @@ import Button from "react-bootstrap/Button";
 import {getTimetable} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
 import SelectSearch from "react-select-search";
+import {ClipLoader} from "react-spinners"
 
 const weeks = Array.apply(null, {length: 13}).map(Number.call, Number).splice(1);
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -24,12 +25,12 @@ export class Timetable extends React.Component {
 			timetable: [],
 			fullRoomTimetable: {},
 			fullStudentTimetable: {},
-			weekIndex: 1,
-			timetableType: TIMETABLE_TYPE.STUDENT
+			weekIndex: 1
 		};
 	}
 
 	room = "1C";
+	timetableType = TIMETABLE_TYPE.STUDENT
 
 	populateTimetable = async () => {
 		await this.setState({
@@ -42,10 +43,11 @@ export class Timetable extends React.Component {
 
 	generateSchedule(w) {
 		this.setState({
-			timetable: (this.state.timetableType === TIMETABLE_TYPE.ROOM ? this.state.fullRoomTimetable[this.room] : this.state.fullStudentTimetable)
+			timetable: (this.timetableType === TIMETABLE_TYPE.ROOM ? this.state.fullRoomTimetable[this.room] : this.state.fullStudentTimetable)
 				.slice((w - 1) * WEEK_LENGTH, (w - 1) * WEEK_LENGTH + WEEK_LENGTH),
 			weekIndex: w
 		});
+		console.debug(this.state.timetable);
 	}
 
 	genTable() {
@@ -80,14 +82,17 @@ export class Timetable extends React.Component {
 	}
 
 	swapTimetable(type) {
-		this.setState({timetableType: type});
+		this.timetableType = type;
+		this.generateSchedule(this.state.weekIndex);
 	}
 
 	render() {
+		console.debug('rendered');
+
 		return (
 			(this.state.timetable.length > 0) ?
 				<div>
-					<h1>Timetable for {this.state.timetableType} {this.state.timetableType === TIMETABLE_TYPE.ROOM ? "- " + this.room : ""}</h1>
+					<h1>Timetable for {this.timetableType} {this.timetableType === TIMETABLE_TYPE.ROOM ? "- " + this.room : ""}</h1>
 					<Dropdown
 						style={{float: 'left', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Timetable Types</Dropdown.Toggle>
@@ -102,7 +107,7 @@ export class Timetable extends React.Component {
 						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
 					</ButtonGroup>
 
-					{this.state.timetableType === TIMETABLE_TYPE.ROOM ? <Dropdown
+					{this.timetableType === TIMETABLE_TYPE.ROOM ? <Dropdown
 						style={{float: 'right', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Rooms</Dropdown.Toggle>
 						<Dropdown.Menu>
@@ -114,7 +119,10 @@ export class Timetable extends React.Component {
 					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '300px'}}>
 						{this.genTable()}
 					</Table>
-				</div> : ""
+				</div> : <div>
+					<br/><br/><br/><br/>
+					<ClipLoader sizeUnit={"px"} size={300} color={'#123abc'} loading={true}/>
+				</div>
 		);
 	}
 }
