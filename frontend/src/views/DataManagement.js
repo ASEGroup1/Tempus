@@ -5,16 +5,17 @@ import {Route} from "react-router-dom";
 import {Home} from "./Home";
 import {Students} from "./dataManagement/Students";
 import {Modules} from "./dataManagement/Modules";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export class DataManagement extends React.Component {
 	render() {
 		return (
 			<div>
 			<Navbar bg="dark" variant="dark" sticky="top">
-				<Navbar.Brand href="/dataManagement">Data Management</Navbar.Brand>
+				<Navbar.Brand href="/dataManagement"><h4><FontAwesomeIcon icon="database"/> &nbsp; Data Management</h4></Navbar.Brand>
 				<Nav className="mr-auto">
-					<Nav.Link href="/dataManagement/students">Students</Nav.Link>
-					<Nav.Link href="/dataManagement/modules">Modules</Nav.Link>
+					<Nav.Link href="/dataManagement/students"><FontAwesomeIcon icon="user-graduate"/>&nbsp; Students</Nav.Link>
+					<Nav.Link href="/dataManagement/modules"><FontAwesomeIcon icon="chalkboard-teacher"/>&nbsp;Modules</Nav.Link>
 				</Nav>
 			</Navbar>
 				<div>
