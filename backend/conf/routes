@@ -4,6 +4,8 @@
 # ~~~~
 
 GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
+GET     /get-generated-room-schedule-json                      controllers.ScheduleController.generateScheduleForRoomTable
+GET     /get-generated-student-schedule-json                      controllers.ScheduleController.generateScheduleForStudentTable
 
 #CRUD
 
