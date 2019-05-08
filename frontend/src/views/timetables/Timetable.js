@@ -5,6 +5,8 @@ import Button from "react-bootstrap/Button";
 import {getTimetable} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
 import SelectSearch from "react-select-search";
+import {ClipLoader} from "react-spinners";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const weeks = Array.apply(null, {length: 13}).map(Number.call, Number).splice(1);
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -24,12 +26,12 @@ export class Timetable extends React.Component {
 			timetable: [],
 			fullRoomTimetable: {},
 			fullStudentTimetable: {},
-			weekIndex: 1,
-			timetableType: TIMETABLE_TYPE.STUDENT
+			weekIndex: 1
 		};
 	}
 
 	room = "1C";
+	timetableType = TIMETABLE_TYPE.STUDENT
 
 	populateTimetable = async () => {
 		await this.setState({
@@ -40,13 +42,30 @@ export class Timetable extends React.Component {
 		this.generateSchedule(1);
 	};
 
+	newStudent = async () => {
+		this.setState({fullStudentTimetable: [], timetable: []});
+		await this.setState({
+			fullStudentTimetable: await getTimetable('student')
+		});
+		this.generateSchedule(1);
+	};
+
+	newRooms = async () => {
+		this.setState({fullRoomTimetable: [], timetable: []});
+		await this.setState({
+			fullRoomTimetable: await getTimetable('room')
+		});
+		this.generateSchedule(1);
+	};
+
 	generateSchedule(w) {
 		this.setState({
-			timetable: (this.state.timetableType === TIMETABLE_TYPE.ROOM ? this.state.fullRoomTimetable[this.room] : this.state.fullStudentTimetable)
+			timetable: (this.timetableType === TIMETABLE_TYPE.ROOM ? this.state.fullRoomTimetable[this.room] : this.state.fullStudentTimetable)
 				.slice((w - 1) * WEEK_LENGTH, (w - 1) * WEEK_LENGTH + WEEK_LENGTH),
 			weekIndex: w
 		});
-	}
+		console.debug(this.state.timetable);
+	};
 
 	genTable() {
 		let body = [];
@@ -80,21 +99,24 @@ export class Timetable extends React.Component {
 	}
 
 	swapTimetable(type) {
-		this.setState({timetableType: type});
+		this.timetableType = type;
+		this.generateSchedule(this.state.weekIndex);
 	}
 
 	render() {
+		console.debug('rendered');
+
 		return (
 			(this.state.timetable.length > 0) ?
 				<div>
-					<h1>Timetable for {this.state.timetableType} {this.state.timetableType === TIMETABLE_TYPE.ROOM ? "- " + this.room : ""}</h1>
+					<h1>Timetable for {this.timetableType} {this.timetableType === TIMETABLE_TYPE.ROOM ? "- " + this.room : ""}</h1>
 					<Dropdown
 						style={{float: 'left', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Timetable Types</Dropdown.Toggle>
 
 						<Dropdown.Menu>
-							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.ROOM)}>Rooms</Dropdown.Item>
-							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.STUDENT)}>Student</Dropdown.Item>
+							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.ROOM)}><FontAwesomeIcon icon="building"/> &nbsp; Rooms</Dropdown.Item>
+							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.STUDENT)}><FontAwesomeIcon icon="user-graduate"/>&nbsp; Student</Dropdown.Item>
 						</Dropdown.Menu>
 					</Dropdown>
 
@@ -102,19 +124,25 @@ export class Timetable extends React.Component {
 						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
 					</ButtonGroup>
 
-					{this.state.timetableType === TIMETABLE_TYPE.ROOM ? <Dropdown
+					{this.timetableType === TIMETABLE_TYPE.ROOM ? <Dropdown
 						style={{float: 'right', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Rooms</Dropdown.Toggle>
 						<Dropdown.Menu>
 							{Object.keys(this.state.fullRoomTimetable).map(r => <Dropdown.Item
 								onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
 						</Dropdown.Menu>
-					</Dropdown> : ""}
+					</Dropdown> : <Button style={{float: 'right'}} onClick={() => this.newStudent()}>Generate new student</Button>}
+
+					{this.timetableType === TIMETABLE_TYPE.ROOM ? <Button style={{float: 'right'}} onClick={() => this.newRooms()}>New Rooms timetable</Button> : ""}
 					<br/>
 					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '300px'}}>
 						{this.genTable()}
 					</Table>
-				</div> : ""
+				</div> : <div>
+					<br/><br/><br/><br/>
+					<ClipLoader sizeUnit={"px"} size={300} color={'#123abc'} loading={true}/>
+					<h1> Generating Timetable </h1>
+				</div>
 		);
 	}
 }

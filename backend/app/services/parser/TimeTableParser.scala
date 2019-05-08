@@ -32,7 +32,7 @@ object TimeTableParser {
     val schlName = schools.keys.toList(Random.nextInt(schools.keys.size - 1))
 
     def takeModulesFromTerm(term: Int) =
-      Random.shuffle(modules.filter(m => m.school.schoolName == schlName && m.terms.head == term)).take(4).map(_.moduleName)
+      Random.shuffle(modules.filter(m => m.school.schoolName == schlName && m.terms.nonEmpty && m.terms.head == term)).take(4).map(_.moduleName)
 
     (1 to 3).flatMap(takeModulesFromTerm).toList
   }

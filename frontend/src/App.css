@@ -1,6 +1,5 @@
 * {
-    font-family: 'HankenBook';
-    font-size: 14pt;
+  font-family: 'GidoleRegular';
 }
 
 .App {
@@ -49,5 +48,3 @@
 h1{
     margin: 1rem;
 }
-
-

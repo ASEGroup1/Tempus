@@ -11,10 +11,10 @@ import {Timetables} from "./views/Timetables";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import { library } from '@fortawesome/fontawesome-svg-core'
-import {faCalendarAlt, faDatabase, faUserClock, faWrench, faUserGraduate, faChalkboardTeacher} from '@fortawesome/free-solid-svg-icons';
+import {faCalendarAlt, faDatabase, faUserClock, faWrench, faUserGraduate, faChalkboardTeacher, faBuilding} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-library.add(faCalendarAlt, faDatabase, faWrench, faUserClock, faUserGraduate, faChalkboardTeacher);
+library.add(faCalendarAlt, faDatabase, faWrench, faUserClock, faUserGraduate, faChalkboardTeacher, faBuilding);
 
 class App extends Component {
 	render() {
@@ -26,7 +26,7 @@ class App extends Component {
 						<Nav className="mr-auto">
 							<Nav.Link href="/dataManagement"><FontAwesomeIcon icon="database"/> &nbsp;Data Management</Nav.Link>
 							<Nav.Link href="/dsl"><FontAwesomeIcon icon="wrench"/> &nbsp;Custom Constraints</Nav.Link>
-							<Nav.Link href="/outputs"><FontAwesomeIcon icon="calendar-alt"/> &nbsp;Timetable</Nav.Link>
+							<Nav.Link href="/timetables"><FontAwesomeIcon icon="calendar-alt"/> &nbsp;Timetable</Nav.Link>
 						</Nav>
 					</Navbar>
 					<div className="content">
