@@ -5,7 +5,8 @@ import Button from "react-bootstrap/Button";
 import {getTimetable} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
 import SelectSearch from "react-select-search";
-import {ClipLoader} from "react-spinners"
+import {ClipLoader} from "react-spinners";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const weeks = Array.apply(null, {length: 13}).map(Number.call, Number).splice(1);
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -45,7 +46,16 @@ export class Timetable extends React.Component {
 		this.setState({fullStudentTimetable: [], timetable: []});
 		await this.setState({
 			fullStudentTimetable: await getTimetable('student')
-		})
+		});
+		this.generateSchedule(1);
+	};
+
+	newRooms = async () => {
+		this.setState({fullRoomTimetable: [], timetable: []});
+		await this.setState({
+			fullRoomTimetable: await getTimetable('room')
+		});
+		this.generateSchedule(1);
 	};
 
 	generateSchedule(w) {
@@ -105,8 +115,8 @@ export class Timetable extends React.Component {
 						<Dropdown.Toggle>Timetable Types</Dropdown.Toggle>
 
 						<Dropdown.Menu>
-							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.ROOM)}>Rooms</Dropdown.Item>
-							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.STUDENT)}>Student</Dropdown.Item>
+							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.ROOM)}><FontAwesomeIcon icon="building"/> &nbsp; Rooms</Dropdown.Item>
+							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.STUDENT)}><FontAwesomeIcon icon="user-graduate"/>&nbsp; Student</Dropdown.Item>
 						</Dropdown.Menu>
 					</Dropdown>
 
@@ -122,6 +132,8 @@ export class Timetable extends React.Component {
 								onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
 						</Dropdown.Menu>
 					</Dropdown> : <Button style={{float: 'right'}} onClick={() => this.newStudent()}>Generate new student</Button>}
+
+					{this.timetableType === TIMETABLE_TYPE.ROOM ? <Button style={{float: 'right'}} onClick={() => this.newRooms()}>New Rooms timetable</Button> : ""}
 					<br/>
 					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '300px'}}>
 						{this.genTable()}
@@ -129,6 +141,7 @@ export class Timetable extends React.Component {
 				</div> : <div>
 					<br/><br/><br/><br/>
 					<ClipLoader sizeUnit={"px"} size={300} color={'#123abc'} loading={true}/>
+					<h1> Generating Timetable </h1>
 				</div>
 		);
 	}
