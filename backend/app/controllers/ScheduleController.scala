@@ -2,6 +2,7 @@ package controllers
 
 import java.time.temporal.ChronoField
 
+import db.TimeTableDao
 import org.json4s._
 import javax.inject.{Inject, Singleton}
 import org.json4s.native.Serialization
@@ -59,5 +60,12 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
     schedule.groupBy(_.day.calendar.getDayOfYear).map(day => day._2.map(sc => (sc.time.start.getHour, sc.time.end.getHour, sc.className)))
       //populates timetable with session if the time intersects, otherwise with nothing
       .map(dayBounds => for (time <- 8 to 20) yield getSessionName(dayBounds, time))
+  }
+
+  def saveSchedule(name: String) = Action {
+    try {
+      TimeTableDao.insert(Scheduler.lastTimetable, name)
+      Ok("Inserted")
+    } catch {case e: Exception => BadRequest(e.getMessage)}
   }
 }

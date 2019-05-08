@@ -14,6 +14,8 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Random
 
 object Scheduler {
+  var lastTimetable = List[ScheduledClass]()
+
   val filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = FilterList.getFilters()
 
   def getPeriodDefault(dayOfMonth: Int) = getPeriod(dayOfMonth, 1, 8, 20)
@@ -77,6 +79,8 @@ object Scheduler {
       }
 
     })
+
+    if(schedule.toList != null && schedule.nonEmpty) lastTimetable = schedule.toList
 
     Some(schedule.toList)
   }
