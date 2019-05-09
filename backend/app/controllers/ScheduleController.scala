@@ -65,7 +65,7 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   def saveSchedule(name: String) = Action {
     try {
       TimeTableDao.insert(Scheduler.lastTimetable, name)
-      Ok("Inserted")
+      Ok(s"Inserted timetable: $name")
     } catch {case e: Exception => BadRequest(e.getMessage)}
   }
 }

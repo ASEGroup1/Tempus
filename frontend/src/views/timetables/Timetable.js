@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 import {Modal, Button, ButtonGroup, InputGroup, FormControl} from "react-bootstrap"
-import {getTimetable} from "../../RequestManager";
+import {getTimetable, saveTimetable} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
 import SelectSearch from "react-select-search";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -32,12 +32,12 @@ export class Timetable extends React.Component {
 			fullStudentTimetable: {},
 			weekIndex: 1,
 			timetableType: TIMETABLE_TYPE.STUDENT,
-			modal: MODAL_STATES.NONE,
-			newTimetableName: ""
+			modal: MODAL_STATES.NONE
 		};
 	}
 
 	room = "1C";
+	newTimetableName = "TEST";
 
 	populateTimetable = async () => {
 		await this.setState({
@@ -102,9 +102,20 @@ export class Timetable extends React.Component {
           </Modal.Header>
           <Modal.Body>Save the current permutation of the timetable, for all rooms?
 	          <br/><br/>
-	          <label>Name &nbsp; </label><input value={this.state.newTimetableName} onChange={this.handleChange}/></Modal.Body>
+	          <InputGroup className="mb-3">
+		          <InputGroup.Prepend>
+			          <InputGroup.Text id="basic-addon1">Name</InputGroup.Text>
+		          </InputGroup.Prepend>
+		          <FormControl
+			          ref={(inputRef) => {this.newTimetableName = inputRef}}
+			          placeholder="Timetable Name"
+			          aria-describedby="basic-addon1"
+		          />
+	          </InputGroup>
+	          </Modal.Body>
           <Modal.Footer>
-	          <Button variant="primary"><FontAwesomeIcon icon="save"/>Save Timetable</Button>
+	          <Button variant="primary">Close</Button>
+	          <Button variant="primary" onClick={() => saveTimetable(this.newTimetableName.value)}><FontAwesomeIcon icon="save"/>&nbsp; Save Timetable</Button>
           </Modal.Footer>
         </Modal>)
 	}

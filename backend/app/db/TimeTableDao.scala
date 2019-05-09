@@ -11,7 +11,8 @@ object TimeTableDao extends Dao[List[ScheduledClass]] {
   override val tableName = "TIMETABLE"
   override val handler = (rs: ResultSet) => if (rs.next) Array(rs.getObject(2)) else Array()
 
-  def insert(timeTable: List[ScheduledClass], name: String) = run.update(conn, s"INSERT INTO TIMETABLES VALUES(${Random.nextInt},$name,?)", serialize(timeTable))
+  def insert(timeTable: List[ScheduledClass], name: String) =
+    run.update(conn, s"INSERT INTO TIMETABLES VALUES('$name',?)", serialize(timeTable))
 
   override def get(id: Int) =
     deserialize(run.query(conn, "SELECT * FROM TIMETABLES WHERE ID=$id", handler).head.asInstanceOf[Array[Byte]])

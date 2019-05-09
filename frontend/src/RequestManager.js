@@ -13,8 +13,9 @@ export async function getTimetable(timetableType) {
 	});
 }
 
-export async function saveTimetable() {
-	return await request.post(BASE_URL + 'save-timetable').then(res => {
+export async function saveTimetable(name) {
+	return await request.post(BASE_URL + 'timetable/' + name)
+		.then(res => {
 		if (res.text != null) return JSON.parse(res.text);
 		return true;
 	}).catch(err => {

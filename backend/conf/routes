@@ -9,6 +9,9 @@ GET     /get-generated-student-schedule-json                      controllers.Sc
 
 #CRUD
 
+#Timetable
+POST  /timetable/:name                   controllers.ScheduleController.saveSchedule(name: String)
+
 #Student
 PUT     /student/                         controllers.crud.StudentController.create
 GET     /student/:id                     controllers.crud.StudentController.read(id: Int)
@@ -21,7 +24,7 @@ GET     /module/:id                     controllers.crud.ModuleController.read(i
 POST     /module/:id                     controllers.crud.ModuleController.update(id: Int)
 DELETE    /module/:id                     controllers.crud.ModuleController.delete(id: Int)
 
-# For retriving and displaying frontend pages
+# For retrieving and displaying frontend pages
 GET     /                       controllers.FrontendController.index
 GET     /*file                      controllers.FrontendController.assetOrDefault(file)
 
