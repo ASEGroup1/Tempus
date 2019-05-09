@@ -1,9 +1,10 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
-import {Modal, Button, ButtonGroup} from "react-bootstrap"
+import {Modal, Button, ButtonGroup, InputGroup, FormControl} from "react-bootstrap"
 import {getTimetable} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
 import SelectSearch from "react-select-search";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 const weeks = Array.apply(null, {length: 13}).map(Number.call, Number).splice(1);
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -23,7 +24,7 @@ const MODAL_STATES = {
 export class Timetable extends React.Component {
 	constructor(props) {
 		super(props);
-
+		this.handleChange.bind(this);
 		this.populateTimetable();
 		this.state = {
 			timetable: [],
@@ -31,7 +32,8 @@ export class Timetable extends React.Component {
 			fullStudentTimetable: {},
 			weekIndex: 1,
 			timetableType: TIMETABLE_TYPE.STUDENT,
-			modal: MODAL_STATES.NONE
+			modal: MODAL_STATES.NONE,
+			newTimetableName: ""
 		};
 	}
 
@@ -89,16 +91,20 @@ export class Timetable extends React.Component {
 		this.setState({timetableType: type});
 	}
 
+	handleChange(event) {
+		this.setState({newTimetableName: event.target.value});
+	}
+
 	saveTimetableModal() {
 		return (<Modal show={this.state.modal === MODAL_STATES.SAVE} >
           <Modal.Header closeButton>
             <Modal.Title>Save Timetable</Modal.Title>
           </Modal.Header>
-          <Modal.Body>Save the current permutation of the timetable, for all rooms?</Modal.Body>
+          <Modal.Body>Save the current permutation of the timetable, for all rooms?
+	          <br/><br/>
+	          <label>Name &nbsp; </label><input value={this.state.newTimetableName} onChange={this.handleChange}/></Modal.Body>
           <Modal.Footer>
-            <Button variant="primary">
-              Save Changes
-            </Button>
+	          <Button variant="primary"><FontAwesomeIcon icon="save"/>Save Timetable</Button>
           </Modal.Footer>
         </Modal>)
 	}
@@ -131,8 +137,8 @@ export class Timetable extends React.Component {
 								onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
 						</Dropdown.Menu>
 					</Dropdown> : ""}
-					<Button style={{float: 'right'}} onClick={() => this.generateSchedule()}>Save Timetable</Button>
-					<Button style={{float: 'right'}} onClick={() => this.generateSchedule()}>Load Timetable</Button>
+					<Button style={{float: 'right'}} onClick={() => this.setState({modal: MODAL_STATES.SAVE})}>Save Timetable</Button>
+					<Button style={{float: 'right'}} onClick={() => this.setState({modal: MODAL_STATES.SAVE})}>Load Timetable</Button>
 					<br/>
 					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '300px'}}>
 						{this.genTable()}
