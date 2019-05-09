@@ -18,8 +18,12 @@ DELETE     /student/:id                     controllers.crud.StudentController.d
 #Module
 PUT     /module/                         controllers.crud.ModuleController.create
 GET     /module/:id                     controllers.crud.ModuleController.read(id: Int)
+GET     /module/with-students/:id       controllers.crud.ModuleController.getModuleWithStudent(id: Int)
 POST     /module/:id                     controllers.crud.ModuleController.update(id: Int)
 DELETE    /module/:id                     controllers.crud.ModuleController.delete(id: Int)
+
+#Mapping
+PUT     /student/map/:studentId/:moduleId               controllers.crud.StudentController.map(studentId: Int, moduleId: Int)
 
 # For retriving and displaying frontend pages
 GET     /                       controllers.FrontendController.index
