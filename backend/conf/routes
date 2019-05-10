@@ -3,27 +3,27 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
-GET     /get-generated-room-schedule-json                      controllers.ScheduleController.generateScheduleForRoomTable
-GET     /get-generated-student-schedule-json                      controllers.ScheduleController.generateScheduleForStudentTable
+GET     /api/get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
+GET     /api/get-generated-room-schedule-json                      controllers.ScheduleController.generateScheduleForRoomTable
+GET     /api/get-generated-student-schedule-json                      controllers.ScheduleController.generateScheduleForStudentTable
 
 #CRUD
 
 #Student
-PUT     /student/                         controllers.crud.StudentController.create
-GET     /student/:id                     controllers.crud.StudentController.read(id: Int)
-POST     /student/:id                     controllers.crud.StudentController.update(id: Int)
-DELETE     /student/:id                     controllers.crud.StudentController.delete(id: Int)
+PUT     /api/student/                         controllers.crud.StudentController.create
+GET     /api/student/:id                     controllers.crud.StudentController.read(id: Int)
+POST     /api/student/:id                     controllers.crud.StudentController.update(id: Int)
+DELETE     /api/student/:id                     controllers.crud.StudentController.delete(id: Int)
 
 #Module
-PUT     /module/                         controllers.crud.ModuleController.create
-GET     /module/:id                     controllers.crud.ModuleController.read(id: Int)
-GET     /module/with-students/:id       controllers.crud.ModuleController.getModuleWithStudent(id: Int)
-POST     /module/:id                     controllers.crud.ModuleController.update(id: Int)
-DELETE    /module/:id                     controllers.crud.ModuleController.delete(id: Int)
+PUT     /api/module/                         controllers.crud.ModuleController.create
+GET     /api/module/:id                     controllers.crud.ModuleController.read(id: Int)
+GET     /api/module/with-students/:id       controllers.crud.ModuleController.getModuleWithStudent(id: Int)
+POST     /api/module/:id                     controllers.crud.ModuleController.update(id: Int)
+DELETE    /api/module/:id                     controllers.crud.ModuleController.delete(id: Int)
 
 #Mapping
-PUT     /student/map/:studentId/:moduleId               controllers.crud.StudentController.map(studentId: Int, moduleId: Int)
+PUT     /api/student/map/:studentId/:moduleId               controllers.crud.StudentController.map(studentId: Int, moduleId: Int)
 
 # For retriving and displaying frontend pages
 GET     /                       controllers.FrontendController.index
