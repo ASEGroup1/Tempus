@@ -48,3 +48,15 @@
 h1{
     margin: 1rem;
 }
+
+.button{
+    margin-bottom: 2rem;
+}
+
+.table{
+    margin: 4rem 2rem 2rem 2rem;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: available;
+}
+

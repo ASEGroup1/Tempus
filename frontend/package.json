@@ -13,8 +13,7 @@
     "react-scripts": "2.1.8",
     "react-select-search": "^0.9.6",
     "react-spinners": "^0.5.4",
-    "superagent": "^5.0.2",
-    "typescript": "^3.4.5"
+    "superagent": "^5.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
