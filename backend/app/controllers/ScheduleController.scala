@@ -21,19 +21,13 @@ import views.ErrorPage
 class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def generateScheduleResponse = Action {
-    val schedule = Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules)
-
-    if(schedule.isEmpty) BadRequest(ErrorPage.badRequest("Could not generate, refresh for new random parameters.")).as("text/html")
-    else Ok (Json.parse(schedule.get.sortBy(e => (e.day.calendar.getDayOfYear, e.room.roomName, e.time.start.get(ChronoField.MILLI_OF_DAY))).map(_.toJson).mkString("[", ",", "]"))).as("application/json")
-  }
+  val moduleNames = TimeTableParser.getGeneratedStudentsModuleNames
 
   def generateScheduleForRoomTable = Action {
     Ok(write(scheduleToRoomJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get)))
   }
 
   def generateScheduleForStudentTable = Action {
-    val moduleNames = TimeTableParser.getGeneratedStudentsModuleNames
     Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get
       .filter(sc => moduleNames.contains(sc.className)).sortBy(sc => (sc.day.calendar, sc.time.start)), TimeTableParser.getGeneratedStudentsModuleNames)))
   }
@@ -66,6 +60,12 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
     try {
       TimeTableDao.insert(Scheduler.lastTimetable, name)
       Ok(s"Inserted timetable: $name")
-    } catch {case e: Exception => BadRequest(e.getMessage)}
+    } catch {case e: Exception => BadRequest(if(e.getMessage.length > 100) e.getMessage.substring(0, 100) else e.getMessage)}
+  }
+
+  def getTimetableNames = Action {Ok(write(TimeTableDao.getTimetableNames))}
+
+  def get(name: String) = Action {
+    Ok(write(scheduleToRoomJson(TimeTableDao.get(name))))
   }
 }

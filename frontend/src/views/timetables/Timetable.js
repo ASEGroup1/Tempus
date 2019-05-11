@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 import {Modal, Button, ButtonGroup, InputGroup, FormControl} from "react-bootstrap"
-import {getTimetable, saveTimetable} from "../../RequestManager";
+import {getTimetable, loadTimetable, saveTimetable} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
 import SelectSearch from "react-select-search";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -25,7 +25,7 @@ export class Timetable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.handleChange.bind(this);
-		this.populateTimetable();
+		this.populateTimetable(null);
 		this.state = {
 			timetable: [],
 			fullRoomTimetable: {},
@@ -39,8 +39,11 @@ export class Timetable extends React.Component {
 	room = "1C";
 	newTimetableName = "TEST";
 
-	populateTimetable = async () => {
-		await this.setState({
+	populateTimetable = async (name) => {
+		if(name !== null) {
+			await this.setState({fullRoomTimetable: await loadTimetable(name)});
+			await this.setState({fullRoomTimetable: await getTimetable('student')});
+		} else await this.setState({
 			fullRoomTimetable: await getTimetable('room'),
 			fullStudentTimetable: await getTimetable('student')
 		});
@@ -114,7 +117,7 @@ export class Timetable extends React.Component {
 	          </InputGroup>
 	          </Modal.Body>
           <Modal.Footer>
-	          <Button variant="primary">Close</Button>
+	          <Button variant="primary" onClick={() => this.setState({modal: MODAL_STATES.NONE})}>Close</Button>
 	          <Button variant="primary" onClick={() => saveTimetable(this.newTimetableName.value)}><FontAwesomeIcon icon="save"/>&nbsp; Save Timetable</Button>
           </Modal.Footer>
         </Modal>)
@@ -149,7 +152,14 @@ export class Timetable extends React.Component {
 						</Dropdown.Menu>
 					</Dropdown> : ""}
 					<Button style={{float: 'right'}} onClick={() => this.setState({modal: MODAL_STATES.SAVE})}>Save Timetable</Button>
-					<Button style={{float: 'right'}} onClick={() => this.setState({modal: MODAL_STATES.SAVE})}>Load Timetable</Button>
+					<Dropdown
+						style={{float: 'right', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
+						<Dropdown.Toggle>Load Timetable</Dropdown.Toggle>
+						<Dropdown.Menu>
+							{Object.keys(this.state.fullRoomTimetable).map(name => <Dropdown.Item
+								onClick={() => this.populateTimetable(name)}>{name}</Dropdown.Item>)}
+						</Dropdown.Menu>
+					</Dropdown>
 					<br/>
 					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '300px'}}>
 						{this.genTable()}

@@ -5,8 +5,6 @@ import java.sql.ResultSet
 
 import services.scheduler.poso.ScheduledClass
 
-import scala.util.Random
-
 object TimeTableDao extends Dao[List[ScheduledClass]] {
   override val tableName = "TIMETABLE"
   override val handler = (rs: ResultSet) => if (rs.next) Array(rs.getObject(2)) else Array()
@@ -14,18 +12,22 @@ object TimeTableDao extends Dao[List[ScheduledClass]] {
   def insert(timeTable: List[ScheduledClass], name: String) =
     run.update(conn, s"INSERT INTO TIMETABLES VALUES('$name',?)", serialize(timeTable))
 
-  override def get(id: Int) =
-    deserialize(run.query(conn, "SELECT * FROM TIMETABLES WHERE ID=$id", handler).head.asInstanceOf[Array[Byte]])
+  def get(name: String) =
+    deserialize(run.query(conn, s"SELECT * FROM TIMETABLES WHERE NAME='$name'", handler).head.asInstanceOf[Array[Byte]])
 
-  private[this] def serialize(obj: Any) = {
+  private[this] def serialize(obj: List[ScheduledClass]) = {
     val bo = new ByteArrayOutputStream
     new ObjectOutputStream(bo).writeObject(obj)
-
     bo.toByteArray
   }
 
-  private[this] def deserialize(binary: Array[Byte]) =
+  private[this] def deserialize(binary: Array[Byte]) = {
     new ObjectInputStream(new ByteArrayInputStream(binary)).readObject.asInstanceOf[List[ScheduledClass]]
+  }
 
   override def insert(data: List[ScheduledClass]) = ???
+
+  def getTimetableNames() =
+    run.query(conn, "SELECT NAME FROM TIMETABLES", (rs: ResultSet) => if (rs.next) Array(rs.getString(1)) else Array())
+
 }

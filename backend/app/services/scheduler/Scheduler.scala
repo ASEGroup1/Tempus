@@ -14,7 +14,7 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Random
 
 object Scheduler {
-  var lastTimetable = List[ScheduledClass]()
+  var lastTimetable:List[ScheduledClass] = List[ScheduledClass]()
 
   val filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = FilterList.getFilters()
 
@@ -35,7 +35,7 @@ object Scheduler {
 
     val schedule = ListBuffer[ScheduledClass]()
 
-    val fmap = modules.map(m => m.sessionStructure.map(_.session -> m)).flatten.toMap
+    val fmap = modules.flatMap(m => m.sessionStructure.map(_.session -> m)).toMap
 
     // group modules into Seq(Term)[Map[Session, Seq(Weeks session runs)[Int]]]
     modules.flatMap(_.sessionStructure.map(s => s.session -> s.weekNo)).groupBy(_._2 <= term1End).map(_._2.groupBy(_._1).map { case (k, v) => (k, v.map(_._2)) }.map(e => e._1 -> e._2.toList.sorted)).foreach(t => {
@@ -53,7 +53,7 @@ object Scheduler {
         var choice: Map[Int, RequiredSession] = Map()
         // If such a slot exists, add the session to the slot
         // Otherwise create a new slot
-        if (!options.isEmpty) {
+        if (options.nonEmpty) {
           choice = options.maxBy(_.size)
           slots -= choice
         }
@@ -134,9 +134,9 @@ object Scheduler {
           validEventsWrapped = validEventsWrapped.groupBy(_.event.duration).maxBy(_._1)._2
 
           // Schedule the event
-          mostFree + validEventsWrapped(0).event
-          unProcEvents -= validEventsWrapped(0).event
-          wrappedSchedules += validEventsWrapped(0)
+          mostFree + validEventsWrapped.head.event
+          unProcEvents -= validEventsWrapped.head.event
+          wrappedSchedules += validEventsWrapped.head
 
         }
 
