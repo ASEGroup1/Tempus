@@ -4,12 +4,12 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import * as request from "superagent";
-import {Display} from "./Display";
+import {ViewEditContainer} from "./ViewEditContainer";
 
 export class View extends React.Component {
-	constructor(props){
+	constructor(props) {
 		super(props);
-		this.state = {student: null};
+		this.state = {student: null, editingStudent: false};
 		
 	}
 	
@@ -26,12 +26,11 @@ export class View extends React.Component {
 					</Form.Group>
 					<Button type="submit" className="float-right">View</Button>
 				</Form>
-				{this.state.student == null ? null : <Display student={this.state.student}/>}
+				<ViewEditContainer student={this.state.student} editingStudent={this.state.editingStudent}/>
 			</div>
 		);
 	}
 	
-
 	
 	submit(e) {
 		e.preventDefault();
@@ -43,10 +42,18 @@ export class View extends React.Component {
 			"lastName": "5",
 			"otherNames": "6"
 		};
-		// The following is currently throwing a cors error
-		request.get("http://localhost:9000/api/student/"+e.target["studentId"].value).set("Accept", "application/json").set("Access-Control-Allow-Origin", "*").then(result => {alert("Got Student\n Response: \n" + JSON.stringify(result.body))});
-		this.setState({student: rtnStudent})
+		
+		request.get("http://localhost:9000/api/student/" + e.target["studentId"].value)
+			.set("Accept", "application/json")
+			.set("Access-Control-Allow-Origin", "*")
+			.then(result => {
+				alert("Got Student\n Response: \n" + JSON.stringify(result.body))
+			});
+		
+		this.setState({student: rtnStudent, editingStudent: false});
 		console.log(this.state.student);
 		
+		
 	}
+
 }

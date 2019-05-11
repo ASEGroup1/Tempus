@@ -1,6 +1,5 @@
 import React from "react";
 import Navbar from "react-bootstrap/Navbar";
-import Nav from "react-bootstrap/Nav";
 import {Home} from "./Home";
 import {Timetable} from "./timetables/Timetable";
 import {Route} from "react-router-dom";
