@@ -3,11 +3,14 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /get-generated-schedule                           controllers.ScheduleController.generateScheduleResponse
+#CRUD
+
+#Timetable
+POST    /timetable/:name                   controllers.ScheduleController.saveSchedule(name: String)
+GET     /timetable-names                   controllers.ScheduleController.getTimetableNames
+GET     /timetable/:name                   controllers.ScheduleController.get(name: String)
 GET     /get-generated-room-schedule-json                      controllers.ScheduleController.generateScheduleForRoomTable
 GET     /get-generated-student-schedule-json                      controllers.ScheduleController.generateScheduleForStudentTable
-
-#CRUD
 
 #Student
 PUT     /student/                         controllers.crud.StudentController.create
@@ -26,6 +29,10 @@ DELETE    /module/:id                     controllers.crud.ModuleController.dele
 PUT     /student/map/:studentId/:moduleId               controllers.crud.StudentController.map(studentId: Int, moduleId: Int)
 
 # For retriving and displaying frontend pages
+
+#Mapping
+PUT     /student/map/:studentId/:moduleId               controllers.crud.StudentController.map(studentId: Int, moduleId: Int)
+
 GET     /                       controllers.FrontendController.index
 GET     /*file                      controllers.FrontendController.assetOrDefault(file)
 
