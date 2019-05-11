@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 import {Modal, Button, ButtonGroup, InputGroup, FormControl} from "react-bootstrap"
-import {getTimetable, loadTimetable, saveTimetable} from "../../RequestManager";
+import {getTimetable, loadTimetable, saveTimetable, getTimetableNames} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
 import SelectSearch from "react-select-search";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -31,7 +31,7 @@ export class Timetable extends React.Component {
 			fullRoomTimetable: {},
 			fullStudentTimetable: {},
 			weekIndex: 1,
-			timetableType: TIMETABLE_TYPE.STUDENT,
+			timetableType: TIMETABLE_TYPE.ROOM,
 			modal: MODAL_STATES.NONE
 		};
 	}
@@ -40,12 +40,14 @@ export class Timetable extends React.Component {
 	newTimetableName = "TEST";
 
 	populateTimetable = async (name) => {
+		this.setState({timetable: []})
 		if(name !== null) {
+			console.debug(name)
 			await this.setState({fullRoomTimetable: await loadTimetable(name)});
-			await this.setState({fullRoomTimetable: await getTimetable('student')});
 		} else await this.setState({
 			fullRoomTimetable: await getTimetable('room'),
-			fullStudentTimetable: await getTimetable('student')
+			fullStudentTimetable: await getTimetable('student'),
+			timetableNames: await getTimetableNames()
 		});
 		console.debug(this.state.fullRoomTimetable, this.state.fullStudentTimetable);
 		this.generateSchedule(1);
@@ -98,6 +100,12 @@ export class Timetable extends React.Component {
 		this.setState({newTimetableName: event.target.value});
 	}
 
+	addTimetable = async (name) => {
+		await saveTimetable(name);
+		await this.setState({timetableNames: await getTimetableNames()});
+		this.setState({modal: MODAL_STATES.NONE});
+	}
+
 	saveTimetableModal() {
 		return (<Modal show={this.state.modal === MODAL_STATES.SAVE} >
           <Modal.Header closeButton>
@@ -118,7 +126,7 @@ export class Timetable extends React.Component {
 	          </Modal.Body>
           <Modal.Footer>
 	          <Button variant="primary" onClick={() => this.setState({modal: MODAL_STATES.NONE})}>Close</Button>
-	          <Button variant="primary" onClick={() => saveTimetable(this.newTimetableName.value)}><FontAwesomeIcon icon="save"/>&nbsp; Save Timetable</Button>
+	          <Button variant="primary" onClick={() => this.addTimetable(this.newTimetableName.value)}><FontAwesomeIcon icon="save"/>&nbsp; Save Timetable</Button>
           </Modal.Footer>
         </Modal>)
 	}
@@ -156,7 +164,7 @@ export class Timetable extends React.Component {
 						style={{float: 'right', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Load Timetable</Dropdown.Toggle>
 						<Dropdown.Menu>
-							{Object.keys(this.state.fullRoomTimetable).map(name => <Dropdown.Item
+							{this.state.timetableNames.map(name => <Dropdown.Item
 								onClick={() => this.populateTimetable(name)}>{name}</Dropdown.Item>)}
 						</Dropdown.Menu>
 					</Dropdown>

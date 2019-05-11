@@ -20,6 +20,7 @@ import views.ErrorPage
 @Singleton
 class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
   implicit val formats = Serialization.formats(NoTypeHints)
+  var lastTimetableStr = Map[String, Iterable[List[String]]]()
 
   val moduleNames = TimeTableParser.getGeneratedStudentsModuleNames
 
@@ -39,9 +40,10 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
         yield toNatLang(scheduledClass.className)
 
     //Room schedules
-    schedule.sortBy(sc => (sc.day.calendar, sc.time.start)).groupBy(_.room)
+    lastTimetableStr = schedule.sortBy(sc => (sc.day.calendar, sc.time.start)).groupBy(_.room)
       //Room schedules by day so 2D array is created
       .map(ss => ss._1.roomName -> ss._2.groupBy(_.day.calendar.getDayOfYear).map(_._2.flatMap(getStringCountCorrespondingToLength)))
+    lastTimetableStr
   }
 
   def scheduleToStudentJson(schedule: List[ScheduledClass], moduleNames: List[String]) = {
@@ -58,7 +60,7 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
 
   def saveSchedule(name: String) = Action {
     try {
-      TimeTableDao.insert(Scheduler.lastTimetable, name)
+      TimeTableDao.insert(lastTimetableStr, name)
       Ok(s"Inserted timetable: $name")
     } catch {case e: Exception => BadRequest(if(e.getMessage.length > 100) e.getMessage.substring(0, 100) else e.getMessage)}
   }
@@ -66,6 +68,6 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   def getTimetableNames = Action {Ok(write(TimeTableDao.getTimetableNames))}
 
   def get(name: String) = Action {
-    Ok(write(scheduleToRoomJson(TimeTableDao.get(name))))
+    Ok(write(TimeTableDao.get(name)))
   }
 }
