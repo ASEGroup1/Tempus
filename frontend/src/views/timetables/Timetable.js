@@ -32,18 +32,18 @@ export class Timetable extends React.Component {
 			fullStudentTimetable: {},
 			weekIndex: 1,
 			timetableType: TIMETABLE_TYPE.ROOM,
-			modal: MODAL_STATES.NONE,
-			loaded: false
+			modal: MODAL_STATES.NONE
 		};
 	}
 
 	room = "1C";
 	newTimetableName = "TEST";
+	loaded = false;
 
 	populateTimetable = async (name) => {
 		this.setState({timetable: []})
 		if(name !== null) {
-			console.debug(name)
+			this.loaded = true;
 			await this.setState({fullRoomTimetable: await loadTimetable(name)});
 		} else await this.setState({
 			fullRoomTimetable: await getTimetable('room'),
@@ -103,9 +103,8 @@ export class Timetable extends React.Component {
 
 	addTimetable = async (name) => {
 		await saveTimetable(name);
-		await this.setState({timetableNames: await getTimetableNames()});
-		this.setState({modal: MODAL_STATES.NONE, loaded: false});
-	}
+		await this.setState({timetableNames: await getTimetableNames(), modal: MODAL_STATES.NONE});
+	};
 
 	saveTimetableModal() {
 		return (<Modal show={this.state.modal === MODAL_STATES.SAVE} >
@@ -138,15 +137,15 @@ export class Timetable extends React.Component {
 				<div>
 					{this.saveTimetableModal()}
 					<h1>Timetable for {this.state.timetableType} {this.state.timetableType === TIMETABLE_TYPE.ROOM ? "- " + this.room : ""}</h1>
-					<Dropdown
+
+					{!this.loaded ? <Dropdown
 						style={{float: 'left', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Timetable Types</Dropdown.Toggle>
-
-						<Dropdown.Menu>
-							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.ROOM)}>Rooms</Dropdown.Item>
-							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.STUDENT)}>Student</Dropdown.Item>
+							<Dropdown.Menu>
+								<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.ROOM)}>Rooms</Dropdown.Item>
+								<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.STUDENT)}>Student</Dropdown.Item>
 						</Dropdown.Menu>
-					</Dropdown>
+					</Dropdown> :  "" }
 
 					<ButtonGroup>
 						{weeks.map(w => (<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
