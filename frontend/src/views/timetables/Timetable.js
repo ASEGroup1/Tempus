@@ -32,7 +32,8 @@ export class Timetable extends React.Component {
 			fullStudentTimetable: {},
 			weekIndex: 1,
 			timetableType: TIMETABLE_TYPE.ROOM,
-			modal: MODAL_STATES.NONE
+			modal: MODAL_STATES.NONE,
+			loaded: false
 		};
 	}
 
@@ -103,7 +104,7 @@ export class Timetable extends React.Component {
 	addTimetable = async (name) => {
 		await saveTimetable(name);
 		await this.setState({timetableNames: await getTimetableNames()});
-		this.setState({modal: MODAL_STATES.NONE});
+		this.setState({modal: MODAL_STATES.NONE, loaded: false});
 	}
 
 	saveTimetableModal() {
