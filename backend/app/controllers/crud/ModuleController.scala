@@ -1,6 +1,6 @@
 package controllers.crud
 
-import db.ModuleDao
+import db.{ModuleDao, StudentDao}
 import entities.module.Module
 import javax.inject.{Inject, Singleton}
 import org.json4s.DefaultFormats
@@ -47,5 +47,12 @@ class ModuleController @Inject()(cc: ControllerComponents) extends AbstractContr
   def delete(id: Int) = Action {
     if (ModuleDao.delete(id)) Ok(s"Removed module with id $id")
     else BadRequest(s"Could not remove module with id $id, ensure module exists")
+  }
+
+  def getModuleWithStudent(id: Int) = Action {
+    try Ok(write(ModuleDao.get(id) -> StudentDao.getStudentsInModule(id)))
+    catch {
+      case e: Exception => BadRequest(e.getMessage)
+    }
   }
 }
