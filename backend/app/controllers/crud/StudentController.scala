@@ -1,6 +1,6 @@
 package controllers.crud
 
-import db.{Dao, StudentDao}
+import db.{Dao, ModuleDao, StudentDao}
 import entities.people.{Person, Student}
 import javax.inject.{Inject, Singleton}
 import org.json4s.DefaultFormats
@@ -33,7 +33,7 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
   def update(id: Int) = Action(parse.json) { request =>
     try {
       val body = request.body.asInstanceOf[JsObject].value
-      if(!StudentDao.delete(id)) BadRequest(s"""{"message":"Could not find student with id $id"}""")
+      if (!StudentDao.delete(id)) BadRequest(s"""{"message":"Could not find student with id $id"}""")
       else {
         StudentDao.insert(Student(studentFields.map(f => f -> (if (body.contains(f)) body(f) else null)).toMap))
         Ok(s"Updated Student with id ${body("studentId")}")
@@ -46,5 +46,17 @@ class StudentController @Inject()(cc: ControllerComponents) extends AbstractCont
   def delete(id: Int) = Action {
     if (StudentDao.delete(id)) Ok(s"Removed student with id $id")
     else BadRequest(s"Could not remove student with id $id, ensure student exists")
+  }
+
+  def map(studentId: Int, moduleId: Int) = Action {
+    try {
+      //If either don't exist will through exception
+      StudentDao.get(studentId)
+      ModuleDao.get(moduleId)
+      StudentDao.map(studentId, moduleId)
+      Ok(s"Successfully mapped student with id $studentId to $moduleId")
+    } catch {
+      case e: Exception => BadRequest(e.getMessage)
+    }
   }
 }
