@@ -12,30 +12,37 @@ import services.scheduler.{ScheduleInterfaceMapper, Scheduler}
   */
 object FilterList {
 
-  private var filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = null
+  private val defaultDSL = "filter WillFit(e){\n\te.schedule.timeRemaining >= e.duration\n}"
 
-  def getFilters(): Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = {
-    if (filters == null) {
-      val dsl =
-        """
-          |filter WillFit(e){
-          |	e.schedule.timeRemaining >= e.duration
-          |}
-          |
-        """.stripMargin
+  private var filters: ListBuffer[CompiledFilter] = DSLCompiler.compile(defaultDSL)
 
-      filters = DSLCompiler.compile(dsl)
-      println("Compiled Filters")
-    }
-    filters
+  def getFilters():Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = filters.map(_.filter)
+
+  def getFilterInfo: ListBuffer[(String, String)] = filters.map(f =>(f.name, f.code))
+
+  def getFilterNames: ListBuffer[String] = filters.map(_.name)
+
+  def addFilters(filterText: String):ListBuffer[String]  = {
+    val newFilters = DSLCompiler.compile(filterText);
+    filters ++= newFilters
+    newFilters.map(_.name)
+  }
+
+  def removeFilters(remove: Seq[String]): Unit = filters = filters.filterNot(f => remove.contains(f.name))
+
+  def clearFilters(): Unit = filters = ListBuffer[CompiledFilter]()
+
+  def setFilters(filterText: String): ListBuffer[String] = {
+    clearFilters()
+    addFilters(filterText)
   }
 }
 
 object DSLCompiler {
 
 
-  def compile(code: String): Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] =
-    DSLParser.parse(DSLLexer.lex(code)).map(new FilterCompiler(_).getFunction())
+  def compile(code: String): ListBuffer[CompiledFilter] =
+    DSLParser.parse(DSLLexer.lex(code)).map(new FilterCompiler(_).getCompiledFilter).to[ListBuffer]
 
   /**
     * Uses reflection to generate MethodReference's using fields of a class
@@ -133,7 +140,7 @@ private class FilterCompiler(val filterNode: FilterNode) {
     */
   private def crushWhereList(list: Seq[BooleanExpNode]) = list.reduce((l, r) => new BinaryOperationNode(l, r, BinOp.And))
 
-  private val compiledFilter: CompiledFilter = {
+  private val compiledFilter: CompiledFilterFunc = {
     val bodyExp = new ExpressionCompiler(filterNode.body, filterNode.name.string + "Body", filterNode.param1)
     val whereExp = if (filterNode.where.isDefined) Some(new ExpressionCompiler(crushWhereList(filterNode.where.get.condition), filterNode.name.string + "Where", filterNode.param1)) else None
     if (filterNode.param2.isDefined) {
@@ -143,39 +150,39 @@ private class FilterCompiler(val filterNode: FilterNode) {
       if (!whereExp.isDefined || whereExp.get.isCommutative) {
         if (bodyExp.isCommutative) {
           // if the where and body are both commutative functions
-          new DoubleFilter(whereFunc, bodyFunc, 0)
+          new DoubleFilterFunc(whereFunc, bodyFunc, 0)
         } else {
           // if only the where function is commutative
-          new DoubleFilter(whereFunc, bodyFunc, 1)
+          new DoubleFilterFunc(whereFunc, bodyFunc, 1)
         }
       } else {
         // if the where function is not commutative
-        new DoubleFilter(whereFunc, bodyFunc, 2)
+        new DoubleFilterFunc(whereFunc, bodyFunc, 2)
       }
     } else {
       // if the filter expresses a constraint on a single event
-      new SingleFilter(if (whereExp.isDefined) applyWhereSingle(_, whereExp.get.compileSingle(filterNode.param1)) else applyWhereSingleNone(_), bodyExp.compileSingle(filterNode.param1))
+      new SingleFilterFunc(if (whereExp.isDefined) applyWhereSingle(_, whereExp.get.compileSingle(filterNode.param1)) else applyWhereSingleNone(_), bodyExp.compileSingle(filterNode.param1))
     }
   }
 
   /**
     * Will repackage where, body functions using the respective wrapper functions in Scheduler
     */
-  trait CompiledFilter {
+  trait CompiledFilterFunc {
     def compile: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]
   }
 
   /**
     * CompiledFilter with only one parameter
     */
-  class SingleFilter(val where: (Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper], val body: (ScheduleInterfaceMapper) => Boolean) extends CompiledFilter {
+  class SingleFilterFunc(val where: (Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper], val body: (ScheduleInterfaceMapper) => Boolean) extends CompiledFilterFunc {
     override def compile: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] = sWrap(_, _, where(_), body(_))
   }
 
   /**
     * CompiledFilter with two parameters
     */
-  class DoubleFilter(val where: Option[(ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean], val body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, val t: Int) extends CompiledFilter {
+  class DoubleFilterFunc(val where: Option[(ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean], val body: (ScheduleInterfaceMapper, ScheduleInterfaceMapper) => Boolean, val t: Int) extends CompiledFilterFunc {
     override def compile: (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] = {
       val whereFunc = if (where.isDefined) applyWhereDouble(_, _, where.get) else applyWhereDoubleNone(_, _)
       t match {
@@ -300,9 +307,10 @@ private class FilterCompiler(val filterNode: FilterNode) {
 
   private def applyWhereSingleNone(possibleSlots: Seq[ScheduleInterfaceMapper]): Seq[ScheduleInterfaceMapper] = possibleSlots
 
+  def getCompiledFilter: CompiledFilter = new CompiledFilter(filterNode.name.string, compiledFilter.compile, filterNode.toString)
 
-  def getFunction(): (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper] =
-    compiledFilter.compile
+  def getFunction(): (String, (Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]) =
+    (filterNode.name.string, compiledFilter.compile)
 }
 
 /**
@@ -540,9 +548,17 @@ class MethodReference(val dslReference: Seq[String], val codeReference: String, 
   def getMap(): (Seq[String], MethodReference) = (dslReference, this)
 
   override def toString = s"MethodReference($dslReference, $codeReference, $referenceType, $resolvedType)"
+
+  def toJson: String = {
+    s"""{ "reference": "${dslReference.mkString(".")}",
+       |"type": "${resolvedType.getSimpleName}"
+       |}""".stripMargin
+  }
 }
 
 object ReferenceType extends Enumeration {
   type ReferenceType = Value
   val None, Module, Week = Value
 }
+
+class CompiledFilter(val name: String, val filter:(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper], val code: String)

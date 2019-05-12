@@ -4,6 +4,22 @@
 # ~~~~
 
 
+
+# DSL Functions
+GET     /dsl/set            controllers.DSLController.getDSLForm(controller = "/dsl/set")
+POST    /dsl/set            controllers.DSLController.setDSL()
+
+GET     /dsl/add            controllers.DSLController.getDSLForm(controller ="/dsl/add")
+POST    /dsl/add            controllers.DSLController.addDSL()
+
+GET     /dsl/remove         controllers.DSLController.getDSLForm(controller ="/dsl/remove")
+POST    /dsl/remove         controllers.DSLController.removeDSL()
+
+GET     /dsl/references     controllers.DSLController.getDSLReferenceObjects()
+
+GET     /dsl                controllers.DSLController.getCurrentDSL()
+
+
 #CRUD
 
 #Timetable
@@ -29,12 +45,13 @@ DELETE    /api/module/:id                     controllers.crud.ModuleController.
 #Mapping
 PUT     /api/student/map/:studentId/:moduleId               controllers.crud.StudentController.map(studentId: Int, moduleId: Int)
 
-# For retriving and displaying frontend pages
+GET     /                           controllers.FrontendController.index
 
 #Mapping
 PUT     /student/map/:studentId/:moduleId               controllers.crud.StudentController.map(studentId: Int, moduleId: Int)
 
 GET     /                       controllers.FrontendController.index
+
 GET     /*file                      controllers.FrontendController.assetOrDefault(file)
 
 

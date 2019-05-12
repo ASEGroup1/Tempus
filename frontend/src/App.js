@@ -10,6 +10,7 @@ import {DSL} from "./views/DSL";
 import {Timetables} from "./views/Timetables";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
+import {AddDSL} from "./views/AddDSL";
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {faCalendarAlt, faDatabase, faUserClock, faWrench, faUserGraduate, faChalkboardTeacher, faBuilding, faSave} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -33,6 +34,7 @@ class App extends Component {
 						<Route exact path="/" component={Home}/>
 						<Route path="/dataManagement" component={DataManagement}/>
 						<Route path="/dsl" component={DSL}/>
+						<Route path="/add-dsl" component={AddDSL}/>
 						<Route path="/timetables" component={Timetables}/>
 					</div>
 				</div>
