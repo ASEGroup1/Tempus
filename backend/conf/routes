@@ -6,18 +6,18 @@
 
 
 # DSL Functions
-GET     /dsl/set            controllers.DSLController.getDSLForm(controller = "/dsl/set")
-POST    /dsl/set            controllers.DSLController.setDSL()
+GET     /api/dsl/set            controllers.DSLController.getDSLForm(controller = "/dsl/set")
+POST    /api/dsl/set            controllers.DSLController.setDSL()
 
-GET     /dsl/add            controllers.DSLController.getDSLForm(controller ="/dsl/add")
-POST    /dsl/add            controllers.DSLController.addDSL()
+GET     /api/dsl/add            controllers.DSLController.getDSLForm(controller ="/dsl/add")
+POST    /api/dsl/add            controllers.DSLController.addDSL()
 
-GET     /dsl/remove         controllers.DSLController.getDSLForm(controller ="/dsl/remove")
-POST    /dsl/remove         controllers.DSLController.removeDSL()
+GET     /api/dsl/remove         controllers.DSLController.getDSLForm(controller ="/dsl/remove")
+POST    /api/dsl/remove         controllers.DSLController.removeDSL()
 
-GET     /dsl/references     controllers.DSLController.getDSLReferenceObjects()
+GET     /api/dsl/references     controllers.DSLController.getDSLReferenceObjects()
 
-GET     /dsl                controllers.DSLController.getCurrentDSL()
+GET     /api/dsl                controllers.DSLController.getCurrentDSL()
 
 
 #CRUD

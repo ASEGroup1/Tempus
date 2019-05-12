@@ -1,6 +1,6 @@
 import request from 'superagent';
 
-const ip = 'http://127.0.0.1:9000/';
+const ip = 'http://127.0.0.1:9000/api/';
 
 const networkLogging = true;
 
