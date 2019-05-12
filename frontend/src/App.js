@@ -12,10 +12,10 @@ import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import {AddDSL} from "./views/AddDSL";
 import { library } from '@fortawesome/fontawesome-svg-core'
-import {faCalendarAlt, faDatabase, faUserClock, faWrench, faUserGraduate, faChalkboardTeacher, faBuilding, faSave} from '@fortawesome/free-solid-svg-icons';
+import {faCalendarAlt, faDatabase, faUserClock, faWrench, faUserGraduate, faChalkboardTeacher, faBuilding, faSave, faTimesCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-library.add(faCalendarAlt, faDatabase, faWrench, faUserClock, faUserGraduate, faChalkboardTeacher, faBuilding, faSave);
+library.add(faCalendarAlt, faDatabase, faWrench, faUserClock, faUserGraduate, faChalkboardTeacher, faBuilding, faSave, faTimesCircle);
 
 class App extends Component {
 	render() {

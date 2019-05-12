@@ -226,7 +226,8 @@ export class Timetable extends React.Component {
 				</div> : this.state.fullRoomTimetable === false ?
 				<div>
 					<br/><br/><br/><br/>
-					<h2>Could not generate timetable with those constraints</h2>
+					{/*faCross*/}
+					<h1 style={{color: 'red'}}><FontAwesomeIcon icon="times-circle"/>&nbsp; Could not generate timetable with those constraints&nbsp;<FontAwesomeIcon icon="times-circle"/></h1>
 				</div> :
 				<div>
 					<br/><br/><br/><br/>
