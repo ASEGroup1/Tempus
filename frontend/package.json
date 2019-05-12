@@ -6,15 +6,14 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.0-7",
     "@fortawesome/free-solid-svg-icons": "^5.8.1",
     "@fortawesome/react-fontawesome": "^0.1.4",
-    "axios": "^0.18.0",
+    "typescript": "^3.4.5",
     "react": "^16.8.6",
     "react-bootstrap": "^1.0.0-beta.8",
     "react-dom": "^16.8.6",
     "react-scripts": "2.1.8",
     "react-select-search": "^0.9.6",
     "react-spinners": "^0.5.4",
-    "superagent": "^5.0.2",
-    "typescript": "^3.4.5"
+    "superagent": "^5.0.2"
   },
   "scripts": {
     "start": "react-scripts start",

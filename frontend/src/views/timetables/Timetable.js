@@ -3,6 +3,7 @@ import Table from "react-bootstrap/Table";
 import {Modal, Button, ButtonGroup, InputGroup, FormControl} from "react-bootstrap"
 import {getTimetable, loadTimetable, saveTimetable, getTimetableNames} from "../../RequestManager";
 import Dropdown from "react-bootstrap/Dropdown";
+
 import SelectSearch from "react-select-search";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 

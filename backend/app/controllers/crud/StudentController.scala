@@ -1,6 +1,6 @@
 package controllers.crud
 
-import db.{Dao, ModuleDao, StudentDao}
+import db.{ModuleDao, StudentDao}
 import entities.people.{Person, Student}
 import javax.inject.{Inject, Singleton}
 import org.json4s.DefaultFormats
