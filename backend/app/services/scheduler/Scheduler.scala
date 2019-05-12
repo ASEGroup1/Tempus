@@ -95,8 +95,7 @@ object Scheduler {
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
     val wrappedSchedules: ListBuffer[ScheduleInterfaceMapper] = ListBuffer()
 
-    // Events that have not been scheduled, shuffled to help distribute across the week
-    var unProcEvents = Random.shuffle(events).to[ListBuffer]
+    var unProcEvents = events.to[ListBuffer]
     // Room schedules mapped to whether they contain space
     var scheduleMap = schedule.map((_ -> true)).toMap
 
@@ -137,6 +136,10 @@ object Scheduler {
           mostFree + validEventsWrapped.head.event
           unProcEvents -= validEventsWrapped.head.event
           wrappedSchedules += validEventsWrapped.head
+
+          if(unProcEvents.size % 100 == 0){
+            println(unProcEvents.size)
+          }
 
         }
 

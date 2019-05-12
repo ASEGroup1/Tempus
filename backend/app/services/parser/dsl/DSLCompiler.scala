@@ -12,7 +12,14 @@ import services.scheduler.{ScheduleInterfaceMapper, Scheduler}
   */
 object FilterList {
 
-  private val defaultDSL = "filter WillFit(e){\n\te.schedule.timeRemaining >= e.duration\n}"
+  private val defaultDSL =
+    // Assert that rooms must have enough time for the event to take place in
+    "filter WillFit(e){\n\te.schedule.timeRemaining >= e.duration\n}\n" +
+    // Assert that the room has enough space for all the students in the event to fit in
+    "filter StudentCapacity(Param1) {\n\tParam1.room.roomCapacity >= Param1.module.studentCount\n}\n" +
+    // Assert that if a event requires requires disabled access, that the room has it.
+    "filter DisabledAccess(Param1) {\n\tIf (Param1.module.disabledAccess) {\n\t\tParam1.room.disabledAccess\n\t} else {\n\t\tTrue\n\t}\n}\n"
+
 
   private var filters: ListBuffer[CompiledFilter] = DSLCompiler.compile(defaultDSL)
 
@@ -94,7 +101,7 @@ object DSLCompiler {
     val floatType = 0.1f.getClass
 
     // Room
-    map ++ mapTypes("entities.locations.Room", Array("room"), Set("roomType", "partitions", "serialVersionUID"))
+    map ++= mapTypes("entities.locations.Room", Array("room"), Set("roomType", "partitions", "serialVersionUID"))
     map += new MethodReference("room.type", "%s.room.roomType.name", stringType).getMap()
 
     // Time
@@ -505,6 +512,8 @@ private class ExpressionCompiler(val toCompile: BooleanExpNode, val name: String
         str.toString()
       case e: BooleanLiteralNode =>
         s"${e.bool}"
+      case e: ReferenceNode =>
+        resolveReference(e)
     }
   }
 

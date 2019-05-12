@@ -10,15 +10,21 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
 object Module {
+  val num = 50
+
+  val disMax = 100
+  val disPer = 5
+
+
   def apply(json:Map[String, Any]): Module = {
     var moduleId = extractInt(json("moduleId"))
     if(moduleId == -1) moduleId = Random.nextInt
 
     new Module(moduleId, extractString(json("moduleCode")), extractString(json("moduleName")),
-      extractString(json("moduleDescription")), null, ListBuffer(), mutable.Set(), null, Random.nextInt(250), Random.nextInt(10) > 9)
+      extractString(json("moduleDescription")), null, ListBuffer(), mutable.Set(), null, Random.nextInt(num), Random.nextInt(disMax) > disPer)
   }
 
-  def apply(qr: ResultSet): Module = new Module(qr.getInt(1), qr.getString(2), qr.getString(3), qr.getString(4), null, null, null, null, Random.nextInt(250), Random.nextInt(10) > 9)
+  def apply(qr: ResultSet): Module = new Module(qr.getInt(1), qr.getString(2), qr.getString(3), qr.getString(4), null, null, null, null, Random.nextInt(num), Random.nextInt(disMax) > disPer)
 }
 
 class Module(
@@ -33,8 +39,8 @@ class Module(
               var studentCount: Int,
               var disabledAccess: Boolean
             ) {
-  def this() = this(0, "", "", "", null, null, null, null, Random.nextInt(250), Random.nextInt(10) > 9)
-  def this(name:String) = this(0, "", name, "", null, null, null, null, Random.nextInt(250), Random.nextInt(10) > 9)
+  def this() = this(0, "", "", "", null, null, null, null, Random.nextInt(Module.num), Random.nextInt(Module.disMax) > Module.disPer)
+  def this(name:String) = this(0, "", name, "", null, null, null, null, Random.nextInt(Module.num), Random.nextInt(Module.disMax) > Module.disPer)
 
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Module]

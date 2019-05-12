@@ -73,7 +73,7 @@ object TimeTableParser {
           }, moduleMatcher.group(7), Utils.toSnake(moduleMatcher.group(1)), "",
             if (schools.contains(Utils.toSnake(moduleMatcher.group(8)))) schools(Utils.toSnake(moduleMatcher.group(8))) else nullSchool,
             getTerms(moduleMatcher.group(6)),
-            mutable.Set[RequiredSession](), ListBuffer[ModuleSessionStructure](), Random.nextInt(250), Random.nextInt(10) > 9)
+            mutable.Set[RequiredSession](), ListBuffer[ModuleSessionStructure](), Random.nextInt(Module.num), Random.nextInt(Module.disMax) > Module.disPer)
           // add the module to the set
           modules += (m.moduleName -> m)
           m
