@@ -43,7 +43,7 @@ export class View extends React.Component {
 			"otherNames": "6"
 		};
 		
-		request.get("http://localhost:9000/api/student/" + e.target["studentId"].value)
+		request.get("/api/student/" + e.target["studentId"].value)
 			.set("Accept", "application/json")
 			.set("Access-Control-Allow-Origin", "*")
 			.then(result => {

@@ -61,7 +61,7 @@ export class Add extends React.Component {
 			"terms": e.target["terms"].value
 		};
 		// The following is currently throwing a cors error
-		request.put("http://localhost:9000/api/module/")
+		request.put("/api/module/")
 			.send(module).set("Accept", "application/json")
 			.set("Access-Control-Allow-Origin", "*")
 			.then(result =>

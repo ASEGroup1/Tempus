@@ -42,7 +42,7 @@ export class View extends React.Component {
 			"terms":[1,2]
 		};
 		
-		request.get("http://localhost:9000/api/module/" + e.target["moduleId"].value)
+		request.get("/api/module/" + e.target["moduleId"].value)
 			.set("Accept", "application/json")
 			.set("Access-Control-Allow-Origin", "*")
 			.then(result => alert("Got Module\n Response: \n" + JSON.stringify(result.body)))

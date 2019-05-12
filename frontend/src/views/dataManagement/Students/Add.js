@@ -64,7 +64,7 @@ export class Add extends React.Component {
 			"otherNames": e.target["otherNames"].value
 		};
 		// The following is currently throwing a cors error
-		request.put("http://localhost:9000/api/student/").send(student).set("Accept", "application/json").set("Access-Control-Allow-Origin", "*").then(result => {alert("Added Student\n Response: \n" + JSON.stringify(result.body))});
+		request.put("/api/student/").send(student).set("Accept", "application/json").set("Access-Control-Allow-Origin", "*").then(result => {alert("Added Student\n Response: \n" + JSON.stringify(result.body))});
 		console.log(student);
 	}
 }

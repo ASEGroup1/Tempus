@@ -32,7 +32,7 @@ export class ViewEditContainer extends React.Component {
 	}
 	
 	deleteModule() {
-		request.del("http://localhost:9000/api/module/" + this.props.module.moduleId)
+		request.del("/api/module/" + this.props.module.moduleId)
 			.set("Accept", "application/json")
 			.set("Access-Control-Allow-Origin", "*")
 			.then(result => {
