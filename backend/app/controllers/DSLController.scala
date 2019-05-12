@@ -12,6 +12,7 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
 
   def setDSL() = Action {implicit request =>
     try{
+      println("Setting DSL")
       FilterList.setFilters(Form("dsl" -> text).bindFromRequest.get)
       Ok("New filters: " + getDSLText)
     } catch{
@@ -26,6 +27,7 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
 
   def addDSL() = Action {implicit request =>
     try{
+      println("Adding Filter")
       val newFilters = FilterList.addFilters(Form("dsl" -> text).bindFromRequest.get)
       Ok("Added filters: \""+newFilters.mkString("\", \"")+"\"\nCurrent Filters: " + getDSLText)
     } catch{
@@ -36,6 +38,7 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
 
   def removeDSL() = Action {implicit request =>
     try{
+      println("Deleting filter")
       val filtersToRemove = Form("dsl" -> text).bindFromRequest.get.split("\\s*;\\s*")
       FilterList.removeFilters(filtersToRemove)
       Ok("Removed filters: \""+filtersToRemove.mkString("\", \"")+"\"\nCurrent Filters: " + getDSLText)

@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
 object Module {
-  val num = 50
+  val num = 45
 
   val disMax = 100
   val disPer = 5

@@ -5,9 +5,9 @@ object DSLLexer {
   // Literals
   private val CAPWORD_REG = raw"([A-Z][A-Za-z0-9]*)(.*)".r
   private val UNCAPWORD_REG = raw"([a-z][A-Za-z0-9]*)(.*)".r
-  private val INTLITERAL_REG = raw"([+-]?\\d+)(.*)".r
+  private val INTLITERAL_REG = raw"([+-]?\d+)(.*)".r
   private val BOOLEANLITERAL_REG = raw"(?i)(TRUE|FALSE)(.*)".r
-  private val FLOATLITERAL_REG = raw"(([+-]?(\\d+\\.)?\\d+))(.*)".r
+  private val FLOATLITERAL_REG = raw"(([+-]?(\d+\.)?\d+))(.*)".r
   private val CHARLITERAL_REG = raw"('.')(.*)".r
 
   // Keywords
