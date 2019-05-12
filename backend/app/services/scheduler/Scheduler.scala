@@ -26,7 +26,7 @@ object Scheduler {
       end = OffsetTime.of(endHour24, 0, 0, 0, ZoneOffset.UTC)
     })
 
-  def binPackSchedule(daysToGenerate: Int, rooms: ArrayBuffer[Room], modules: Set[Module],
+  def binPackSchedule(rooms: ArrayBuffer[Room], modules: Set[Module],
                       weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
                       None): Option[List[ScheduledClass]] = {
     // These values are an estimates
@@ -62,9 +62,7 @@ object Scheduler {
       })
 
       // Get schedule for term
-      val termSchedule = binPackScheduleI(daysToGenerate, rooms,
-        slots.map(s => new Event(s.map(_._2.durationInHours).max, s)).toSet,
-        weights)
+      val termSchedule = binPackScheduleI(rooms, slots.map(s => new Event(s.map(_._2.durationInHours).max, s)).toSet, weights)
 
       // unpack schedule
       if (termSchedule.isDefined) {
@@ -86,11 +84,11 @@ object Scheduler {
   }
 
 
-  def binPackScheduleI(daysToGenerate: Int, rooms: ArrayBuffer[Room], events: Set[Event],
+  def binPackScheduleI( rooms: ArrayBuffer[Room], events: Set[Event],
                        weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
                        None
                       ): Option[List[RoomSchedule]] = {
-    val periods = for (i <- 1 until daysToGenerate + 1) yield getPeriodDefault(i)
+    val periods = for (i <- 1 until 5 + 1) yield getPeriodDefault(i)
 
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
     val wrappedSchedules: ListBuffer[ScheduleInterfaceMapper] = ListBuffer()
@@ -98,11 +96,11 @@ object Scheduler {
     // Events that have not been scheduled, shuffled to help distribute across the week
     var unProcEvents = Random.shuffle(events).to[ListBuffer]
     // Room schedules mapped to whether they contain space
-    var scheduleMap = schedule.map((_ -> true)).toMap
+    var scheduleMap = schedule.map(_ -> true).toMap
 
-    while (!unProcEvents.isEmpty) {
+    while (unProcEvents.nonEmpty) {
       // get the unfilled rooms
-      val free = scheduleMap.filter(_._2).map(_._1).groupBy(_.period.calendar)
+      val free = scheduleMap.filter(_._2).keys.groupBy(_.period.calendar)
 
       if (free.isEmpty) {
         // If there are no free rooms, but there are events to be scheduled

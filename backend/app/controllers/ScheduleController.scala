@@ -1,21 +1,16 @@
 package controllers
 
-import java.time.temporal.ChronoField
-
 import db.TimeTableDao
-import org.json4s._
 import javax.inject.{Inject, Singleton}
+import org.json4s._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
-import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
 import services.Utils._
 import services.parser.TimeTableParser
 import services.scheduler.Scheduler
 import services.scheduler.poso.ScheduledClass
 import services.sussexroomscraper.SussexRoomScraper
-import views.ErrorPage
-
 
 @Singleton
 class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
@@ -25,11 +20,11 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   val moduleNames = TimeTableParser.getGeneratedStudentsModuleNames
 
   def generateScheduleForRoomTable = Action {
-    Ok(write(scheduleToRoomJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get)))
+    Ok(write(scheduleToRoomJson(Scheduler.binPackSchedule(SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get)))
   }
 
   def generateScheduleForStudentTable = Action {
-    Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get
+    Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get
       .filter(sc => moduleNames.contains(sc.className)).sortBy(sc => (sc.day.calendar, sc.time.start)), TimeTableParser.getGeneratedStudentsModuleNames)))
   }
 

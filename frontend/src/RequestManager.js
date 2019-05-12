@@ -43,3 +43,29 @@ export async function saveTimetable(name) {
 		return false;
 	});
 }
+
+export async function post(extension, data) {
+	return await request.post(BASE_URL + extension)
+		.send(data)
+		.then(res => {
+			if (res.body != null) {
+				return res.body;
+			} else {
+				return res;
+			}
+		}).catch(err => {
+			return null;
+		});
+}
+
+export async function get(extension) {
+	return await request.get(BASE_URL + extension).then(res => {
+		if (res.text != null) {
+			return res.text;
+		} else {
+			return res;
+		}
+	}).catch(err => {
+		return null;
+	});
+}
