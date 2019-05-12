@@ -9,24 +9,24 @@ import {ViewEditContainer} from "./ViewEditContainer";
 export class View extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {student: null, editingStudent: false};
+		this.state = {module: null, editingModule: false};
 		
 	}
 	
 	render() {
 		return (
 			<div>
-				<h1>View Student Form</h1>
+				<h1>View Module Form</h1>
 				<Form className="form" onSubmit={(e) => this.submit(e)}>
-					<Form.Group as={Row} controlId="studentId">
-						<Form.Label column sm={2}>Student ID</Form.Label>
+					<Form.Group as={Row} controlId="moduleId">
+						<Form.Label column sm={2}>Module ID</Form.Label>
 						<Col sm={10}>
 							<Form.Control type="number"/>
 						</Col>
 					</Form.Group>
 					<Button type="submit" className="float-right">View</Button>
 				</Form>
-				<ViewEditContainer student={this.state.student} editingStudent={this.state.editingStudent}/>
+				<ViewEditContainer module={this.state.module} editingModule={this.state.editingModule}/>
 			</div>
 		);
 	}
@@ -34,24 +34,21 @@ export class View extends React.Component {
 	
 	submit(e) {
 		e.preventDefault();
-		let rtnStudent = {
-			"studentId": "1",
-			"currentFehqLevelCompleted": "2",
-			"personId": "3",
-			"firstName": "4",
-			"lastName": "5",
-			"otherNames": "6"
+		let rtnModule = {
+			"moduleId": 1,
+			"moduleCode": "a",
+			"moduleName": "a",
+			"moduleDescription": "a",
+			"terms":[1,2]
 		};
 		
-		request.get("http://localhost:9000/api/student/" + e.target["studentId"].value)
+		request.get("http://localhost:9000/api/module/" + e.target["moduleId"].value)
 			.set("Accept", "application/json")
 			.set("Access-Control-Allow-Origin", "*")
-			.then(result => {
-				alert("Got Student\n Response: \n" + JSON.stringify(result.body))
-			});
+			.then(result => alert("Got Module\n Response: \n" + JSON.stringify(result.body)))
+			.catch(error => alert("Unable to Get module\nResponse: \n"+JSON.stringify(error)));
 		
-		this.setState({student: rtnStudent, editingStudent: false});
-		console.log(this.state.student);
+		this.setState({module: rtnModule, editingModule: false});
 		
 		
 	}
