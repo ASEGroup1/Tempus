@@ -59,7 +59,7 @@ class DSLController @Inject()(cc: ControllerComponents) extends AbstractControll
   private def getDSLNamesJSON: String = {
     "{" + FilterList.getFilterInfo.map(f => {
       "\"" + f._1 + "\": \"" + f._2 + "\""
-    }).mkString(", ").replaceAll("\"", "\\\"").replaceAll("\r\n", "\\\\n") + "}"
+    }).mkString(", ").replaceAll("\"", "\\\"").replaceAll("\r?\n", "\\\\n") + "}"
   }
 
   private def getDSLText = "\""+FilterList.getFilterNames.mkString("\", \"")+"\""

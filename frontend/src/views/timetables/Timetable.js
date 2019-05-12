@@ -42,7 +42,7 @@ export class Timetable extends React.Component {
 	loaded = false;
 
 	populateTimetable = async (name) => {
-		this.setState({timetable: []})
+		this.setState({timetable: []});
 		if(name !== null) {
 			this.loaded = true;
 			await this.setState({fullRoomTimetable: await loadTimetable(name)});
