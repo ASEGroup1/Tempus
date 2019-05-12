@@ -25,11 +25,11 @@ class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractCon
   val moduleNames = TimeTableParser.getGeneratedStudentsModuleNames
 
   def generateScheduleForRoomTable = Action {
-    Ok(write(scheduleToRoomJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get)))
+    Ok(write(scheduleToRoomJson(Scheduler.binPackSchedule(SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get)))
   }
 
   def generateScheduleForStudentTable = Action {
-    Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(5, SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get
+    Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get
       .filter(sc => moduleNames.contains(sc.className)).sortBy(sc => (sc.day.calendar, sc.time.start)), TimeTableParser.getGeneratedStudentsModuleNames)))
   }
 

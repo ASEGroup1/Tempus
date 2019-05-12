@@ -12,16 +12,15 @@ class SchedulerTests extends TestCase {
 
 
   def testIfScheduleIncludesAllEvents =
-    assertEquals(79302, Scheduler.binPackSchedule(5, rooms, events).get.size)
+    assertEquals(79302, Scheduler.binPackSchedule(rooms, events).get.size)
 
-  def testIfNoEventsGenerateEmptySchedule = assertEquals(None, Scheduler.binPackSchedule(0, rooms, events))
 
   def testIfEventsDoNotIntersect = {
     var currentEnd = -1
     var currentDay = -1
     var currentRoom = ""
 
-    Scheduler.binPackSchedule(5, rooms, events).get.groupBy(sc => (sc.room.roomName, sc.day.calendar.getDayOfYear)).foreach(s => {
+    Scheduler.binPackSchedule(rooms, events).get.groupBy(sc => (sc.room.roomName, sc.day.calendar.getDayOfYear)).foreach(s => {
       s._2.sortBy(sc => (sc.time.start.getHour, sc.time.start.getMinute)).foreach(e => {
         print(s"[Day: ${e.day.calendar.getDayOfYear} Room: ${e.room.roomName} Start time: ${e.time.start.getHour} End time: ${e.time.end.getHour} module: ${e.className}] < ")
 
@@ -41,9 +40,5 @@ class SchedulerTests extends TestCase {
         currentEnd = e.time.end.getHour
       })
     })
-  }
-
-  def testIfEventsCannotFitInSchedule: Unit = {
-    assertEquals(None, Scheduler.binPackSchedule(1, rooms, events))
   }
 }
