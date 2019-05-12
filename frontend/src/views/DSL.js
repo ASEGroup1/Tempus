@@ -30,14 +30,13 @@ export class DSL extends React.Component {
 	render() {
 		return (
 			<div>
-
 				{this.state.addRedirect? <Redirect to={"/add-dsl"} /> : null}
 				<div>
-
 					<p>
 						<h2>DSL/Timetabling Constraints</h2>
 						<p>Current Filters:</p>
-						{this.state.list? <Table striped bordered hover variant="dark">
+						<p><Button onClick = {() => {this.setState({addRedirect: true})}}><h3> Add New Filter </h3></Button></p>
+						{this.state.list? <Table striped bordered hover variant="dark" style={{fontSize: '16pt'}}>
 							<thead>
 								<tr>
 									<th>Filter Name</th>
@@ -53,8 +52,7 @@ export class DSL extends React.Component {
 						}
 					</p>
                 </div>
-				<p><Button onClick = {() => {this.setState({addRedirect: true})}}> Add Filter </Button></p>
-                <div>
+                <div style={{position: 'absolute', left: '35%'}}>
 					<DSLDelete callback = {() => this.update()}/>
                     <DSLUpload callback = {() => this.update()}/>
                 </div>
