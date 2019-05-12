@@ -60,8 +60,7 @@ export class Edit extends React.Component {
 			"moduleDescription": e.target["moduleDescription"].value,
 			"terms": e.target["terms"].value
 		};
-		// The following is currently throwing a cors error
-		request.post("/api/module/"+module.moduleId)
+		request.post("/api/module/" + module.moduleId)
 			.send(module).set("Accept", "application/json")
 			.set("Access-Control-Allow-Origin", "*")
 			.then(result =>

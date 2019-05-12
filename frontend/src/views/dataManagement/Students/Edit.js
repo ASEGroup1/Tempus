@@ -63,7 +63,6 @@ export class Edit extends React.Component {
 			"lastName": e.target["lastName"].value,
 			"otherNames": e.target["otherNames"].value
 		};
-		// The following is currently throwing a cors error
 		request.post("/api/student/")
 			.send(student)
 			.set("Accept", "application/json")

@@ -31,7 +31,6 @@ export class Add extends React.Component {
 	
 	submit(e) {
 		e.preventDefault();
-		// The following is currently throwing a cors error
 		request.put("/api/student/map/" + e.target["studentId"].value + "/" + e.target["moduleId"].value)
 			.set("Accept", "application/json")
 			.set("Access-Control-Allow-Origin", "*")
