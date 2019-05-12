@@ -136,7 +136,7 @@ object Scheduler {
           unProcEvents -= validEventsWrapped.head.event
           wrappedSchedules += validEventsWrapped.head
 
-          if(unProcEvents.size % 100 == 0){
+          if(unProcEvents.size % 1000 == 0){
             println(unProcEvents.size)
           }
 

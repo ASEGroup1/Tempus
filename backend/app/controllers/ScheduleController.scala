@@ -16,15 +16,18 @@ import services.sussexroomscraper.SussexRoomScraper
 class ScheduleController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
   implicit val formats = Serialization.formats(NoTypeHints)
   var lastTimetableStr = Map[String, Iterable[List[String]]]()
+  var timetable = Option(List[ScheduledClass]())
 
   val moduleNames = TimeTableParser.getGeneratedStudentsModuleNames
 
   def generateScheduleForRoomTable = Action {
-    Ok(write(scheduleToRoomJson(Scheduler.binPackSchedule(SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get)))
+    timetable = Scheduler.binPackSchedule(SussexRoomScraper.roomDataForSession, TimeTableParser.modules)
+    if(timetable.isEmpty) Ok(write(false))
+    Ok(write(scheduleToRoomJson(timetable.get)))
   }
 
   def generateScheduleForStudentTable = Action {
-    Ok(write(scheduleToStudentJson(Scheduler.binPackSchedule(SussexRoomScraper.roomDataForSession, TimeTableParser.modules).get
+    Ok(write(scheduleToStudentJson(timetable.get
       .filter(sc => moduleNames.contains(sc.className)).sortBy(sc => (sc.day.calendar, sc.time.start)), TimeTableParser.getGeneratedStudentsModuleNames)))
   }
 
