@@ -1,5 +1,5 @@
 import React from "react";
-import * as NetLib from '../RequestManager.js';
+import * as NetLib from '../lib/NetworkLib.js';
 import Button from "react-bootstrap/Button";
 import {DSLDelete} from "./DSL/DSLDelete.js";
 import {DSLUpload} from "./DSL/DSLUpload.js";

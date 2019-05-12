@@ -8,8 +8,10 @@ import SelectSearch from "react-select-search";
 import {ClipLoader} from "react-spinners";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-const weeks = {1: 1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 11:9, 12:10, 13:11, 14: 12, 15:13, 16: 14,
-				19: 15, 20: 16, 21: 17, 22: 18, 23: 19};
+const weeks = {
+	1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 11: 9, 12: 10, 13: 11, 14: 12, 15: 13, 16: 14,
+	19: 15, 20: 16, 21: 17, 22: 18, 23: 19
+};
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const WEEK_LENGTH = 5;
 
@@ -45,7 +47,7 @@ export class Timetable extends React.Component {
 
 	populateTimetable = async (name) => {
 		this.setState({timetable: []});
-		if(name !== null) {
+		if (name !== null) {
 			this.loaded = true;
 			await this.setState({fullRoomTimetable: await loadTimetable(name)});
 		} else await this.setState({
@@ -74,11 +76,14 @@ export class Timetable extends React.Component {
 	};
 
 	generateSchedule(w) {
-		this.setState({
-			timetable: (this.timetableType === TIMETABLE_TYPE.ROOM ? this.state.fullRoomTimetable[this.room] : this.state.fullStudentTimetable)
-				.slice((w - 1) * WEEK_LENGTH, (w - 1) * WEEK_LENGTH + WEEK_LENGTH),
-			weekIndex: w
-		});
+		console.debug(this.state.fullRoomTimetable)
+		if (this.state.fullRoomTimetable !== false) {
+			this.setState({
+				timetable: (this.timetableType === TIMETABLE_TYPE.ROOM ? this.state.fullRoomTimetable[this.room] : this.state.fullStudentTimetable)
+					.slice((w - 1) * WEEK_LENGTH, (w - 1) * WEEK_LENGTH + WEEK_LENGTH),
+				weekIndex: w
+			});
+		}
 	}
 
 	genTable() {
@@ -128,28 +133,32 @@ export class Timetable extends React.Component {
 	};
 
 	saveTimetableModal() {
-		return (<Modal show={this.state.modal === MODAL_STATES.SAVE} >
-          <Modal.Header closeButton>
-            <Modal.Title>Save Timetable</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>Save the current permutation of the timetable, for all rooms?
-	          <br/><br/>
-	          <InputGroup className="mb-3">
-		          <InputGroup.Prepend>
-			          <InputGroup.Text id="basic-addon1">Name</InputGroup.Text>
-		          </InputGroup.Prepend>
-		          <FormControl
-			          ref={(inputRef) => {this.newTimetableName = inputRef}}
-			          placeholder="Timetable Name"
-			          aria-describedby="basic-addon1"
-		          />
-	          </InputGroup>
-	          </Modal.Body>
-          <Modal.Footer>
-	          <Button variant="primary" onClick={() => this.setState({modal: MODAL_STATES.NONE})}>Close</Button>
-	          <Button variant="primary" onClick={() => this.addTimetable(this.newTimetableName.value)}><FontAwesomeIcon icon="save"/>&nbsp; Save Timetable</Button>
-          </Modal.Footer>
-        </Modal>)
+		return (<Modal show={this.state.modal === MODAL_STATES.SAVE}>
+			<Modal.Header closeButton>
+				<Modal.Title>Save Timetable</Modal.Title>
+			</Modal.Header>
+			<Modal.Body>Save the current permutation of the timetable, for all rooms?
+				<br/><br/>
+				<InputGroup className="mb-3">
+					<InputGroup.Prepend>
+						<InputGroup.Text id="basic-addon1">Name</InputGroup.Text>
+					</InputGroup.Prepend>
+					<FormControl
+						ref={(inputRef) => {
+							this.newTimetableName = inputRef
+						}}
+						placeholder="Timetable Name"
+						aria-describedby="basic-addon1"
+					/>
+				</InputGroup>
+			</Modal.Body>
+			<Modal.Footer>
+				<Button variant="primary" onClick={() => this.setState({modal: MODAL_STATES.NONE})}>Close</Button>
+				<Button variant="primary"
+				        onClick={() => this.addTimetable(this.newTimetableName.value)}><FontAwesomeIcon
+					icon="save"/>&nbsp; Save Timetable</Button>
+			</Modal.Footer>
+		</Modal>)
 	}
 
 	render() {
@@ -157,35 +166,53 @@ export class Timetable extends React.Component {
 			(this.state.timetable.length > 0) ?
 				<div>
 					{this.saveTimetableModal()}
-					<h1>Timetable for {this.timetableType} {this.timetableType === TIMETABLE_TYPE.ROOM ? "- " + this.room : ""}</h1>
+					<h1>Timetable
+						for {this.timetableType} {this.timetableType === TIMETABLE_TYPE.ROOM ? "- " + this.room : ""}</h1>
 
 					{!this.loaded ? <Dropdown
 						style={{float: 'left', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
 						<Dropdown.Toggle>Timetable Types</Dropdown.Toggle>
 
 						<Dropdown.Menu>
-							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.ROOM)}><FontAwesomeIcon icon="building"/> &nbsp; Rooms</Dropdown.Item>
-							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.STUDENT)}><FontAwesomeIcon icon="user-graduate"/>&nbsp; Student</Dropdown.Item>
+							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.ROOM)}><FontAwesomeIcon
+								icon="building"/> &nbsp; Rooms</Dropdown.Item>
+							<Dropdown.Item onClick={() => this.swapTimetable(TIMETABLE_TYPE.STUDENT)}><FontAwesomeIcon
+								icon="user-graduate"/>&nbsp; Student</Dropdown.Item>
 						</Dropdown.Menu>
-					</Dropdown> :  "" }
+					</Dropdown> : ""}
 
 					<ButtonGroup style={{position: 'absolute', left: '32%'}}>
-						{Object.keys(weeks).map(w => (<Button onClick={() => this.generateSchedule(weeks[w])}>{w}</Button>))}
+						{Object.keys(weeks).map(w => (
+							<Button onClick={() => this.generateSchedule(weeks[w])}>{w}</Button>))}
 					</ButtonGroup>
 
 					{this.timetableType === TIMETABLE_TYPE.ROOM ? <Dropdown
-						style={{float: 'right', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
+						style={{
+							float: 'right',
+							height: '800px',
+							width: '200px',
+							zIndex: 50,
+							background: 'transparent'
+						}}>
 						<Dropdown.Toggle>Rooms</Dropdown.Toggle>
 						<Dropdown.Menu>
 							{Object.keys(this.state.fullRoomTimetable).map(r => <Dropdown.Item
 								onClick={() => this.changeRoom(r)}>{r}</Dropdown.Item>)}
 						</Dropdown.Menu>
-					</Dropdown> : <Button style={{float: 'right'}} onClick={() => this.newStudent()}>Generate new student</Button>}
-					<Button style={{float: 'right'}} onClick={() => this.setState({modal: MODAL_STATES.SAVE})}>Save Timetable</Button>
+					</Dropdown> : <Button style={{float: 'right'}} onClick={() => this.newStudent()}>Generate new
+						student</Button>}
+					<Button style={{float: 'right'}} onClick={() => this.setState({modal: MODAL_STATES.SAVE})}>Save
+						Timetable</Button>
 
 					<Button style={{float: 'left'}} onClick={() => this.newRooms()}>Generate Timetable</Button>
 					<Dropdown
-						style={{float: 'right', height: '800px', width: '200px', zIndex: 50, background: 'transparent'}}>
+						style={{
+							float: 'right',
+							height: '800px',
+							width: '200px',
+							zIndex: 50,
+							background: 'transparent'
+						}}>
 						<Dropdown.Toggle>Load Timetable</Dropdown.Toggle>
 						<Dropdown.Menu>
 							{this.state.timetableNames.map(name => <Dropdown.Item
@@ -196,7 +223,12 @@ export class Timetable extends React.Component {
 					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '200px'}}>
 						{this.genTable()}
 					</Table>
-				</div> : <div>
+				</div> : this.state.fullRoomTimetable === false ?
+				<div>
+					<br/><br/><br/><br/>
+					<h2>Could not generate timetable with those constraints</h2>
+				</div> :
+				<div>
 					<br/><br/><br/><br/>
 					<ClipLoader sizeUnit={"px"} size={300} color={'#123abc'} loading={true}/>
 					<h1> Fetching Timetable </h1>
