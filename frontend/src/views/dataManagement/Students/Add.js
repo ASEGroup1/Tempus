@@ -3,7 +3,7 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import axios from "axios";
+import * as request from "superagent";
 
 export class Add extends React.Component {
 	render() {
@@ -63,8 +63,7 @@ export class Add extends React.Component {
 			"lastName": e.target["lastName"].value,
 			"otherNames": e.target["otherNames"].value
 		};
-		// The following is currently throwing a cors error
-		// axios.post("https://ptsv2.com/t/mv902-1555726666/post", student).then(resp => console.log(resp)).catch(err => console.error(err));
+		request.put("/api/student/").send(student).set("Accept", "application/json").set("Access-Control-Allow-Origin", "*").then(result => {alert("Added Student\n Response: \n" + JSON.stringify(result.body))});
 		console.log(student);
 	}
 }

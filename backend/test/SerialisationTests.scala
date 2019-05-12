@@ -12,21 +12,14 @@ import services.sussexroomscraper.SussexRoomScraper
 class SerialisationTests extends TestCase {
   val rooms = SussexRoomScraper.roomDataForSession
   val events = TimeTableParser.modules
-  val dao = new Dao
 
   def testIfSerialisedItemsAreTheSameDeserialised() = {
     val classes = Scheduler.binPackSchedule(5, rooms, events).get
 
     val bo = new ByteArrayOutputStream
     new ObjectOutputStream(bo).writeObject(classes)
-    val serializedObject = bo
+    val serializedObject = bo.toByteArray
 
-    assertEquals(classes.size, new ObjectInputStream(new ByteArrayInputStream(serializedObject.toByteArray)).readObject.asInstanceOf[List[ScheduledClass]].size)
+    assertEquals(classes.size, new ObjectInputStream(new ByteArrayInputStream(serializedObject)).readObject.asInstanceOf[List[ScheduledClass]].size)
   }
-
-  //TODO remove after we decided when we're storing data
-  def testIfSerializedTimeTableIsInserted =  dao.insertTimeTable(Scheduler.binPackSchedule(5, rooms, events).get)
-
-  //TODO remove after we decided when we're storing data
-  def testIfRetrievesDeserializedTimeTable = assert(dao.retrieveTimeTable(0).nonEmpty)
 }
