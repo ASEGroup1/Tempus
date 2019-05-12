@@ -4,12 +4,19 @@ import services.parser.TimeTableParser
 import services.scheduler.Scheduler
 import services.sussexroomscraper.SussexRoomScraper
 
-import scala.util.Random
-
 class SchedulerTests extends TestCase {
   val rooms = SussexRoomScraper.roomDataForSession
   val events = TimeTableParser.modules
 
+  def testIfScheduleHasValidDisabledAccessAndRoomCapacity =  assertTrue(Scheduler.binPackSchedule(5, rooms, events).get.forall(s => {
+    val module = TimeTableParser.moduleMap(s.className)
+    (s.room.roomCapacity >= module.studentCount) && (
+      if(module.disabledAccess){
+        s.room.disabledAccess
+      }else{
+        true
+      })
+  }))
 
   def testIfScheduleIncludesAllEvents =
     assertEquals(79302, Scheduler.binPackSchedule(rooms, events).get.size)

@@ -16,8 +16,6 @@ import scala.util.Random
 object Scheduler {
   var lastTimetable:List[ScheduledClass] = List[ScheduledClass]()
 
-  val filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]] = FilterList.getFilters()
-
   def getPeriodDefault(dayOfMonth: Int) = getPeriod(dayOfMonth, 1, 8, 20)
 
   def getPeriod(dayOfMonth: Int, monthOfYear: Int, beginHour24: Int, endHour24: Int) =
@@ -62,7 +60,9 @@ object Scheduler {
       })
 
       // Get schedule for term
-      val termSchedule = binPackScheduleI(rooms, slots.map(s => new Event(s.map(_._2.durationInHours).max, s)).toSet, weights)
+      val termSchedule = binPackScheduleI(rooms,
+        slots.map(s => new Event(s.map(_._2.durationInHours).max, s)).toSet,
+        weights, FilterList.getFilters())
 
       // unpack schedule
       if (termSchedule.isDefined) {
@@ -86,15 +86,15 @@ object Scheduler {
 
   def binPackScheduleI( rooms: ArrayBuffer[Room], events: Set[Event],
                        weights: Option[Seq[(Seq[ScheduleInterfaceMapper], ScheduleInterfaceMapper) => Double]] =
-                       None
+                       None,
+                       filters: Seq[(Seq[ScheduleInterfaceMapper], Seq[ScheduleInterfaceMapper]) => Seq[ScheduleInterfaceMapper]]
                       ): Option[List[RoomSchedule]] = {
     val periods = for (i <- 1 until 5 + 1) yield getPeriodDefault(i)
 
     val schedule = rooms.flatMap(r => periods.map(new RoomSchedule(r, _)))
     val wrappedSchedules: ListBuffer[ScheduleInterfaceMapper] = ListBuffer()
 
-    // Events that have not been scheduled, shuffled to help distribute across the week
-    var unProcEvents = Random.shuffle(events).to[ListBuffer]
+    var unProcEvents = events.to[ListBuffer]
     // Room schedules mapped to whether they contain space
     var scheduleMap = schedule.map(_ -> true).toMap
 
@@ -135,6 +135,10 @@ object Scheduler {
           mostFree + validEventsWrapped.head.event
           unProcEvents -= validEventsWrapped.head.event
           wrappedSchedules += validEventsWrapped.head
+
+          if(unProcEvents.size % 100 == 0){
+            println(unProcEvents.size)
+          }
 
         }
 

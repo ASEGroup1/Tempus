@@ -16,13 +16,13 @@ export class DSLUpload extends React.Component{
         return(
             <Form inline>
                 <Form.Group controlId="Upload">
-                    <Form.Label style={{marginRight: 10}}>Upload DSL:</Form.Label>
+                    <Form.Label style={{marginRight: 10}}><h4>Upload DSL</h4></Form.Label>
                     <Form.Control placeholder="Enter DSL" as="textarea" onChange={(event) => this.text = event.target.value}/>
                 </Form.Group>
 
                 <Button type="submit" onClick = {() => {
                     NetLib.post("dsl/add", {dsl: this.text}).then(this.callback)
-                }}> Upload</Button>
+                }}> <h4>Upload</h4></Button>
             </Form>
         )
     }

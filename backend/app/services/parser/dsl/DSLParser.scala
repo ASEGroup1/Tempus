@@ -2,6 +2,7 @@ package services.parser.dsl
 
 import services.parser.dsl.BinOp.BinOp
 import ASTVisitor._
+import services.parser.dsl
 import services.parser.dsl.Comparator.Comparator
 
 import scala.collection.mutable.ListBuffer
@@ -130,12 +131,16 @@ private object Value {
   def visit(tokens: ListBuffer[Symbol]): Value = {
     tokens(0) match {
       case INTLITERAL(int) =>
+        tokens.remove(0)
         new IntegerLiteralNode(int)
       case CHARLITERAL(c) =>
+        tokens.remove(0)
         new CharLiteralNode(c)
       case FLOATLITERAL(f) =>
+        tokens.remove(0)
         new FloatLiteralNode(f)
       case BOOLEANLITERAL(b) =>
+        tokens.remove(0)
         new BooleanLiteralNode(b)
       case _ =>
         val parts = ListBuffer[StringLiteralNode]()
@@ -181,32 +186,40 @@ private object BooleanExpNode {
         BooleanExpNode.visit(extract)
       case _ =>
         val left = Value.visit(tokens)
-        val (op, isBinOp): (Any, Boolean) = tokens.remove(0) match {
-          case OR =>
-            (BinOp.Or, true)
-          case AND =>
-            (BinOp.And, true)
-          case EQ =>
-            (Comparator.Eq, false)
-          case NE =>
-            (Comparator.Ne, false)
-          case GE =>
-            (Comparator.Ge, false)
-          case GT =>
-            (Comparator.Gt, false)
-          case LE =>
-            (Comparator.Le, false)
-          case LT =>
-            (Comparator.Lt, false)
-          case _ =>
-            throw new ParserException("""Invalid operation: "$left $op" """)
-        }
-        if (isBinOp) {
-          val right = BooleanExpNode.visit(tokens)
-          new BinaryOperationNode(left.asInstanceOf[BooleanExpNode], right, op.asInstanceOf[BinOp])
-        } else {
-          val right = Value.visit(tokens)
-          new ComparisonNode(left, right, op.asInstanceOf[Comparator])
+        if(tokens.isEmpty){
+          if(left.isInstanceOf[ReferenceNode]){
+            left.asInstanceOf[ReferenceNode]
+          }else{
+            throw new ParserException("Malformed Constraint: expected ReferenceNode got \"" + left.getClass.getName+"\"")
+          }
+        }else {
+          val (op, isBinOp): (Any, Boolean) = tokens.remove(0) match {
+            case OR =>
+              (BinOp.Or, true)
+            case AND =>
+              (BinOp.And, true)
+            case EQ =>
+              (Comparator.Eq, false)
+            case NE =>
+              (Comparator.Ne, false)
+            case GE =>
+              (Comparator.Ge, false)
+            case GT =>
+              (Comparator.Gt, false)
+            case LE =>
+              (Comparator.Le, false)
+            case LT =>
+              (Comparator.Lt, false)
+            case _ =>
+              throw new ParserException("""Invalid operation: "$left $op" """)
+          }
+          if (isBinOp) {
+            val right = BooleanExpNode.visit(tokens)
+            new BinaryOperationNode(left.asInstanceOf[BooleanExpNode], right, op.asInstanceOf[BinOp])
+          } else {
+            val right = Value.visit(tokens)
+            new ComparisonNode(left, right, op.asInstanceOf[Comparator])
+          }
         }
     }
   }
@@ -369,7 +382,7 @@ private object BranchNode {
   }
 }
 
-case class ReferenceNode(variable: ParamNode, parts: Seq[StringLiteralNode]) extends Value{
+case class ReferenceNode(variable: ParamNode, parts: Seq[StringLiteralNode]) extends BooleanExpNode {
   override def toString: String = {
     s"$variable.${parts.mkString(".")}"
   }
