@@ -1,6 +1,6 @@
 import request from 'superagent';
 
-const BASE_URL = 'http://' + window.location.hostname + ':9000/api/';
+const BASE_URL = 'http://' + window.location.hostname + ':9000/';
 
 export async function getTimetable(timetableType) {
 	return await request.get(BASE_URL + 'get-generated-' + timetableType + '-schedule-json').then(res => {
