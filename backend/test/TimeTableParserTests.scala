@@ -8,5 +8,4 @@ class TimeTableParserTests extends TestCase{
   def testIfCorrectAmountOfSchoolsAreParsed = assertEquals(29, schools.size)
   def testIfAnyModuleNamesAreValid = assert(moduleMap.values.exists(_.moduleName.matches("[A-Z0-9\\(\\),]+")))
   def testIfAnySchoolsArePopulated = assert(moduleMap.values.exists(_.school != null))
-  def testIfSchoolNamesArePopulated = assert(8 >= getGeneratedStudentsModuleNames.size)
 }
