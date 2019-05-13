@@ -14,7 +14,7 @@ class SerialisationTests extends TestCase {
   val events = TimeTableParser.modules
 
   def testIfSerialisedItemsAreTheSameDeserialised() = {
-    val classes = Scheduler.binPackSchedule(5, rooms, events).get
+    val classes = Scheduler.binPackSchedule(rooms, events).get
 
     val bo = new ByteArrayOutputStream
     new ObjectOutputStream(bo).writeObject(classes)

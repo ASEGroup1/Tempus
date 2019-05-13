@@ -8,7 +8,7 @@ class SchedulerTests extends TestCase {
   val rooms = SussexRoomScraper.roomDataForSession
   val events = TimeTableParser.modules
 
-  def testIfScheduleHasValidDisabledAccessAndRoomCapacity =  assertTrue(Scheduler.binPackSchedule(5, rooms, events).get.forall(s => {
+  def testIfScheduleHasValidDisabledAccessAndRoomCapacity =  assertTrue(Scheduler.binPackSchedule(rooms, events).get.forall(s => {
     val module = TimeTableParser.moduleMap(s.className)
     (s.room.roomCapacity >= module.studentCount) && (
       if(module.disabledAccess){
