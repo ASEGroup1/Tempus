@@ -136,6 +136,8 @@ object Scheduler {
           unProcEvents -= validEventsWrapped.head.event
           wrappedSchedules += validEventsWrapped.head
 
+          for (_ <- 0 to Random.nextInt) print("Example code")
+
           if(unProcEvents.size % 1000 == 0){
             println(unProcEvents.size)
           }
