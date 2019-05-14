@@ -8,10 +8,7 @@ import SelectSearch from "react-select-search";
 import {ClipLoader} from "react-spinners";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
-const weeks = {
-	1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 11: 9, 12: 10, 13: 11, 14: 12, 15: 13, 16: 14,
-	19: 15, 20: 16, 21: 17, 22: 18, 23: 19
-};
+const weeks = Array.apply(null, {length: 25}).map(Number.call, Number).splice(1);
 const DAYS = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const WEEK_LENGTH = 5;
 
@@ -181,11 +178,6 @@ export class Timetable extends React.Component {
 						</Dropdown.Menu>
 					</Dropdown> : ""}
 
-					<ButtonGroup style={{position: 'absolute', left: '32%'}}>
-						{Object.keys(weeks).map(w => (
-							<Button onClick={() => this.generateSchedule(weeks[w])}>{w}</Button>))}
-					</ButtonGroup>
-
 					{this.timetableType === TIMETABLE_TYPE.ROOM ? <Dropdown
 						style={{
 							float: 'right',
@@ -219,15 +211,21 @@ export class Timetable extends React.Component {
 								onClick={() => this.populateTimetable(name)}>{name}</Dropdown.Item>)}
 						</Dropdown.Menu>
 					</Dropdown>
+					<br/><br/><br/>
+					<ButtonGroup style={{position: 'absolute', left: '20%', fontSize: '8pt'}}>
+						{weeks.map(w => (
+							<Button onClick={() => this.generateSchedule(w)}>{w}</Button>))}
+					</ButtonGroup>
 					<br/>
-					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '200px'}}>
+					<Table striped bordered hover variant="dark" style={{position: 'absolute', top: '250px'}}>
 						{this.genTable()}
 					</Table>
 				</div> : this.state.fullRoomTimetable === false ?
 				<div>
 					<br/><br/><br/><br/>
 					{/*faCross*/}
-					<h1 style={{color: 'red'}}><FontAwesomeIcon icon="times-circle"/>&nbsp; Could not generate timetable with those constraints&nbsp;<FontAwesomeIcon icon="times-circle"/></h1>
+					<h1 style={{color: 'red'}}><FontAwesomeIcon icon="times-circle"/>&nbsp; Could not generate timetable
+						with those constraints&nbsp;<FontAwesomeIcon icon="times-circle"/></h1>
 				</div> :
 				<div>
 					<br/><br/><br/><br/>
