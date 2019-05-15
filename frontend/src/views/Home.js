@@ -15,7 +15,7 @@ export class Home extends React.Component {
 			<h2> How to use Tempus </h2>
 			<p style={{marginLeft: '15%', marginRight: '15%'}}>Tempus doesn't assume what you want, you have to specify that.
 				Meaning if on average only 80% of students attend lectures, you can schedule them in rooms with only 80% capacity, if that's against the rules of your establishment,
-				no problem you can specify that too.</p>
+				no problem you can specify that too. DEMO ADD</p>
 
 		</div>
 	}
